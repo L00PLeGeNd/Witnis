@@ -1,9 +1,10 @@
 # Witnis
 
-**Engineering witness for AI coding agents.**  
-Understand the repo. Trace the blast radius. Verify with evidence — not vibes.
+**An engineering witness for AI coding agents.**
 
-Sibling to [Harnis](https://github.com/L00PLeGeNd/Harnis): *Harness* constrains what an agent may **do**; *Witness* grounds what an agent may **claim**.
+Map the repo. Trace the blast radius. Verify with evidence — not vibes.
+
+Witnis pairs with [Harnis](https://github.com/L00PLeGeNd/Harnis): the *harness* limits what an agent can **do**; the *witness* grounds what an agent can **claim**.
 
 [![CI](https://github.com/L00PLeGeNd/Witnis/actions/workflows/ci.yml/badge.svg)](https://github.com/L00PLeGeNd/Witnis/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -13,42 +14,38 @@ Sibling to [Harnis](https://github.com/L00PLeGeNd/Harnis): *Harness* constrains 
 
 ---
 
-## The problem
+## Why it exists
 
-Coding agents can edit files, run tests, and sound confident. They still frequently:
+Agents can edit files, run tests, and sound sure of themselves. They still often:
 
-- confuse text hits with **typed symbols**
-- miss call / inherit / override edges that define blast radius
-- treat “tests passed once” as proof without a **gated** verification story
-- return answers with no machine-checkable **evidence status**
+- treat a text hit as a **typed symbol**
+- miss call, inherit, and override edges that define real blast radius
+- equate “tests passed once” with proof — without a **gated** verify path
+- answer without a machine-checkable **evidence status**
 
-Grep and RAG help retrieval. They do not witness claims.
+Grep and RAG find strings. They do not witness claims.
 
-## What Witnis is
+Witnis is local-first: index the tree into SQLite, answer through shared contracts, and keep Core facts free of any LLM.
 
-Witnis is **local-first verification infrastructure** for agent workflows:
-
-| Capability | What it means |
+| Piece | Role |
 |---|---|
-| **Index** | Symbols & relations into SQLite (no cloud required) |
-| **Evidence envelopes** | Every answer carries `status`, `evidence`, `limitations` |
-| **Impact** | Bound change blast radius and related tests |
-| **Gated verify** | Execution blocked unless `--execute` + `WITNIS_ALLOW_VERIFY=1` |
-| **One Core, many adapters** | Same contracts over **CLI · MCP · SDK · Studio** |
-
-Core facts do **not** require an LLM.
+| **Index** | Symbols and relations on disk — no cloud |
+| **Evidence envelope** | Every reply carries `status`, `evidence`, `limitations` |
+| **Impact** | Callers, related tests, change radius |
+| **Gated verify** | Runs only with `--execute` and `WITNIS_ALLOW_VERIFY=1` |
+| **One Core** | Same behavior on **CLI · MCP · SDK · Studio** |
 
 ```mermaid
 flowchart LR
-  Repo[Repository] --> Index[Index SQLite]
+  Repo[Repository] --> Index[SQLite index]
   Index --> Search[search / LSP]
   Index --> Trace[trace / impact]
   Trace --> Plan[plan-verify]
-  Plan --> Gate{WITNIS_ALLOW_VERIFY?}
+  Plan --> Gate{authorized?}
   Gate -->|no| Blocked[blocked]
-  Gate -->|yes| Verify[verify + evidence]
-  Index --> Studio[Studio HTML]
-  Index --> MCP[MCP tools]
+  Gate -->|yes| Verify[verify]
+  Index --> Studio[Studio]
+  Index --> MCP[MCP]
 ```
 
 ---
@@ -72,32 +69,24 @@ pytest -q
 python -m witnis bench --suite public
 ```
 
-Optional extras:
-
-```bash
-pip install -e ".[lsp]"    # Jedi enrichment
-pip install -e ".[rust]"   # maturin helper for native builds
-pip install -e ".[all]"
-```
+Extras: `.[lsp]` (Jedi), `.[rust]` (maturin), or `.[all]`.
 
 ---
 
-## Agent loop (recommended)
+## How agents should use it
 
-A practical witness loop for Cursor / Claude / other MCP agents:
+1. **Index** the repo (refresh after large edits)
+2. **Search** the symbol before changing it
+3. **Trace** callers, inheritance, decorators
+4. **Impact** and related tests before the edit
+5. **plan-verify**, then **verify --execute** only with explicit auth
+6. Open **Studio** or an evidence bundle for review
 
-1. **Index** the repo once (or refresh after large edits)
-2. **Search** for the symbol the agent claims to change
-3. **Trace** callers / inheritance / decorators
-4. **Impact** + related tests before editing
-5. **plan-verify** → only then **verify --execute** with explicit auth
-6. **Studio** / evidence bundle for human review
+Longer playbook: [`examples/agent-playbook.md`](examples/agent-playbook.md)
 
-Playbook: [`examples/agent-playbook.md`](examples/agent-playbook.md)
+### Envelope shape
 
-### Evidence envelope (shape)
-
-Every Core/MCP/CLI JSON payload includes:
+CLI, MCP, and SDK share the same JSON shape:
 
 ```json
 {
@@ -105,39 +94,43 @@ Every Core/MCP/CLI JSON payload includes:
   "repository": { "name": "mini_py", "root_path": "..." },
   "result": {},
   "evidence": [
-    { "type": "symbol", "status": "observed", "path": "auth.py", "line": 12, "name": "AuthService.login" }
+    {
+      "type": "symbol",
+      "status": "observed",
+      "path": "auth.py",
+      "line": 12,
+      "name": "AuthService.login"
+    }
   ],
-  "limitations": ["Search is name/path FTS+LIKE match, not semantic embedding"],
+  "limitations": ["Search is name/path FTS+LIKE, not embeddings"],
   "generated_at": "2026-11-03T12:00:00Z"
 }
 ```
 
-Evidence statuses are the uncertainty model: `observed` · `derived` · `verified` · `unverified` · `contradicted` · `stale` · …
+Statuses encode uncertainty: `observed` · `derived` · `verified` · `unverified` · `contradicted` · `stale` · …
 
-Full contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
+Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 
 ---
 
-## What you get
+## Surfaces
 
-| Layer | Surface |
+| Layer | What you get |
 |---|---|
-| **CLI** | `index`, `refresh`, `overview`, `status`, `search`, `trace`, `impact`, `evidence`, `plan-verify`, `verify`, `studio`, `lsp`, `bench`, `compare-baselines`, `capabilities`, … |
-| **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, `list_capabilities`, … |
+| **CLI** | `index`, `search`, `trace`, `impact`, `plan-verify`, `verify`, `studio`, `lsp`, `bench`, `compare-baselines`, … |
+| **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, … |
 | **SDK** | `from witnis.sdk import index_repository, repo_search, trace_symbol, …` |
-| **Studio** | Static HTML dashboard (graph / evidence / report), locales `en\|zh\|pt\|fr\|ru` |
-| **Languages** | Python (deep AST) · JS/TS · Go · Java (shallow) |
-| **LSP** | Jedi definitions/refs · index fallback · optional Pyright diagnostics |
+| **Studio** | Static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru` |
+| **Languages** | Python (AST) · JS/TS · Go · Java (shallow) |
+| **LSP** | Jedi · index fallback · optional Pyright diagnostics |
 
-### vs baselines
+### Against simple baselines
 
-| Approach | Typed symbols | Call/impact graph | Evidence statuses | Gated verify |
+| Approach | Typed symbols | Call / impact | Evidence | Gated verify |
 |---|---|---|---|---|
-| `git grep` / naive scan | no | no | no | no |
-| Naive `def/class` regex | shallow | no | no | no |
+| `git grep` / naive scan | — | — | — | — |
+| Regex `def` / `class` | shallow | — | — | — |
 | **Witnis** | yes | yes | yes | yes |
-
-Run the comparison yourself:
 
 ```bash
 python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-v1.md
@@ -146,6 +139,8 @@ python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-
 ---
 
 ## Cursor MCP
+
+Index the repo first, then point MCP at the DB:
 
 ```json
 {
@@ -161,62 +156,60 @@ python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-
 }
 ```
 
-Example config: [`examples/mcp.cursor.example.json`](examples/mcp.cursor.example.json)
+Sample file: [`examples/mcp.cursor.example.json`](examples/mcp.cursor.example.json)
 
-Index first, then point `WITNIS_DB` at the SQLite file. Agents should call `list_capabilities` before assuming tool names.
+Agents should call `list_capabilities` before assuming tool names.
 
 ---
 
-## Security defaults
+## Security posture
 
-Witnis is **read-only by default**.
+Read-only by default.
 
-- Path sandbox + symlink escape checks
-- Sensitive filenames (`.env`, `*.pem`, `*.key`, …) skipped or flagged
+- Paths sandboxed to the indexed root (symlink escapes rejected)
+- Sensitive names (`.env`, `*.pem`, `*.key`, …) skipped or flagged
 - Secret-like values redacted in previews
-- Verification blocked unless explicitly authorized
-- Repo text treated as **untrusted** (prompt-injection aware)
+- Verify stays blocked until you authorize it
+- Repo prose is untrusted input (prompt-injection aware)
 
-Details: [`SECURITY.md`](SECURITY.md)
+More: [`SECURITY.md`](SECURITY.md)
 
 ---
 
 ## Benchmarks
 
-Public acceptance suite (must stay green in CI):
+CI keeps the public suite green:
 
 ```bash
 python -m witnis bench --suite local
 python -m witnis bench --suite public
 ```
 
-| Suite | Fixture focus |
+| Suite | Scope |
 |---|---|
-| Local | `fixtures/mini_py` regression tasks |
-| Public | `mini_py` + Go/JS/Java smokes + polyglot `fixtures/public_svc` |
+| Local | `fixtures/mini_py` regressions |
+| Public | `mini_py` + Go / JS / Java smokes + polyglot `fixtures/public_svc` |
 
-Current scoreboard: **21 / 21** on public (v1.8.0).  
-Methodology: [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) · History: [`docs/benchmarks/public-scoreboard.md`](docs/benchmarks/public-scoreboard.md)
+Public score (v1.8.0): **21 / 21**.  
+Method: [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) · History: [`docs/benchmarks/public-scoreboard.md`](docs/benchmarks/public-scoreboard.md)
 
 ---
 
-## Architecture
+## Layout
 
 ```
-adapters:  CLI (Typer) · MCP · SDK · Studio HTML
+adapters   CLI · MCP · SDK · Studio
     │
-core:      index · search · trace · impact · verify · evidence · LSP
+core       index · search · trace · impact · verify · evidence · LSP
     │
-native:    optional witnis._native (PyO3) → witnis-core (Rust)
+native     optional witnis._native (PyO3) → witnis-core (Rust)
     │
-store:     SQLite + FTS5 symbols / relations / snapshots
+store      SQLite + FTS5 (symbols, relations, snapshots)
 ```
 
-- **Python-first adapters** stay installable with plain `pip`
-- **Rust** accelerates discover, digests, RustPython AST, SQLite index/search
-- Missing native module ⇒ Python implementations keep working
+Python adapters install with plain `pip`. Rust speeds discover, digests, RustPython AST, and SQLite index/search. If `_native` is missing, Python paths still work.
 
-### Rust core (optional)
+### Optional Rust tools
 
 ```bash
 cargo test -p witnis-core
@@ -229,49 +222,47 @@ maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
 pip install dist-native/witnis-*.whl
 ```
 
-Env knobs:
-
-| Variable | Effect |
+| Env | Meaning |
 |---|---|
-| `WITNIS_RUST_INDEX=1` | Force Rust indexer |
+| `WITNIS_RUST_INDEX=1` | Always use the Rust indexer |
 | `WITNIS_RUST_INDEX=auto` | Rust indexer when `_native` is loaded |
-| (default) | Rust for non-`.py` trees; Python AST for `.py` |
+| *(default)* | Rust for non-`.py` trees; Python AST for `.py` |
 | `WITNIS_ALLOW_VERIFY=1` | Allow `verify --execute` |
 
-Migration notes: [`docs/rust-migration.md`](docs/rust-migration.md)
+See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 ---
 
-## Docs map
+## Docs
 
-| Doc | Purpose |
+| Doc | Contents |
 |---|---|
-| [`docs/contracts-v1.md`](docs/contracts-v1.md) | Stable CLI/MCP/envelope contracts |
-| [`docs/rust-migration.md`](docs/rust-migration.md) | Gradual Rust phases |
-| [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench methodology |
+| [`docs/contracts-v1.md`](docs/contracts-v1.md) | Stable CLI / MCP / envelope |
+| [`docs/rust-migration.md`](docs/rust-migration.md) | Rust migration phases |
+| [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench method |
 | [`SECURITY.md`](SECURITY.md) | Security defaults |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop + PR rules |
-| [`CHANGELOG.md`](CHANGELOG.md) | Release history |
-| [`examples/agent-playbook.md`](examples/agent-playbook.md) | Agent usage playbook |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop and PR expectations |
+| [`CHANGELOG.md`](CHANGELOG.md) | Releases |
+| [`examples/agent-playbook.md`](examples/agent-playbook.md) | Agent usage |
 
 ---
 
 ## Status
 
-**Usable today** for local Python-first agent workflows:
+Ready for local Python-first agent work:
 
-`index → search / trace / impact → gated verify → Studio / MCP`
+**index → search / trace / impact → gated verify → Studio / MCP**
 
-Still deepening: unified Rust `witnis` binary, stronger language-server backends, larger third-party corpora.
+Still ahead: a single Rust `witnis` binary, stronger language servers, larger third-party corpora.
 
-Latest release: [v1.8.0](https://github.com/L00PLeGeNd/Witnis/releases/tag/v1.8.0)
+Latest: [v1.8.0](https://github.com/L00PLeGeNd/Witnis/releases/tag/v1.8.0)
 
 ---
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md). Please keep `pytest` and `witnis bench --suite public` green.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Keep `pytest` and `witnis bench --suite public` green.
 
 ## License
 
-Apache-2.0 — see [`LICENSE`](LICENSE).
+Apache-2.0 — [`LICENSE`](LICENSE).

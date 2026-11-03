@@ -147,7 +147,7 @@ witnis baselines fixtures/mini_py
 
 ## MCP (any compatible client)
 
-Works with any MCP host — Claude Desktop, Continue, Cline, custom agents, and similar. Index the repo, then register the server:
+Same Core over MCP for any compatible host or coding agent. Index the repo, then register the server:
 
 ```json
 {

@@ -5,8 +5,8 @@ use std::path::PathBuf;
 
 use witnis_core::parse::{go, java, js};
 use witnis_core::{
-    assert_path_in_root, is_sensitive_path, iter_source_files, scan_source_digests, sha256_file,
-    SandboxError,
+    assert_path_in_root, index_repository, is_sensitive_path, iter_source_files,
+    scan_source_digests, sha256_file, SandboxError,
 };
 
 fn map_err(err: SandboxError) -> PyErr {
@@ -38,7 +38,6 @@ fn ensure_in_root(root: &str, candidate: &str) -> PyResult<String> {
     Ok(p.to_string_lossy().into_owned())
 }
 
-/// Return list of {rel_path, sha256} for all source files under root.
 #[pyfunction]
 fn scan_digests(py: Python<'_>, root: &str) -> PyResult<Py<PyList>> {
     let rows = scan_source_digests(&PathBuf::from(root)).map_err(map_err)?;
@@ -89,30 +88,21 @@ fn parse_shallow(
     rel_path: &str,
 ) -> PyResult<(Py<PyList>, Py<PyList>)> {
     let (symbols, relations) = match lang {
-        "go" => (
-            go::parse_symbols(source, rel_path),
-            {
-                let mut edges = go::parse_imports(source, rel_path);
-                edges.extend(go::parse_calls(source, rel_path));
-                edges
-            },
-        ),
-        "java" => (
-            java::parse_symbols(source, rel_path),
-            {
-                let mut edges = java::parse_imports(source, rel_path);
-                edges.extend(java::parse_calls(source, rel_path));
-                edges
-            },
-        ),
-        "js" | "ts" => (
-            js::parse_symbols(source, rel_path),
-            {
-                let mut edges = js::parse_imports(source, rel_path);
-                edges.extend(js::parse_calls(source, rel_path));
-                edges
-            },
-        ),
+        "go" => {
+            let mut edges = go::parse_imports(source, rel_path);
+            edges.extend(go::parse_calls(source, rel_path));
+            (go::parse_symbols(source, rel_path), edges)
+        }
+        "java" => {
+            let mut edges = java::parse_imports(source, rel_path);
+            edges.extend(java::parse_calls(source, rel_path));
+            (java::parse_symbols(source, rel_path), edges)
+        }
+        "js" | "ts" => {
+            let mut edges = js::parse_imports(source, rel_path);
+            edges.extend(js::parse_calls(source, rel_path));
+            (js::parse_symbols(source, rel_path), edges)
+        }
         other => {
             return Err(PyValueError::new_err(format!(
                 "unsupported shallow lang: {other}"
@@ -120,6 +110,33 @@ fn parse_shallow(
         }
     };
     Ok((symbols_to_py(py, symbols)?, relations_to_py(py, relations)?))
+}
+
+#[pyfunction]
+fn index_repo(
+    py: Python<'_>,
+    root: &str,
+    db_path: &str,
+    incremental: bool,
+) -> PyResult<Py<PyDict>> {
+    let stats = index_repository(
+        &PathBuf::from(root),
+        &PathBuf::from(db_path),
+        incremental,
+    )
+    .map_err(map_err)?;
+    let d = PyDict::new(py);
+    d.set_item("repository", stats.repository)?;
+    d.set_item("files", stats.files)?;
+    d.set_item("symbols", stats.symbols)?;
+    d.set_item("db_path", stats.db_path)?;
+    d.set_item("updated_files", stats.updated_files)?;
+    d.set_item("skipped_unchanged", stats.skipped_unchanged)?;
+    d.set_item("removed_files", stats.removed_files)?;
+    d.set_item("relations", stats.relations)?;
+    d.set_item("mode", stats.mode)?;
+    d.set_item("backend", stats.backend)?;
+    Ok(d.into())
 }
 
 #[pymodule]
@@ -130,6 +147,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ensure_in_root, m)?)?;
     m.add_function(wrap_pyfunction!(scan_digests, m)?)?;
     m.add_function(wrap_pyfunction!(parse_shallow, m)?)?;
+    m.add_function(wrap_pyfunction!(index_repo, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

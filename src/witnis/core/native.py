@@ -1,7 +1,4 @@
-"""Optional Rust native acceleration (witnis._native via PyO3).
-
-Falls back silently when the extension is not built.
-"""
+"""Optional Rust native acceleration (witnis._native via PyO3)."""
 
 from __future__ import annotations
 
@@ -12,6 +9,7 @@ _list_source_files: Callable[[str], list[str]] | None
 _file_sha256: Callable[[str], str] | None
 _scan_digests: Callable[[str], list[dict[str, Any]]] | None
 _parse_shallow: Callable[[str, str, str], tuple[list[dict], list[dict]]] | None
+_index_repo: Callable[[str, str, bool], dict[str, Any]] | None
 
 try:
     from witnis import _native as _ext
@@ -20,13 +18,15 @@ try:
     _file_sha256 = _ext.file_sha256
     _scan_digests = _ext.scan_digests
     _parse_shallow = _ext.parse_shallow
+    _index_repo = _ext.index_repo
     NATIVE_AVAILABLE = True
     NATIVE_VERSION = getattr(_ext, "__version__", "unknown")
-except Exception:  # pragma: no cover - missing extension is normal
+except Exception:  # pragma: no cover
     _list_source_files = None
     _file_sha256 = None
     _scan_digests = None
     _parse_shallow = None
+    _index_repo = None
     NATIVE_AVAILABLE = False
     NATIVE_VERSION = None
 
@@ -56,3 +56,13 @@ def rust_parse_shallow(
         return None
     symbols, relations = _parse_shallow(lang, source, rel_path)
     return list(symbols), list(relations)
+
+
+def rust_index_repository(
+    root: Path, db_path: Path, *, incremental: bool = True
+) -> dict[str, Any] | None:
+    if _index_repo is None:
+        return None
+    return dict(
+        _index_repo(str(root.resolve()), str(Path(db_path).resolve()), incremental)
+    )

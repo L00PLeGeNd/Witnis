@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 
 from witnis.core.calls_python import parse_python_calls
 from witnis.core.discover import iter_source_files
 from witnis.core.models import IndexStats, Symbol
-from witnis.core.native import rust_parse_shallow, rust_scan_digests
+from witnis.core.native import rust_index_repository, rust_parse_shallow, rust_scan_digests
 from witnis.core.parse_go import parse_go_file
 from witnis.core.parse_java import parse_java_file
 from witnis.core.parse_js import parse_js_file
@@ -120,6 +121,14 @@ def _file_digest_map(root: Path, paths: list[Path]) -> dict[str, str]:
     return out
 
 
+def _prefer_rust_index(paths: list[Path]) -> bool:
+    flag = os.environ.get("WITNIS_RUST_INDEX", "").strip().lower()
+    if flag in {"1", "true", "yes"}:
+        return True
+    # Non-Python trees can use the Rust indexer by default.
+    return bool(paths) and all(p.suffix != ".py" for p in paths)
+
+
 def index_repository(
     root: Path, db_path: Path, *, incremental: bool = True
 ) -> IndexStats:
@@ -127,10 +136,23 @@ def index_repository(
     if not root.is_dir():
         raise FileNotFoundError(f"Not a directory: {root}")
 
+    paths = iter_source_files(root)
+    if _prefer_rust_index(paths):
+        rust_stats = rust_index_repository(root, db_path, incremental=incremental)
+        if rust_stats is not None:
+            return IndexStats(
+                repository=str(rust_stats.get("repository") or root.name),
+                files=int(rust_stats.get("files") or 0),
+                symbols=int(rust_stats.get("symbols") or 0),
+                db_path=str(rust_stats.get("db_path") or db_path),
+                updated_files=int(rust_stats.get("updated_files") or 0),
+                skipped_unchanged=int(rust_stats.get("skipped_unchanged") or 0),
+                removed_files=int(rust_stats.get("removed_files") or 0),
+            )
+
     store = Store(db_path)
     try:
         repo_id = store.upsert_repository(root)
-        paths = iter_source_files(root)
         digests = _file_digest_map(root, paths)
         relations: list[dict] = []
         for path in paths:

@@ -97,18 +97,19 @@ Hot paths are moving into Rust while Python keeps CLI/MCP/Studio adapters.
 ```bash
 cargo test -p witnis-core
 cargo run -p witnis-cli -- discover fixtures/mini_py
+cargo run -p witnis-cli -- index fixtures/mini_go --db .witnis/rust-go.sqlite --full
 maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
 pip install dist-native/witnis-*.whl   # optional witnis._native
 ```
 
-Native accelerates discover, batch digests, and shallow Go/JS/Java parse.  
+Native accelerates discover, digests, shallow parse, and SQLite indexing (non-`.py` trees or `WITNIS_RUST_INDEX=1`).  
 See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 ## Status
 
 **Usable today** for local Python-first agent workflows (index → search/trace/impact → gated verify → Studio/MCP).
 
-Still deepening: Rust SQLite index writer, stronger LSP backends, larger public corpora.
+Still deepening: deeper Rust Python analysis, stronger LSP backends, larger public corpora.
 
 ## License
 

@@ -42,7 +42,8 @@ def test_native_helper_reports_availability() -> None:
 
 def test_index_go_java_still_works(tmp_path: Path) -> None:
     db = tmp_path / "go.sqlite"
-    index_repository(ROOT / "fixtures" / "mini_go", db, incremental=False)
+    stats = index_repository(ROOT / "fixtures" / "mini_go", db, incremental=False)
+    assert stats.files >= 1
     store = Store(db)
     try:
         assert any(h["name"] == "Login" for h in store.search("Login", limit=10))
@@ -55,3 +56,21 @@ def test_index_go_java_still_works(tmp_path: Path) -> None:
         assert any(h["name"] == "login" for h in store.search("login", limit=20))
     finally:
         store.close()
+
+
+def test_rust_index_env_opt_in_for_python(tmp_path: Path, monkeypatch) -> None:
+    import os
+
+    monkeypatch.setenv("WITNIS_RUST_INDEX", "1")
+    if not NATIVE_AVAILABLE:
+        return
+    db = tmp_path / "py-rust.sqlite"
+    stats = index_repository(ROOT / "fixtures" / "mini_py", db, incremental=False)
+    assert stats.symbols >= 1
+    store = Store(db)
+    try:
+        hits = store.search("login", limit=20)
+        assert hits, hits
+    finally:
+        store.close()
+    os.environ.pop("WITNIS_RUST_INDEX", None)

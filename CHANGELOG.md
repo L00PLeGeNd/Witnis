@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0
+
+- Rust SQLite index writer (`store` + `index_repository`) for Go / JS / Java / shallow Python
+- `witnis-core` CLI: `index` (alongside `discover` / `scan`)
+- PyO3 `index_repo`; Python index prefers Rust for non-`.py` trees or `WITNIS_RUST_INDEX=1`
+- Migration phase 6 done
+
 ## 1.4.0
 
 - Rust shallow parsers for Go / JS / Java + batch `scan_digests`

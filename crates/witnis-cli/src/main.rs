@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use witnis_core::{iter_source_files, scan_source_digests};
+use witnis_core::{index_repository, iter_source_files, scan_source_digests};
 
 #[derive(Parser, Debug)]
 #[command(name = "witnis-core", about = "Witnis Rust core utilities")]
@@ -23,6 +23,15 @@ enum Commands {
         #[arg(value_name = "ROOT")]
         root: PathBuf,
     },
+    /// Index a repository into SQLite (Rust backend)
+    Index {
+        #[arg(value_name = "ROOT")]
+        root: PathBuf,
+        #[arg(long, value_name = "DB")]
+        db: PathBuf,
+        #[arg(long, default_value_t = false)]
+        full: bool,
+    },
 }
 
 fn main() -> ExitCode {
@@ -42,6 +51,22 @@ fn main() -> ExitCode {
         },
         Commands::Scan { root } => match scan_source_digests(&root) {
             Ok(rows) => match serde_json::to_string_pretty(&rows) {
+                Ok(text) => {
+                    println!("{text}");
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("error: {err}");
+                    ExitCode::FAILURE
+                }
+            },
+            Err(err) => {
+                eprintln!("error: {err}");
+                ExitCode::FAILURE
+            }
+        },
+        Commands::Index { root, db, full } => match index_repository(&root, &db, !full) {
+            Ok(stats) => match serde_json::to_string_pretty(&stats) {
                 Ok(text) => {
                     println!("{text}");
                     ExitCode::SUCCESS

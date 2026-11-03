@@ -528,6 +528,26 @@ def look_cmd(
     typer.echo(f"  plan    {len(steps)} step(s) — run: witnis verify {name} --execute")
 
 
+@app.command("up")
+def up_cmd(
+    root: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        help="Repo root to index",
+    ),
+    symbol: str = typer.Option("login", "--symbol", "-s", help="Symbol for look card"),
+    db: Optional[Path] = typer.Option(None, "--db"),
+) -> None:
+    """Index a repo, then print a look card (index + look)."""
+    db_path = db or _default_db()
+    typer.echo(f"index  {root.resolve()}")
+    stats = index_repository(root, db_path, incremental=True)
+    typer.echo(f"ready  {stats.files} files · {stats.symbols} symbols")
+    look_cmd(name=symbol, db=db_path, as_json=False)
+
+
 @app.command("demo")
 def demo_cmd(
     root: Path = typer.Argument(

@@ -2332,6 +2332,7 @@ def list_capabilities() -> dict[str, Any]:
         "status",
         "search",
         "look",
+        "up",
         "demo",
         "trace",
         "explain",

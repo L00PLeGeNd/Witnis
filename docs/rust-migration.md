@@ -6,29 +6,31 @@ Witnis stays **Python-first for adapters** (CLI/MCP/Studio/SDK) while hot Core p
 
 | Phase | Crate / surface | Status |
 |---|---|---|
-| 0 | Cargo workspace + `witnis-core` | this slice |
-| 1 | Discover / path sandbox / content hash in Rust | this slice |
-| 2 | PyO3 `witnis._native` optional extension | this slice |
-| 3 | Index write path / SQLite helpers | next |
-| 4 | Parsers (Python AST stays in Py; Go/JS/Java regex → Rust) | next |
-| 5 | Optional `witnis` Rust CLI binary sharing core | later |
+| 0 | Cargo workspace + `witnis-core` | done |
+| 1 | Discover / path sandbox / content hash | done |
+| 2 | PyO3 `witnis._native` optional extension | done |
+| 3 | Batch digests for index (`scan_source_digests`) | done |
+| 4 | Shallow Go / JS / Java parsers in Rust | done |
+| 5 | `witnis-core` Rust CLI (`discover` / `scan`) | done |
+| 6 | SQLite index writer in Rust | next |
+| 7 | Full `witnis` Rust binary sharing contracts | later |
 
 ## Rules
 
 1. Evidence envelopes and tool contracts stay stable (`docs/contracts-v1.md`).
-2. Python remains the default install; Rust is additive (`witnis[rust]` / maturin when enabled).
-3. If the native module is missing, Python implementations keep working (feature-flag / try-import).
+2. Python remains the default install; Rust is additive (`witnis[rust]` / maturin).
+3. If the native module is missing, Python implementations keep working.
 4. Prefer porting **deterministic, CPU-bound, pure** logic first — not Typer/MCP glue.
 
 ## Build
 
 ```bash
-# toolchain
 rustup default stable
-
-# native tests
 cargo test -p witnis-core
+cargo run -p witnis-cli -- discover fixtures/mini_py
+cargo run -p witnis-cli -- scan fixtures/mini_go
 
-# optional Python wheel (when maturin wired)
-pip install -e ".[rust]"
+# optional Python wheel
+maturin build -m crates/witnis-py/Cargo.toml --out dist-native
+pip install dist-native/witnis-*.whl
 ```

@@ -1,13 +1,17 @@
 # Changelog
 
+## 1.4.0
+
+- Rust shallow parsers for Go / JS / Java + batch `scan_digests`
+- Index prefers Rust digests/parsers when `witnis._native` is present
+- `witnis-core` Rust CLI: `discover` / `scan`
+- Migration doc updated through phase 5
+
 ## 1.3.0
 
-- Begin gradual Rust migration: Cargo workspace `witnis-core` + PyO3 `witnis-py`
-- Rust discover / path sandbox / SHA-256; Python falls back when `_native` missing
-- Docs: `docs/rust-migration.md`
+- Cargo workspace: `witnis-core` + PyO3 `witnis-py`
+- Rust discover / sandbox / sha256 with Python fallback
 
 ## 1.2.0
 
-- Public single-history release
-- Java shallow analyzer, Studio i18n en/zh/pt/fr/ru
-- Jedi LSP optional, Go shallow, public bench suite
+- Public release: evidence witness CLI/MCP/Studio, multi-lang shallow, LSP optional

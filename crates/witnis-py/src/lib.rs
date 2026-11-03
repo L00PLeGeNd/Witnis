@@ -1,8 +1,13 @@
-use pyo3::exceptions::{PyIOError, PyPermissionError};
+use pyo3::exceptions::{PyIOError, PyPermissionError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyList};
 use std::path::PathBuf;
 
-use witnis_core::{assert_path_in_root, is_sensitive_path, iter_source_files, sha256_file, SandboxError};
+use witnis_core::parse::{go, java, js};
+use witnis_core::{
+    assert_path_in_root, is_sensitive_path, iter_source_files, scan_source_digests, sha256_file,
+    SandboxError,
+};
 
 fn map_err(err: SandboxError) -> PyErr {
     match err {
@@ -11,7 +16,6 @@ fn map_err(err: SandboxError) -> PyErr {
     }
 }
 
-/// List relative source paths under root (sorted).
 #[pyfunction]
 fn list_source_files(root: &str) -> PyResult<Vec<String>> {
     let files = iter_source_files(&PathBuf::from(root)).map_err(map_err)?;
@@ -34,12 +38,98 @@ fn ensure_in_root(root: &str, candidate: &str) -> PyResult<String> {
     Ok(p.to_string_lossy().into_owned())
 }
 
+/// Return list of {rel_path, sha256} for all source files under root.
+#[pyfunction]
+fn scan_digests(py: Python<'_>, root: &str) -> PyResult<Py<PyList>> {
+    let rows = scan_source_digests(&PathBuf::from(root)).map_err(map_err)?;
+    let list = PyList::empty(py);
+    for row in rows {
+        let d = PyDict::new(py);
+        d.set_item("rel_path", row.rel_path)?;
+        d.set_item("sha256", row.sha256)?;
+        d.set_item("path", row.path.to_string_lossy().to_string())?;
+        list.append(d)?;
+    }
+    Ok(list.into())
+}
+
+fn symbols_to_py(py: Python<'_>, symbols: Vec<witnis_core::Symbol>) -> PyResult<Py<PyList>> {
+    let list = PyList::empty(py);
+    for s in symbols {
+        let d = PyDict::new(py);
+        d.set_item("name", s.name)?;
+        d.set_item("kind", s.kind)?;
+        d.set_item("file_path", s.file_path)?;
+        d.set_item("start_line", s.start_line)?;
+        d.set_item("end_line", s.end_line)?;
+        list.append(d)?;
+    }
+    Ok(list.into())
+}
+
+fn relations_to_py(py: Python<'_>, edges: Vec<witnis_core::Relation>) -> PyResult<Py<PyList>> {
+    let list = PyList::empty(py);
+    for e in edges {
+        let d = PyDict::new(py);
+        d.set_item("source", e.source)?;
+        d.set_item("target", e.target)?;
+        d.set_item("relation_type", e.relation_type)?;
+        d.set_item("status", e.status)?;
+        d.set_item("start_line", e.start_line)?;
+        list.append(d)?;
+    }
+    Ok(list.into())
+}
+
+#[pyfunction]
+fn parse_shallow(
+    py: Python<'_>,
+    lang: &str,
+    source: &str,
+    rel_path: &str,
+) -> PyResult<(Py<PyList>, Py<PyList>)> {
+    let (symbols, relations) = match lang {
+        "go" => (
+            go::parse_symbols(source, rel_path),
+            {
+                let mut edges = go::parse_imports(source, rel_path);
+                edges.extend(go::parse_calls(source, rel_path));
+                edges
+            },
+        ),
+        "java" => (
+            java::parse_symbols(source, rel_path),
+            {
+                let mut edges = java::parse_imports(source, rel_path);
+                edges.extend(java::parse_calls(source, rel_path));
+                edges
+            },
+        ),
+        "js" | "ts" => (
+            js::parse_symbols(source, rel_path),
+            {
+                let mut edges = js::parse_imports(source, rel_path);
+                edges.extend(js::parse_calls(source, rel_path));
+                edges
+            },
+        ),
+        other => {
+            return Err(PyValueError::new_err(format!(
+                "unsupported shallow lang: {other}"
+            )))
+        }
+    };
+    Ok((symbols_to_py(py, symbols)?, relations_to_py(py, relations)?))
+}
+
 #[pymodule]
 fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(list_source_files, m)?)?;
     m.add_function(wrap_pyfunction!(file_sha256, m)?)?;
     m.add_function(wrap_pyfunction!(path_is_sensitive, m)?)?;
     m.add_function(wrap_pyfunction!(ensure_in_root, m)?)?;
+    m.add_function(wrap_pyfunction!(scan_digests, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_shallow, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

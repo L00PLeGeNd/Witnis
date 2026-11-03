@@ -1,6 +1,8 @@
 .witnis/
 __pycache__/
 *.py[cod]
+*.pyd
+*.so
 .pytest_cache/
 .mypy_cache/
 .venv/

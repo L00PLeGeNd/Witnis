@@ -3,11 +3,12 @@ resolver = "2"
 members = [
     "crates/witnis-core",
     "crates/witnis-py",
+    "crates/witnis-cli",
 ]
-default-members = ["crates/witnis-core"]
+default-members = ["crates/witnis-core", "crates/witnis-cli"]
 
 [workspace.package]
-version = "1.3.0"
+version = "1.4.0"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/L00PLeGeNd/Witnis"
@@ -20,3 +21,4 @@ thiserror = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 pyo3 = { version = "0.23", features = ["extension-module"] }
+clap = { version = "4", features = ["derive"] }

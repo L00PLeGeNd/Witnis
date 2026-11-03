@@ -1,21 +1,22 @@
-# DONE — Witnis 1.3.0
+# DONE — Witnis 1.4.0
 
 Public repo: https://github.com/L00PLeGeNd/Witnis
 
-## This slice — Rust migration start
-- Cargo workspace: `witnis-core`, `witnis-py` (PyO3)
-- Rust: discover / sandbox / sha256
-- Python `discover.py` prefers `witnis._native` when built
-- Docs: `docs/rust-migration.md`
+## Rust progress
+- `witnis-core`: discover, sandbox, hash, scan digests, Go/JS/Java parse
+- `witnis-py`: PyO3 `_native` (`list_source_files`, `scan_digests`, `parse_shallow`, …)
+- `witnis-cli`: `witnis-core discover|scan`
+- Python index uses native path when available
 
-## Usability
-Still usable end-to-end in pure Python. Optional native accel via:
+## Still Python
+- AST Python analysis, verify engine, MCP/CLI/Studio adapters, SQLite store
 
+## Verify locally before push
 ```bash
 cargo test -p witnis-core
+cargo build -p witnis-cli
 maturin build -m crates/witnis-py/Cargo.toml --out dist-native
-pip install dist-native/witnis-*.whl
+pip install --force-reinstall dist-native/witnis-*.whl
+pytest -q
+python -m witnis bench --suite public
 ```
-
-## Next Rust phases
-Index/SQLite helpers → parsers → optional Rust CLI

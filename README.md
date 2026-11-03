@@ -96,10 +96,12 @@ Hot paths are moving into Rust while Python keeps CLI/MCP/Studio adapters.
 
 ```bash
 cargo test -p witnis-core
-pip install -e ".[rust]"
-maturin develop -m crates/witnis-py/Cargo.toml   # optional witnis._native
+cargo run -p witnis-cli -- discover fixtures/mini_py
+maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
+pip install dist-native/witnis-*.whl   # optional witnis._native
 ```
 
+Native accelerates discover, batch digests, and shallow Go/JS/Java parse.  
 See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 ## Status

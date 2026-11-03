@@ -6,6 +6,7 @@ from pathlib import Path
 from witnis.core.calls_python import parse_python_calls
 from witnis.core.discover import iter_source_files
 from witnis.core.models import IndexStats, Symbol
+from witnis.core.native import rust_parse_shallow, rust_scan_digests
 from witnis.core.parse_go import parse_go_file
 from witnis.core.parse_java import parse_java_file
 from witnis.core.parse_js import parse_js_file
@@ -25,14 +26,50 @@ from witnis.core.store import Store
 _JS_SUFFIXES = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
 
 
+def _symbols_from_dicts(rows: list[dict]) -> list[Symbol]:
+    return [
+        Symbol(
+            name=str(r["name"]),
+            kind=str(r["kind"]),
+            file_path=str(r["file_path"]),
+            start_line=int(r["start_line"]),
+            end_line=int(r["end_line"]),
+        )
+        for r in rows
+    ]
+
+
+def _parse_shallow_native(
+    lang: str, path: Path, *, rel_path: str
+) -> tuple[list[Symbol], list[dict]] | None:
+    try:
+        source = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return [], []
+    parsed = rust_parse_shallow(lang, source, rel_path)
+    if parsed is None:
+        return None
+    symbols, relations = parsed
+    return _symbols_from_dicts(symbols), relations
+
+
 def _parse_symbols(path: Path, *, rel_path: str) -> list[Symbol]:
     if path.suffix == ".py":
         return parse_python_file(path, rel_path=rel_path)
     if path.suffix in _JS_SUFFIXES:
+        native = _parse_shallow_native("js", path, rel_path=rel_path)
+        if native is not None:
+            return native[0]
         return parse_js_file(path, rel_path=rel_path)
     if path.suffix == ".go":
+        native = _parse_shallow_native("go", path, rel_path=rel_path)
+        if native is not None:
+            return native[0]
         return parse_go_file(path, rel_path=rel_path)
     if path.suffix == ".java":
+        native = _parse_shallow_native("java", path, rel_path=rel_path)
+        if native is not None:
+            return native[0]
         return parse_java_file(path, rel_path=rel_path)
     return []
 
@@ -48,18 +85,39 @@ def _parse_relations(path: Path, *, rel_path: str) -> list[dict]:
         edges.extend(parse_python_overrides(path, rel_path=rel_path))
         return edges
     if path.suffix in _JS_SUFFIXES:
+        native = _parse_shallow_native("js", path, rel_path=rel_path)
+        if native is not None:
+            return native[1]
         return parse_js_imports(path, rel_path=rel_path) + parse_js_calls(
             path, rel_path=rel_path
         )
     if path.suffix == ".go":
+        native = _parse_shallow_native("go", path, rel_path=rel_path)
+        if native is not None:
+            return native[1]
         return parse_go_imports(path, rel_path=rel_path) + parse_go_calls(
             path, rel_path=rel_path
         )
     if path.suffix == ".java":
+        native = _parse_shallow_native("java", path, rel_path=rel_path)
+        if native is not None:
+            return native[1]
         return parse_java_imports(path, rel_path=rel_path) + parse_java_calls(
             path, rel_path=rel_path
         )
     return []
+
+
+def _file_digest_map(root: Path, paths: list[Path]) -> dict[str, str]:
+    """Prefer Rust batch hashing; fall back to Python hashlib."""
+    rust_rows = rust_scan_digests(root)
+    if rust_rows is not None:
+        return {str(r["rel_path"]): str(r["sha256"]) for r in rust_rows}
+    out: dict[str, str] = {}
+    for path in paths:
+        rel = path.relative_to(root).as_posix()
+        out[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return out
 
 
 def index_repository(
@@ -73,6 +131,7 @@ def index_repository(
     try:
         repo_id = store.upsert_repository(root)
         paths = iter_source_files(root)
+        digests = _file_digest_map(root, paths)
         relations: list[dict] = []
         for path in paths:
             rel = path.relative_to(root).as_posix()
@@ -82,7 +141,7 @@ def index_repository(
             payload = []
             for path in paths:
                 rel = path.relative_to(root).as_posix()
-                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                digest = digests.get(rel) or hashlib.sha256(path.read_bytes()).hexdigest()
                 symbols = _parse_symbols(path, rel_path=rel)
                 payload.append((rel, digest, symbols))
             files, symbols, rel_count = store.replace_repo_contents(
@@ -116,7 +175,7 @@ def index_repository(
         for path in paths:
             rel = path.relative_to(root).as_posix()
             keep_paths.add(rel)
-            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            digest = digests.get(rel) or hashlib.sha256(path.read_bytes()).hexdigest()
             if existing.get(rel) == digest:
                 skipped += 1
                 continue

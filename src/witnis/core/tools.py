@@ -91,10 +91,18 @@ def repo_overview(db_path: Path) -> dict[str, Any]:
 
 
 def repo_search(db_path: Path, query: str, limit: int = 50) -> dict[str, Any]:
+    from witnis.core.native import rust_search
+
     store = _open_store(db_path)
     try:
         overview = store.overview()
         hits = store.search(query, limit=limit)
+        backend = "python"
+        # Prefer Rust FTS path when native is present and returns hits.
+        rust_hits = rust_search(db_path, query, limit=limit)
+        if rust_hits:
+            hits = rust_hits
+            backend = "rust"
     finally:
         store.close()
     repo = overview.get("repository")
@@ -103,18 +111,17 @@ def repo_search(db_path: Path, query: str, limit: int = 50) -> dict[str, Any]:
         return make_envelope(
             status="partial",
             repository=repository,
-            result={"matches": []},
+            result={"matches": [], "backend": backend},
             limitations=[f"No symbol/path matches for query={query!r}"],
         )
     evidence = [symbol_evidence(h) for h in hits]
     return make_envelope(
         status="success",
         repository=repository,
-        result={"matches": hits},
+        result={"matches": hits, "backend": backend},
         evidence=evidence,
-        limitations=["Search is name/path LIKE match, not semantic embedding"],
+        limitations=["Search is name/path FTS+LIKE match, not semantic embedding"],
     )
-
 
 def trace_symbol(db_path: Path, name: str, limit: int = 50) -> dict[str, Any]:
     """Locate symbol definitions plus call/ref/inherit/override/decorator edges."""
@@ -2196,6 +2203,8 @@ def query_lsp(
         lsp_available,
         lsp_definitions,
         lsp_references,
+        pyright_available,
+        pyright_diagnostics,
     )
 
     store = _open_store(db_path)
@@ -2222,6 +2231,9 @@ def query_lsp(
         if not references:
             references = list(idx_refs.get("references") or [])
 
+        def_paths = [str(d.get("path")) for d in definitions if d.get("path")]
+        pyright = pyright_diagnostics(root, name, paths=def_paths, limit=limit)
+
         backends = []
         if jedi_defs.get("backend") and (jedi_defs.get("definitions") or jedi_refs.get("references")):
             backends.append("jedi")
@@ -2229,13 +2241,17 @@ def query_lsp(
             not jedi_refs.get("references") and idx_refs.get("references")
         ):
             backends.append("index")
+        if pyright.get("available") and pyright.get("diagnostics") is not None and pyright_available():
+            backends.append("pyright")
         if not backends and lsp_available():
             backends.append("jedi")
         if not backends:
             backends.append("index")
         backend = "+".join(backends)
 
-        available = bool(definitions or references or lsp_available())
+        available = bool(
+            definitions or references or lsp_available() or pyright_available()
+        )
         status = (
             "success"
             if definitions or references
@@ -2246,11 +2262,16 @@ def query_lsp(
             limitations.append(
                 "Jedi not installed — using index backend. pip install 'witnis[lsp]'"
             )
+        if not pyright_available():
+            limitations.append(
+                "Pyright optional — install Node pyright/basedpyright for diagnostics"
+            )
         for note in (
             jedi_defs.get("limitation"),
             jedi_refs.get("limitation"),
             idx_defs.get("limitation"),
             idx_refs.get("limitation"),
+            pyright.get("limitation"),
         ):
             if note and note not in limitations and not (definitions or references):
                 limitations.append(note)
@@ -2263,6 +2284,7 @@ def query_lsp(
                 "available": available,
                 "definitions": definitions,
                 "references": references,
+                "diagnostics": pyright.get("diagnostics") or [],
             },
             evidence=[
                 {
@@ -2283,9 +2305,19 @@ def query_lsp(
                     "name": r.get("name"),
                 }
                 for r in references[:10]
+            ]
+            + [
+                {
+                    "type": "pyright_diagnostic",
+                    "status": "observed",
+                    "path": d.get("path"),
+                    "line": d.get("line"),
+                    "name": d.get("severity"),
+                }
+                for d in (pyright.get("diagnostics") or [])[:5]
             ],
             limitations=limitations
-            or ["LSP enrichment may combine Jedi and index backends"],
+            or ["LSP enrichment may combine Jedi, index, and Pyright backends"],
         )
     finally:
         store.close()

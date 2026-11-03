@@ -15,6 +15,7 @@ Witnis stays **Python-first for adapters** (CLI/MCP/Studio/SDK) while hot Core p
 | 6 | SQLite index writer in Rust (`index` CLI + PyO3) | done |
 | 6b | Deeper Python shallow + Rust `search` | done |
 | 6c | Rust Python via `rustpython-parser` AST | done |
+| 6d | Rust `overview` + CI + search prefer-native | done |
 | 7 | Full `witnis` Rust binary sharing contracts | later |
 
 ## Rules
@@ -33,12 +34,16 @@ cargo run -p witnis-cli -- discover fixtures/mini_py
 cargo run -p witnis-cli -- scan fixtures/mini_go
 cargo run -p witnis-cli -- index fixtures/mini_java --db .witnis/rust-java.sqlite --full
 cargo run -p witnis-cli -- search login --db .witnis/rust-java.sqlite
+cargo run -p witnis-cli -- overview --db .witnis/rust-java.sqlite
 
 # optional Python wheel
 maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
 pip install dist-native/witnis-*.whl
 ```
 
-Python `index_repository` uses the Rust writer when `WITNIS_RUST_INDEX=1` or the tree has no `.py` files.
-Rust Python parsing uses `rustpython-parser` AST (qualified methods, inherits, decorators, overrides, calls).
-The pure-Python AST indexer remains the default for `.py` trees unless Rust index is opted in.
+Python `index_repository` uses the Rust writer when:
+- `WITNIS_RUST_INDEX=1`, or
+- `WITNIS_RUST_INDEX=auto` and `witnis._native` is loaded, or
+- the tree has no `.py` files.
+
+Rust Python parsing uses `rustpython-parser` AST. Pure-Python AST remains default for `.py` trees unless opted in.

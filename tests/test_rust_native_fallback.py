@@ -109,8 +109,8 @@ def test_rust_search_after_index(tmp_path: Path) -> None:
 def test_public_svc_indexes_polyglot(tmp_path: Path) -> None:
     db = tmp_path / "public_svc.sqlite"
     stats = index_repository(ROOT / "fixtures" / "public_svc", db, incremental=False)
-    assert stats.files >= 8
-    assert stats.symbols >= 10
+    assert stats.files >= 12
+    assert stats.symbols >= 18
     store = Store(db)
     try:
         hits = store.search("charge", limit=20)

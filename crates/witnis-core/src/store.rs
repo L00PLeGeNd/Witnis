@@ -311,6 +311,29 @@ impl Store {
             .map_err(sqlite_err)
     }
 
+    pub fn relation_count(&self, repo_id: i64) -> Result<i64, SandboxError> {
+        self.conn
+            .query_row(
+                "SELECT COUNT(*) FROM relations WHERE repo_id = ?1",
+                params![repo_id],
+                |r| r.get(0),
+            )
+            .map_err(sqlite_err)
+    }
+
+    pub fn latest_repo_meta(&self) -> Result<Option<(String, String, i64)>, SandboxError> {
+        let row = self
+            .conn
+            .query_row(
+                "SELECT id, name, root_path FROM repositories ORDER BY id DESC LIMIT 1",
+                [],
+                |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?)),
+            )
+            .optional()
+            .map_err(sqlite_err)?;
+        Ok(row.map(|(id, name, root)| (name, root, id)))
+    }
+
     /// Search symbols via FTS5 with LIKE fallback (matches Python Store.search).
     pub fn search(&self, query: &str, limit: usize) -> Result<Vec<SearchHit>, SandboxError> {
         let limit = limit.max(1) as i64;

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +14,10 @@ def lsp_available() -> bool:
     except ImportError:
         return False
     return True
+
+
+def pyright_available() -> bool:
+    return bool(shutil.which("pyright") or shutil.which("basedpyright"))
 
 
 def _rel(root: Path, module_path: Any) -> str:
@@ -192,4 +200,103 @@ def index_references(store: Any, name: str, *, limit: int = 40) -> dict[str, Any
         "references": refs[:limit],
         "available": True,
         "limitation": None if refs else "No index references matched name",
+    }
+
+
+def pyright_diagnostics(
+    root: Path,
+    name: str,
+    *,
+    paths: list[str] | None = None,
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Optional Pyright/BasedPyright diagnostics for files that mention ``name``."""
+    root = root.resolve()
+    exe = shutil.which("basedpyright") or shutil.which("pyright")
+    if not exe:
+        return {
+            "backend": None,
+            "diagnostics": [],
+            "available": False,
+            "limitation": "pyright/basedpyright not on PATH",
+        }
+    leaf = name.split(".")[-1]
+    targets: list[Path] = []
+    if paths:
+        targets = [root / p for p in paths if (root / p).is_file()]
+    if not targets:
+        for path in root.rglob("*.py"):
+            if any(part.startswith(".") for part in path.parts):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8-sig")
+            except OSError:
+                continue
+            if leaf in text:
+                targets.append(path)
+            if len(targets) >= 8:
+                break
+    if not targets:
+        return {
+            "backend": "pyright",
+            "diagnostics": [],
+            "available": True,
+            "limitation": "No Python files mention the symbol for pyright",
+        }
+    cmd = [exe, "--outputjson", *[str(p) for p in targets]]
+    env = os.environ.copy()
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=45,
+            env=env,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as err:
+        return {
+            "backend": "pyright",
+            "diagnostics": [],
+            "available": False,
+            "limitation": f"pyright failed: {err}",
+        }
+    payload: dict[str, Any] = {}
+    raw = (proc.stdout or "").strip()
+    if raw:
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = {}
+    diags: list[dict[str, Any]] = []
+    for file_info in payload.get("generalDiagnostics") or []:
+        file_path = str(file_info.get("file") or "")
+        try:
+            rel = Path(file_path).resolve().relative_to(root).as_posix()
+        except Exception:
+            rel = file_path
+        msg = str(file_info.get("message") or "")
+        if leaf not in msg and leaf not in rel:
+            # keep high-severity nearby diagnostics anyway
+            if str(file_info.get("severity") or "").lower() not in {"error", "warning"}:
+                continue
+        rng = file_info.get("range") or {}
+        start = rng.get("start") or {}
+        diags.append(
+            {
+                "path": rel,
+                "line": (start.get("line") or 0) + 1,
+                "severity": file_info.get("severity"),
+                "message": msg,
+                "rule": file_info.get("rule"),
+            }
+        )
+        if len(diags) >= limit:
+            break
+    return {
+        "backend": "pyright",
+        "diagnostics": diags[:limit],
+        "available": True,
+        "limitation": None if diags else "Pyright reported no matching diagnostics",
     }

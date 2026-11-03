@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 use witnis_core::{
-    index_repository, iter_source_files, scan_source_digests, search_symbols,
+    index_repository, iter_source_files, overview_db, scan_source_digests, search_symbols,
 };
 
 #[derive(Parser, Debug)]
@@ -42,6 +42,11 @@ enum Commands {
         db: PathBuf,
         #[arg(long, default_value_t = 50)]
         limit: usize,
+    },
+    /// Summarize an indexed SQLite DB
+    Overview {
+        #[arg(long, value_name = "DB")]
+        db: PathBuf,
     },
 }
 
@@ -94,6 +99,22 @@ fn main() -> ExitCode {
         },
         Commands::Search { query, db, limit } => match search_symbols(&db, &query, limit) {
             Ok(hits) => match serde_json::to_string_pretty(&hits) {
+                Ok(text) => {
+                    println!("{text}");
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("error: {err}");
+                    ExitCode::FAILURE
+                }
+            },
+            Err(err) => {
+                eprintln!("error: {err}");
+                ExitCode::FAILURE
+            }
+        },
+        Commands::Overview { db } => match overview_db(&db) {
+            Ok(stats) => match serde_json::to_string_pretty(&stats) {
                 Ok(text) => {
                     println!("{text}");
                     ExitCode::SUCCESS

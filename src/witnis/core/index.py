@@ -123,8 +123,14 @@ def _file_digest_map(root: Path, paths: list[Path]) -> dict[str, str]:
 
 def _prefer_rust_index(paths: list[Path]) -> bool:
     flag = os.environ.get("WITNIS_RUST_INDEX", "").strip().lower()
+    if flag in {"0", "false", "no", "off"}:
+        return False
     if flag in {"1", "true", "yes"}:
         return True
+    if flag == "auto":
+        from witnis.core.native import NATIVE_AVAILABLE
+
+        return bool(NATIVE_AVAILABLE and paths)
     # Non-Python trees can use the Rust indexer by default.
     return bool(paths) and all(p.suffix != ".py" for p in paths)
 

@@ -1,19 +1,15 @@
-# DONE — Witnis 1.7.0 (local)
+# DONE — Witnis 1.8.0
 
 Public repo: https://github.com/L00PLeGeNd/Witnis
 
 ## This release
-- Rust Python via `rustpython-parser` AST
-- Larger public polyglot fixture `fixtures/public_svc`
-- Public bench 19 tasks (mini_* + public_svc)
-- LSP Jedi with index fallback
+- CI on GitHub Actions
+- RustPython AST + Rust index/search/overview
+- Jedi + index + optional Pyright diagnostics
+- Polyglot `fixtures/public_svc` + 21 public bench tasks
+- CONTRIBUTING / scoreboard / polished README
 
-## Still later
-- Full Rust `witnis` binary (phase 7)
-- Stronger external LSP (pyright language server)
-- Even larger third-party corpora
-
-## Verify locally before push
+## Verify before publish
 ```bash
 cargo test -p witnis-core
 cargo build -p witnis-cli --release

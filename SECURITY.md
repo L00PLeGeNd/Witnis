@@ -10,8 +10,8 @@ Witnis is **read-only by default**.
 - Runtime trace ingest only accepts paths under the repo root or the local `.witnis` directory.
 - Repo text (README/comments) must be treated as **untrusted** by agents (prompt-injection aware).
 
-## v1 posture
+## Posture
 
 - Stable MCP/CLI surface is documented in `docs/contracts-v1.md`.
 - Core witness paths run **without an LLM**.
-- Public release remains gated until maintainers explicitly publish; local v1.0 does not imply a public remote.
+- Report security issues privately to the repository maintainers before public disclosure.

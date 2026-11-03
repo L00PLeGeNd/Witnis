@@ -96,7 +96,7 @@
       "kind": "overview_min",
       "fixture": "fixtures/public_svc",
       "query": "",
-      "expect": { "min_files": 8, "min_symbols": 10 }
+      "expect": { "min_files": 12, "min_symbols": 18 }
     },
     {
       "id": "P16_public_svc_py_charge",
@@ -125,6 +125,20 @@
       "fixture": "fixtures/public_svc",
       "query": "charge",
       "expect": { "any_symbol_names": ["charge"] }
+    },
+    {
+      "id": "P20_public_svc_ledger",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "Ledger",
+      "expect": { "any_symbol_names": ["Ledger"] }
+    },
+    {
+      "id": "P21_public_svc_authorize",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "Authorize",
+      "expect": { "any_symbol_names": ["Authorize"] }
     }
   ]
 }

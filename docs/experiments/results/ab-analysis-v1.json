@@ -1,0 +1,167 @@
+{
+  "pack": "ab-analysis-v1",
+  "title": "Analysis completeness: grep vs Witnis (reproducible, no LLM)",
+  "disclaimer": "This pack measures analysis completeness only. Agent task success, token cost, and wall time need human+model runs recorded under reports/ (see docs/experiments/).",
+  "results": [
+    {
+      "task_id": "auth-refresh-callers",
+      "needle": "refresh_token",
+      "arm_a": {
+        "arm": "A_grep",
+        "task_id": "refresh_token",
+        "seconds": 0.0026,
+        "symbols_found": [
+          "controller.py:23:return self.service.refresh_token(refresh)",
+          "filter.py:17:pair = self.service.refresh_token(refresh)",
+          "service.py:19:def refresh_token(self, refresh: str) -> TokenPair | None:",
+          "test_auth_refresh.py:20:rotated = svc.refresh_token(pair.refresh)",
+          "test_auth_refresh.py:33:assert svc.refresh_token(pair.refresh) is None"
+        ],
+        "callers_found": [
+          "controller.py",
+          "filter.py",
+          "test_auth_refresh.py"
+        ],
+        "tests_found": [
+          "test_auth_refresh.py"
+        ],
+        "notes": [
+          "text hits only — no typed callers, no impact edges, no verify gate"
+        ]
+      },
+      "arm_b": {
+        "arm": "B_witnis",
+        "task_id": "refresh_token",
+        "seconds": 0.2716,
+        "symbols_found": [
+          "service.py:19:AuthService.refresh_token"
+        ],
+        "callers_found": [
+          "controller.py:AuthController.post_refresh",
+          "filter.py:AuthFilter.refresh_via_filter",
+          "test_auth_refresh.py:test_refresh_ok",
+          "test_auth_refresh.py:test_refresh_rejects_expired"
+        ],
+        "tests_found": [
+          "test_auth_refresh.py"
+        ],
+        "notes": [
+          "impact_direct_edges=4",
+          "typed search + callers + related tests + verify plan available"
+        ]
+      },
+      "caller_recall_a": 1.0,
+      "caller_recall_b": 1.0,
+      "test_recall_a": 1.0,
+      "test_recall_b": 1.0,
+      "delta_notes": [
+        "Arm B should expose typed callers/tests; Arm A is string presence only.",
+        "Full agent success/token metrics require the human+model protocol."
+      ]
+    },
+    {
+      "task_id": "mini-py-login",
+      "needle": "login",
+      "arm_a": {
+        "arm": "A_grep",
+        "task_id": "login",
+        "seconds": 0.0019,
+        "symbols_found": [
+          "app.py:7:service.login(\"alice\", \"secret\")",
+          "auth.py:9:\"\"\"Handles login for the sample app.\"\"\"",
+          "auth.py:12:def login(self, username: str, password: str) -> bool:",
+          "auth.py:23:def login(self, username: str, password: str) -> bool:",
+          "auth.py:24:return super().login(username, password) and username != \"banned\"",
+          "gate.py:9:return self.auth.login(username, password)",
+          "test_auth.py:4:def test_login_ok() -> None:",
+          "test_auth.py:5:assert AuthService().login(\"alice\", \"secret\") is True"
+        ],
+        "callers_found": [
+          "app.py",
+          "gate.py",
+          "test_auth.py"
+        ],
+        "tests_found": [
+          "test_auth.py"
+        ],
+        "notes": [
+          "text hits only — no typed callers, no impact edges, no verify gate"
+        ]
+      },
+      "arm_b": {
+        "arm": "B_witnis",
+        "task_id": "login",
+        "seconds": 0.3003,
+        "symbols_found": [
+          "auth.py:12:AuthService.login",
+          "auth.py:23:SecureAuth.login",
+          "test_auth.py:4:test_login_ok"
+        ],
+        "callers_found": [
+          "app.py:main",
+          "auth.py:SecureAuth.login",
+          "gate.py:AccessGate.allow",
+          "test_auth.py:test_login_ok",
+          "auth.py:AuthService.login"
+        ],
+        "tests_found": [
+          "test_auth.py"
+        ],
+        "notes": [
+          "impact_direct_edges=6",
+          "typed search + callers + related tests + verify plan available"
+        ]
+      },
+      "caller_recall_a": 1.0,
+      "caller_recall_b": 1.0,
+      "test_recall_a": 1.0,
+      "test_recall_b": 1.0,
+      "delta_notes": [
+        "Arm B should expose typed callers/tests; Arm A is string presence only.",
+        "Full agent success/token metrics require the human+model protocol."
+      ]
+    },
+    {
+      "task_id": "java-di-findUser",
+      "needle": "findUser",
+      "arm_a": {
+        "arm": "A_grep",
+        "task_id": "findUser",
+        "seconds": 0.0022,
+        "symbols_found": [
+          "com/example/user/UserController.java:17:return userService.findUser(id);",
+          "com/example/user/UserService.java:11:public User findUser(Long id) {"
+        ],
+        "callers_found": [],
+        "tests_found": [],
+        "notes": [
+          "text hits only — no typed callers, no impact edges, no verify gate"
+        ]
+      },
+      "arm_b": {
+        "arm": "B_witnis",
+        "task_id": "findUser",
+        "seconds": 0.2799,
+        "symbols_found": [
+          "com/example/user/UserService.java:10:findUser"
+        ],
+        "callers_found": [
+          "com/example/user/UserService.java:UserService.findUser"
+        ],
+        "tests_found": [],
+        "notes": [
+          "impact_direct_edges=1",
+          "typed search + callers + related tests + verify plan available"
+        ]
+      },
+      "caller_recall_a": 0.0,
+      "caller_recall_b": 0.5,
+      "test_recall_a": null,
+      "test_recall_b": null,
+      "delta_notes": [
+        "Arm B should expose typed callers/tests; Arm A is string presence only.",
+        "Full agent success/token metrics require the human+model protocol."
+      ]
+    }
+  ]
+}

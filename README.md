@@ -14,9 +14,26 @@ Witnis pairs with [Harnis](https://github.com/L00PLeGeNd/Harnis): the *harness* 
 
 ---
 
-## Why it exists
+## Why not “just let Claude Code / Codex read the repo?”
 
-Agents can edit files, run tests, and sound sure of themselves. They still often:
+Developers already have IDEs, Git, language servers, and agents. If Witnis is only another search MCP, nobody needs it.
+
+Witnis exists to turn a change request into **engineering results**:
+
+1. **Task** — e.g. modify token refresh  
+2. **Context** — controller, service, auth filter, related tests  
+3. **Impact** — direct / related edges an agent should not miss  
+4. **Edit from evidence** — not a repo-wide guess  
+5. **Gated verify** — pass / fail / unverified, explicitly
+
+```bash
+witnis scene                 # auth-refresh story card (not a tool catalog)
+witnis experiment            # grep vs Witnis analysis completeness (no LLM)
+```
+
+Full walkthrough: [`docs/demo-auth-refresh.md`](docs/demo-auth-refresh.md) · A/B sheet: [`docs/experiments/agent-ab-sheet.md`](docs/experiments/agent-ab-sheet.md)
+
+Agents can still edit files and sound sure. They still often:
 
 - treat a text hit as a **typed symbol**
 - miss call, inherit, and override edges that define real blast radius
@@ -50,18 +67,19 @@ flowchart LR
 
 ---
 
-## Quick start
+## Quick start (aim: first useful analysis in minutes)
 
 ```bash
 git clone https://github.com/L00PLeGeNd/Witnis.git
 cd Witnis
-pip install -e ".[dev,lsp]"
+pip install -e .
 
-witnis demo                 # index sample + witness card
-witnis index .              # or index your own repo
-witnis look login           # search · trace · impact · tests · plan
-witnis studio login --open  # HTML dashboard
+witnis scene                # token-refresh story: context → impact → verify plan
+witnis demo                 # smaller sample + look card
+witnis look login           # after: witnis index <your-repo>
 ```
+
+Measured on this machine (2026-11-03): cold `python -m venv` + `pip install -e .` + `witnis demo` ≈ **88s**; `witnis scene` / `witnis demo` alone **&lt;1s** after install. First useful analysis stays inside a five-minute budget when the network for pip is healthy.
 
 Deeper cuts when you need them:
 
@@ -253,6 +271,8 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 | [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench method |
 | [`SECURITY.md`](SECURITY.md) | Security defaults (gate ≠ sandbox) |
 | [`docs/DEPTH.md`](docs/DEPTH.md) | Honest depth status & next bets |
+| [`docs/demo-auth-refresh.md`](docs/demo-auth-refresh.md) | Token-refresh product story |
+| [`docs/experiments/`](docs/experiments/) | Grep vs Witnis results + agent A/B sheet |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop and PR expectations |
 | [`CHANGELOG.md`](CHANGELOG.md) | Releases |
 | [`docs/cli-cheatsheet.md`](docs/cli-cheatsheet.md) | Short CLI commands |
@@ -268,7 +288,7 @@ Ready for local Python-first agent work:
 
 Still ahead: real-repo ground truth (P/R, false-pass rate), deeper four-language semantics, verify isolation, Python/Rust parity as a merge gate, then a single Rust `witnis` binary.
 
-Package / crates: **1.9.0**. Depth-first: Spring-aware Java relations, ground-truth suite, verify isolation. See [`docs/DEPTH.md`](docs/DEPTH.md) · [`CHANGELOG.md`](CHANGELOG.md).
+Package / crates: **1.9.1**. Depth + visible product proof: `scene`, `experiment`, auth-refresh demo. See [`docs/DEPTH.md`](docs/DEPTH.md) · [`docs/experiments/`](docs/experiments/) · [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.1
+
+- `witnis scene` — auth token-refresh story card (engineering results, not MCP names)
+- `witnis experiment` — reproducible grep vs Witnis analysis A/B pack + published JSON
+- `fixtures/auth_refresh` demo; Claude Code / Codex MCP examples
+- README answers “why not bare agent?” with measured cold-install timing
+
 ## 1.9.0
 
 - Java Spring-aware relations: `implements`, field/ctor `injects`, typed field calls

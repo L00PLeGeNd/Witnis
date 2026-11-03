@@ -5,14 +5,15 @@ Prefer Core facts over model guesses.
 ## Bootstrap
 
 ```bash
-pip install -e ".[dev,lsp]"
+pip install -e .
+witnis scene                 # show the product story before tool names
 witnis index /path/to/repo
-witnis look login
+witnis look refresh_token    # or login / your symbol
 ```
 
-Or the shortest first run: `witnis demo`
+Shortest first runs: `witnis scene` (auth narrative) or `witnis demo`.
 
-MCP: set `WITNIS_DB` to `.witnis/index.sqlite` (see `examples/mcp.example.json`). Any MCP-compatible host works.
+MCP (Claude Code, Codex, and other MCP hosts): set `WITNIS_DB` to `.witnis/index.sqlite` (see `examples/mcp.example.json`). Prefer `look` / impact / gated verify over dumping the whole tool list at the user.
 
 ## Typical loops
 

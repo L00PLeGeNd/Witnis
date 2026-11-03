@@ -1,0 +1,41 @@
+{
+  "id": "ab-analysis-v1",
+  "title": "Analysis completeness: grep vs Witnis (reproducible, no LLM)",
+  "disclaimer": "This pack measures analysis completeness only. Agent task success, token cost, and wall time need human+model runs recorded under reports/ (see docs/experiments/).",
+  "tasks": [
+    {
+      "id": "auth-refresh-callers",
+      "corpus": "fixtures/auth_refresh",
+      "needle": "refresh_token",
+      "expect_callers_substr": ["filter", "controller", "test_auth"],
+      "expect_tests_substr": ["test_auth_refresh"]
+    },
+    {
+      "id": "mini-py-login",
+      "corpus": "fixtures/mini_py",
+      "needle": "login",
+      "expect_callers_substr": ["app.py", "gate.py", "test_auth"],
+      "expect_tests_substr": ["test_auth"]
+    },
+    {
+      "id": "java-di-findUser",
+      "corpus": "fixtures/semantic_java_di",
+      "needle": "findUser",
+      "expect_callers_substr": ["UserController", "UserService"],
+      "expect_tests_substr": []
+    }
+  ],
+  "external_agent_protocol": {
+    "corpora": ["flask@2.3.3", "fastapi@0.104.1", "spring-petclinic@pin"],
+    "arms": ["A_agent_only", "B_agent_plus_witnis"],
+    "metrics": [
+      "task_success",
+      "edit_correctness",
+      "impact_omission",
+      "tests_passed",
+      "token_cost",
+      "wall_time"
+    ],
+    "status": "open — community / maintainer runs; sheet template in docs/experiments/agent-ab-sheet.md"
+  }
+}

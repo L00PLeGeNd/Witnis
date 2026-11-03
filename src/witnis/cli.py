@@ -576,6 +576,65 @@ def demo_cmd(
         webbrowser.open(Path(path).resolve().as_uri())
 
 
+@app.command("scene")
+def scene_cmd(
+    as_json: bool = typer.Option(False, "--json", help="Machine-readable story card"),
+    execute: bool = typer.Option(
+        False, "--execute", help="Also run gated verify (needs WITNIS_ALLOW_VERIFY=1)"
+    ),
+    fixture: str = typer.Option(
+        "fixtures/auth_refresh", "--fixture", help="Scene fixture path"
+    ),
+    symbol: str = typer.Option("refresh_token", "--symbol", "-s"),
+) -> None:
+    """Walk the auth-refresh demo as engineering results (not MCP tool names)."""
+    from witnis.core.scene import format_scene_text, run_scene
+
+    payload = run_scene(
+        Path.cwd(),
+        fixture_rel=fixture,
+        symbol=symbol,
+        execute_verify=execute,
+    )
+    if as_json:
+        _print_json(payload)
+        if payload.get("status") == "failed":
+            raise typer.Exit(code=1)
+        return
+    typer.echo(format_scene_text(payload))
+    if payload.get("status") == "failed":
+        raise typer.Exit(code=1)
+
+
+@app.command("experiment")
+def experiment_cmd(
+    pack: Path = typer.Option(
+        Path("benchmarks/experiments/ab_analysis_pack.json"),
+        "--pack",
+        exists=True,
+        dir_okay=False,
+        help="A/B analysis pack JSON",
+    ),
+    out: Optional[Path] = typer.Option(
+        None, "--out", help="Write report JSON (default: benchmarks/experiments/reports/…)"
+    ),
+) -> None:
+    """Reproduce grep vs Witnis analysis completeness (no LLM required)."""
+    from witnis.core.ab_experiment import run_pack
+
+    work = Path.cwd() / ".witnis" / "experiment"
+    work.mkdir(parents=True, exist_ok=True)
+    report = run_pack(Path.cwd(), pack, work)
+    dest = out or (
+        Path("benchmarks/experiments/reports")
+        / f"{report.get('pack') or 'ab'}-latest.json"
+    )
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
+    typer.echo(f"wrote  {dest}", err=True)
+
+
 @app.command("change-impact")
 def change_impact_cmd(
     revision: str = typer.Argument("HEAD", help="Git revision"),

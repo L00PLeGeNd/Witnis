@@ -13,6 +13,7 @@ Witnis stays **Python-first for adapters** (CLI/MCP/Studio/SDK) while hot Core p
 | 4 | Shallow Go / JS / Java parsers in Rust | done |
 | 5 | `witnis-core` Rust CLI (`discover` / `scan`) | done |
 | 6 | SQLite index writer in Rust (`index` CLI + PyO3) | done |
+| 6b | Deeper Python shallow + Rust `search` | done |
 | 7 | Full `witnis` Rust binary sharing contracts | later |
 
 ## Rules
@@ -30,6 +31,7 @@ cargo test -p witnis-core
 cargo run -p witnis-cli -- discover fixtures/mini_py
 cargo run -p witnis-cli -- scan fixtures/mini_go
 cargo run -p witnis-cli -- index fixtures/mini_java --db .witnis/rust-java.sqlite --full
+cargo run -p witnis-cli -- search login --db .witnis/rust-java.sqlite
 
 # optional Python wheel
 maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
@@ -37,3 +39,4 @@ pip install dist-native/witnis-*.whl
 ```
 
 Python `index_repository` uses the Rust writer when `WITNIS_RUST_INDEX=1` or the tree has no `.py` files.
+Rust Python shallow now emits qualified methods and inherits/decorators/overrides/calls; AST depth remains the Python default for `.py` trees.

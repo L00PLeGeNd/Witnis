@@ -310,6 +310,97 @@ impl Store {
             )
             .map_err(sqlite_err)
     }
+
+    /// Search symbols via FTS5 with LIKE fallback (matches Python Store.search).
+    pub fn search(&self, query: &str, limit: usize) -> Result<Vec<SearchHit>, SandboxError> {
+        let limit = limit.max(1) as i64;
+        let mut fts_query = query.trim().replace('"', "");
+        if fts_query.chars().any(|ch| matches!(ch, '.' | '-' | '_' | '/')) {
+            fts_query = format!("\"{fts_query}\"");
+        }
+        let mut out: Vec<SearchHit> = Vec::new();
+        let mut seen = HashSet::new();
+        if !fts_query.is_empty() {
+            let mut stmt = self
+                .conn
+                .prepare("SELECT name, path FROM symbols_fts WHERE symbols_fts MATCH ?1 LIMIT ?2")
+                .map_err(sqlite_err)?;
+            let fts_rows: Result<Vec<(String, String)>, _> = stmt
+                .query_map(params![fts_query, limit], |r| Ok((r.get(0)?, r.get(1)?)))
+                .map_err(sqlite_err)?
+                .collect();
+            if let Ok(rows) = fts_rows {
+                for (name, path) in rows {
+                    let mut detail = self
+                        .conn
+                        .prepare(
+                            "SELECT s.name, s.kind, s.start_line, s.end_line, f.path AS file_path \
+                             FROM symbols s JOIN files f ON f.id = s.file_id \
+                             WHERE s.name = ?1 AND f.path = ?2",
+                        )
+                        .map_err(sqlite_err)?;
+                    let hits = detail
+                        .query_map(params![name, path], |r| {
+                            Ok(SearchHit {
+                                name: r.get(0)?,
+                                kind: r.get(1)?,
+                                start_line: r.get::<_, i64>(2)? as usize,
+                                end_line: r.get::<_, i64>(3)? as usize,
+                                file_path: r.get(4)?,
+                            })
+                        })
+                        .map_err(sqlite_err)?;
+                    for hit in hits {
+                        let hit = hit.map_err(sqlite_err)?;
+                        let key = (hit.name.clone(), hit.file_path.clone(), hit.start_line);
+                        if seen.insert(key) {
+                            out.push(hit);
+                        }
+                    }
+                    if out.len() >= limit as usize {
+                        return Ok(out.into_iter().take(limit as usize).collect());
+                    }
+                }
+            }
+        }
+        if !out.is_empty() {
+            return Ok(out.into_iter().take(limit as usize).collect());
+        }
+        let like = format!("%{query}%");
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT s.name, s.kind, s.start_line, s.end_line, f.path AS file_path \
+                 FROM symbols s JOIN files f ON f.id = s.file_id \
+                 WHERE s.name LIKE ?1 OR f.path LIKE ?2 \
+                 ORDER BY s.name LIMIT ?3",
+            )
+            .map_err(sqlite_err)?;
+        let rows = stmt
+            .query_map(params![like, like, limit], |r| {
+                Ok(SearchHit {
+                    name: r.get(0)?,
+                    kind: r.get(1)?,
+                    start_line: r.get::<_, i64>(2)? as usize,
+                    end_line: r.get::<_, i64>(3)? as usize,
+                    file_path: r.get(4)?,
+                })
+            })
+            .map_err(sqlite_err)?;
+        for row in rows {
+            out.push(row.map_err(sqlite_err)?);
+        }
+        Ok(out)
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, PartialEq, Eq)]
+pub struct SearchHit {
+    pub name: String,
+    pub kind: String,
+    pub start_line: usize,
+    pub end_line: usize,
+    pub file_path: String,
 }
 
 fn sqlite_err(err: rusqlite::Error) -> SandboxError {

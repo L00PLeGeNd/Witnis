@@ -30,7 +30,10 @@ fn parse_file(path: &Path, rel_path: &str, source: &str) -> (Vec<Symbol>, Vec<Re
         .unwrap_or("")
         .to_ascii_lowercase();
     match ext.as_str() {
-        "py" => (python::parse_symbols(source, rel_path), python::parse_imports(source, rel_path)),
+        "py" => (
+            python::parse_symbols(source, rel_path),
+            python::parse_relations(source, rel_path),
+        ),
         "go" => {
             let mut edges = go::parse_imports(source, rel_path);
             edges.extend(go::parse_calls(source, rel_path));
@@ -52,7 +55,8 @@ fn parse_file(path: &Path, rel_path: &str, source: &str) -> (Vec<Symbol>, Vec<Re
 
 /// Index a repository into SQLite using Rust discover/parse/store.
 ///
-/// Python files use shallow regex symbols (AST depth remains available via Python indexer).
+/// Python uses indent-aware shallow parse (methods/inherits/decorators/calls);
+/// full AST depth remains available via the Python indexer.
 pub fn index_repository(
     root: &Path,
     db_path: &Path,

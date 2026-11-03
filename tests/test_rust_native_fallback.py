@@ -6,9 +6,11 @@ from witnis.core.discover import iter_source_files
 from witnis.core.index import index_repository
 from witnis.core.native import (
     NATIVE_AVAILABLE,
+    rust_index_repository,
     rust_list_source_files,
     rust_parse_shallow,
     rust_scan_digests,
+    rust_search,
 )
 from witnis.core.store import Store
 
@@ -71,6 +73,34 @@ def test_rust_index_env_opt_in_for_python(tmp_path: Path, monkeypatch) -> None:
     try:
         hits = store.search("login", limit=20)
         assert hits, hits
+        assert any(
+            h["name"] in {"login", "AuthService.login", "SecureAuth.login"}
+            or "login" in h["name"].lower()
+            for h in hits
+        ), hits
     finally:
         store.close()
     os.environ.pop("WITNIS_RUST_INDEX", None)
+
+
+def test_rust_python_parse_shallow_methods() -> None:
+    if not NATIVE_AVAILABLE:
+        return
+    source = (ROOT / "fixtures" / "mini_py" / "auth.py").read_text(encoding="utf-8")
+    parsed = rust_parse_shallow("python", source, "auth.py")
+    assert parsed is not None
+    symbols, relations = parsed
+    assert any(s["name"] == "AuthService.login" and s["kind"] == "method" for s in symbols)
+    assert any(r["relation_type"] == "inherits" for r in relations)
+    assert any(r["relation_type"] == "decorated_by" for r in relations)
+
+
+def test_rust_search_after_index(tmp_path: Path) -> None:
+    if not NATIVE_AVAILABLE:
+        return
+    db = tmp_path / "search.sqlite"
+    stats = rust_index_repository(ROOT / "fixtures" / "mini_go", db, incremental=False)
+    assert stats is not None
+    hits = rust_search(db, "Login", limit=10)
+    assert hits is not None
+    assert any(h["name"] == "Login" for h in hits), hits

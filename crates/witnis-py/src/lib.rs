@@ -3,10 +3,10 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::path::PathBuf;
 
-use witnis_core::parse::{go, java, js};
+use witnis_core::parse::{go, java, js, python};
 use witnis_core::{
     assert_path_in_root, index_repository, is_sensitive_path, iter_source_files,
-    scan_source_digests, sha256_file, SandboxError,
+    scan_source_digests, search_symbols, sha256_file, SandboxError,
 };
 
 fn map_err(err: SandboxError) -> PyErr {
@@ -103,6 +103,10 @@ fn parse_shallow(
             edges.extend(js::parse_calls(source, rel_path));
             (js::parse_symbols(source, rel_path), edges)
         }
+        "python" | "py" => (
+            python::parse_symbols(source, rel_path),
+            python::parse_relations(source, rel_path),
+        ),
         other => {
             return Err(PyValueError::new_err(format!(
                 "unsupported shallow lang: {other}"
@@ -139,6 +143,22 @@ fn index_repo(
     Ok(d.into())
 }
 
+#[pyfunction]
+fn search_db(py: Python<'_>, db_path: &str, query: &str, limit: usize) -> PyResult<Py<PyList>> {
+    let hits = search_symbols(&PathBuf::from(db_path), query, limit).map_err(map_err)?;
+    let list = PyList::empty(py);
+    for h in hits {
+        let d = PyDict::new(py);
+        d.set_item("name", h.name)?;
+        d.set_item("kind", h.kind)?;
+        d.set_item("start_line", h.start_line)?;
+        d.set_item("end_line", h.end_line)?;
+        d.set_item("file_path", h.file_path)?;
+        list.append(d)?;
+    }
+    Ok(list.into())
+}
+
 #[pymodule]
 fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(list_source_files, m)?)?;
@@ -148,6 +168,7 @@ fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(scan_digests, m)?)?;
     m.add_function(wrap_pyfunction!(parse_shallow, m)?)?;
     m.add_function(wrap_pyfunction!(index_repo, m)?)?;
+    m.add_function(wrap_pyfunction!(search_db, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

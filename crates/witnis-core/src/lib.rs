@@ -1,6 +1,6 @@
 //! Witnis core primitives (Rust).
 //!
-//! Discover, sandbox, hashing, shallow Go/JS/Java parsers.
+//! Discover, sandbox, hashing, shallow parsers, SQLite index/search.
 
 pub mod discover;
 pub mod hash;
@@ -8,6 +8,7 @@ pub mod index;
 pub mod parse;
 pub mod sandbox;
 pub mod scan;
+pub mod search;
 pub mod store;
 
 pub use discover::{iter_source_files, SourceFile};
@@ -16,3 +17,5 @@ pub use index::{index_repository, IndexStats};
 pub use parse::{Relation, Symbol};
 pub use sandbox::{assert_path_in_root, is_sensitive_path, SandboxError};
 pub use scan::{scan_source_digests, FileDigest};
+pub use search::search_symbols;
+pub use store::SearchHit;

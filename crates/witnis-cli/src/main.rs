@@ -2,7 +2,9 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use witnis_core::{index_repository, iter_source_files, scan_source_digests};
+use witnis_core::{
+    index_repository, iter_source_files, scan_source_digests, search_symbols,
+};
 
 #[derive(Parser, Debug)]
 #[command(name = "witnis-core", about = "Witnis Rust core utilities")]
@@ -31,6 +33,15 @@ enum Commands {
         db: PathBuf,
         #[arg(long, default_value_t = false)]
         full: bool,
+    },
+    /// Search symbols in a Witnis SQLite DB
+    Search {
+        #[arg(value_name = "QUERY")]
+        query: String,
+        #[arg(long, value_name = "DB")]
+        db: PathBuf,
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
     },
 }
 
@@ -67,6 +78,22 @@ fn main() -> ExitCode {
         },
         Commands::Index { root, db, full } => match index_repository(&root, &db, !full) {
             Ok(stats) => match serde_json::to_string_pretty(&stats) {
+                Ok(text) => {
+                    println!("{text}");
+                    ExitCode::SUCCESS
+                }
+                Err(err) => {
+                    eprintln!("error: {err}");
+                    ExitCode::FAILURE
+                }
+            },
+            Err(err) => {
+                eprintln!("error: {err}");
+                ExitCode::FAILURE
+            }
+        },
+        Commands::Search { query, db, limit } => match search_symbols(&db, &query, limit) {
+            Ok(hits) => match serde_json::to_string_pretty(&hits) {
                 Ok(text) => {
                     println!("{text}");
                     ExitCode::SUCCESS

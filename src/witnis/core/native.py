@@ -10,6 +10,7 @@ _file_sha256: Callable[[str], str] | None
 _scan_digests: Callable[[str], list[dict[str, Any]]] | None
 _parse_shallow: Callable[[str, str, str], tuple[list[dict], list[dict]]] | None
 _index_repo: Callable[[str, str, bool], dict[str, Any]] | None
+_search_db: Callable[[str, str, int], list[dict[str, Any]]] | None
 
 try:
     from witnis import _native as _ext
@@ -19,6 +20,7 @@ try:
     _scan_digests = _ext.scan_digests
     _parse_shallow = _ext.parse_shallow
     _index_repo = _ext.index_repo
+    _search_db = getattr(_ext, "search_db", None)
     NATIVE_AVAILABLE = True
     NATIVE_VERSION = getattr(_ext, "__version__", "unknown")
 except Exception:  # pragma: no cover
@@ -27,6 +29,7 @@ except Exception:  # pragma: no cover
     _scan_digests = None
     _parse_shallow = None
     _index_repo = None
+    _search_db = None
     NATIVE_AVAILABLE = False
     NATIVE_VERSION = None
 
@@ -66,3 +69,11 @@ def rust_index_repository(
     return dict(
         _index_repo(str(root.resolve()), str(Path(db_path).resolve()), incremental)
     )
+
+
+def rust_search(
+    db_path: Path, query: str, *, limit: int = 50
+) -> list[dict[str, Any]] | None:
+    if _search_db is None:
+        return None
+    return list(_search_db(str(Path(db_path).resolve()), query, int(limit)))

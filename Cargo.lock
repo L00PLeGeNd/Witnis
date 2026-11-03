@@ -925,7 +925,7 @@ dependencies = [
 
 [[package]]
 name = "witnis-cli"
-version = "1.5.0"
+version = "1.6.0"
 dependencies = [
  "clap",
  "serde_json",
@@ -934,7 +934,7 @@ dependencies = [
 
 [[package]]
 name = "witnis-core"
-version = "1.5.0"
+version = "1.6.0"
 dependencies = [
  "chrono",
  "regex",
@@ -949,7 +949,7 @@ dependencies = [
 
 [[package]]
 name = "witnis-py"
-version = "1.5.0"
+version = "1.6.0"
 dependencies = [
  "pyo3",
  "witnis-core",

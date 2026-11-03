@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+
+- Deeper Rust Python parse: qualified methods, inherits, decorators, overrides, calls
+- Rust symbol search (FTS5 + LIKE): `witnis-core search`, PyO3 `search_db`
+- `parse_shallow("python"|"py", …)` via native module
+- Migration phase 6+ search surface
+
 ## 1.5.0
 
 - Rust SQLite index writer (`store` + `index_repository`) for Go / JS / Java / shallow Python

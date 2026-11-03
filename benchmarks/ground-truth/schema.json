@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WitnisGroundTruthCase",
+  "type": "object",
+  "required": ["id", "corpus", "commit", "tasks"],
+  "properties": {
+    "id": { "type": "string" },
+    "corpus": { "type": "string" },
+    "commit": { "type": "string", "description": "Pinned revision or vendored snapshot id" },
+    "license": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "query", "expect"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "symbol_locate",
+              "call_edge",
+              "impact_set",
+              "evidence_anchor",
+              "verify_false_pass"
+            ]
+          },
+          "query": { "type": "string" },
+          "notes": { "type": "string" },
+          "expect": {
+            "type": "object",
+            "properties": {
+              "symbols": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "path"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "path": { "type": "string" },
+                    "line": { "type": "integer" }
+                  }
+                }
+              },
+              "edges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["source", "target", "relation_type"],
+                  "properties": {
+                    "source": { "type": "string" },
+                    "target": { "type": "string" },
+                    "relation_type": { "type": "string" }
+                  }
+                }
+              },
+              "impact_paths": { "type": "array", "items": { "type": "string" } },
+              "must_not_pass_verify": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

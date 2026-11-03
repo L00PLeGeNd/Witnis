@@ -4,7 +4,7 @@
 
 ```bash
 pip install -e ".[dev]"
-python -m witnis version   # 1.0.0
+python -m witnis version   # expect package version (see pyproject.toml)
 ```
 
 ## Index + witness

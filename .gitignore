@@ -13,3 +13,5 @@ build/
 target/
 *.egg-info/
 .git/COMMIT_MSG_CLEAN
+docs/PROMOTE.md
+benchmarks/ground-truth/reports/

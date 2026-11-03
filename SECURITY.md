@@ -10,6 +10,21 @@ Witnis is **read-only by default**.
 - Runtime trace ingest only accepts paths under the repo root or the local `.witnis` directory.
 - Repo text (README/comments) must be treated as **untrusted** by agents (prompt-injection aware).
 
+## Authorize gate ≠ execution sandbox
+
+`WITNIS_ALLOW_VERIFY=1` plus `--execute` is an **authorization gate**: the user opted in.
+
+It is **not** a hardened OS/container sandbox. Authorized verify can still:
+
+- touch files outside intent if a step escapes allowlist assumptions
+- use network if a subprocess does
+- spawn further processes
+- mutate the user environment within process limits
+
+Documented path boundaries and command allowlists are **policy intent**. They are not a completed third-party security audit.
+
+Planned hardening (P1): disposable worktrees, optional container/OS isolation, CPU/memory/time caps, network deny-by-default, stricter argv allowlists, pre/post filesystem diffs. See [`docs/DEPTH.md`](docs/DEPTH.md).
+
 ## Posture
 
 - Stable MCP/CLI surface is documented in `docs/contracts-v1.md`.

@@ -128,8 +128,10 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 | **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, … |
 | **SDK** | `from witnis.sdk import index_repository, repo_search, trace_symbol, …` |
 | **Studio** | Static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru` |
-| **Languages** | Python (AST) · JS/TS · Go · Java (shallow) |
+| **Languages** | Python (AST) · JS/TS · Go · Java (**shallow** — not full semantic) |
 | **LSP** | Jedi · index fallback · optional Pyright diagnostics |
+
+Language depth and known gaps (Spring DI, dual-engine parity, …): [`docs/DEPTH.md`](docs/DEPTH.md).
 
 ### Against simple baselines
 
@@ -137,7 +139,7 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 |---|---|---|---|---|
 | `git grep` / naive scan | — | — | — | — |
 | Regex `def` / `class` | shallow | — | — | — |
-| **Witnis** | yes | yes | yes | yes |
+| **Witnis** | yes (fixture-proven) | yes (name/AST-level; not full semantic) | yes | yes (authorize gate, not OS sandbox) |
 
 ```bash
 witnis baselines fixtures/mini_py
@@ -176,7 +178,7 @@ Read-only by default.
 - Paths sandboxed to the indexed root (symlink escapes rejected)
 - Sensitive names (`.env`, `*.pem`, `*.key`, …) skipped or flagged
 - Secret-like values redacted in previews
-- Verify stays blocked until you authorize it
+- Verify stays blocked until you authorize it (**gate ≠ sandbox** — see [`SECURITY.md`](SECURITY.md))
 - Repo prose is untrusted input (prompt-injection aware)
 
 More: [`SECURITY.md`](SECURITY.md)
@@ -185,7 +187,7 @@ More: [`SECURITY.md`](SECURITY.md)
 
 ## Benchmarks
 
-CI keeps the public suite green:
+CI keeps the public **acceptance** suite green:
 
 ```bash
 witnis bench --suite local
@@ -196,9 +198,11 @@ witnis bench --suite public
 |---|---|
 | Local | `fixtures/mini_py` regressions |
 | Public | `mini_py` + Go / JS / Java smokes + polyglot `fixtures/public_svc` |
+| Ground truth | Scaffold only — [`benchmarks/ground-truth/`](benchmarks/ground-truth/) |
 
-Public score (v1.8.0): **21 / 21**.  
-Method: [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) · History: [`docs/benchmarks/public-scoreboard.md`](docs/benchmarks/public-scoreboard.md)
+Public score (package **1.8.1**): **21 / 21** acceptance checks.  
+That score is **not** a claim of 100% semantic accuracy on real large repos.  
+Method: [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) · History: [`docs/benchmarks/public-scoreboard.md`](docs/benchmarks/public-scoreboard.md) · Honesty: [`docs/DEPTH.md`](docs/DEPTH.md)
 
 ---
 
@@ -247,7 +251,8 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 | [`docs/contracts-v1.md`](docs/contracts-v1.md) | Stable CLI / MCP / envelope |
 | [`docs/rust-migration.md`](docs/rust-migration.md) | Rust migration phases |
 | [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench method |
-| [`SECURITY.md`](SECURITY.md) | Security defaults |
+| [`SECURITY.md`](SECURITY.md) | Security defaults (gate ≠ sandbox) |
+| [`docs/DEPTH.md`](docs/DEPTH.md) | Honest depth status & next bets |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop and PR expectations |
 | [`CHANGELOG.md`](CHANGELOG.md) | Releases |
 | [`examples/agent-playbook.md`](examples/agent-playbook.md) | Agent usage |
@@ -260,9 +265,9 @@ Ready for local Python-first agent work:
 
 **index → search / trace / impact → gated verify → Studio / MCP**
 
-Still ahead: a single Rust `witnis` binary, stronger language servers, larger third-party corpora.
+Still ahead: real-repo ground truth (P/R, false-pass rate), deeper four-language semantics, verify isolation, Python/Rust parity as a merge gate, then a single Rust `witnis` binary.
 
-Latest: [v1.8.0](https://github.com/L00PLeGeNd/Witnis/releases/tag/v1.8.0)
+Package / crates: **1.8.1**. Latest tagged release on GitHub may lag until a release cut — see [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

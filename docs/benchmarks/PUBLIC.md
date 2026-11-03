@@ -4,7 +4,9 @@ Repo: https://github.com/L00PLeGeNd/Witnis
 
 ## Goal
 
-Publish **reproducible**, fixture-backed comparisons so agents and humans can verify Witnis claims without vibes.
+Publish **reproducible**, fixture-backed **acceptance** checks so CI and reviewers can verify the public suite without vibes.
+
+**Scope limit:** a green `21/21` (or whatever the current task count is) proves the listed acceptance tasks passed on self-built fixtures vs grep/regex baselines. It does **not** prove call-graph accuracy, impact completeness, or agent error reduction on large real repositories. Depth metrics live under [`benchmarks/ground-truth/`](../../benchmarks/ground-truth/) (scaffold) and [`docs/DEPTH.md`](../DEPTH.md).
 
 ## Suites
 

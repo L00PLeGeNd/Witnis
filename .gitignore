@@ -13,3 +13,5 @@ build/
 target/
 *.egg-info/
 .git/COMMIT_MSG_CLEAN
+# Local publicity notes — keep off the public repo
+docs/PROMOTE.md

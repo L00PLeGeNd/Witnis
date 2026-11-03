@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contracts
+    url: https://github.com/L00PLeGeNd/Witnis/blob/master/docs/contracts-v1.md
+    about: Stable CLI / MCP / evidence envelope rules
+  - name: README
+    url: https://github.com/L00PLeGeNd/Witnis#readme
+    about: Quick start, MCP, and short CLI commands

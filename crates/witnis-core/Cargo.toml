@@ -1,0 +1,18 @@
+[package]
+name = "witnis-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Rust core primitives for Witnis (discover, sandbox, hashing)"
+
+[dependencies]
+sha2 = { workspace = true }
+walkdir = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

@@ -90,11 +90,23 @@ python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-
 
 Methodology: [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md)
 
+## Rust core (gradual)
+
+Hot paths are moving into Rust while Python keeps CLI/MCP/Studio adapters.
+
+```bash
+cargo test -p witnis-core
+pip install -e ".[rust]"
+maturin develop -m crates/witnis-py/Cargo.toml   # optional witnis._native
+```
+
+See [`docs/rust-migration.md`](docs/rust-migration.md).
+
 ## Status
 
 **Usable today** for local Python-first agent workflows (index → search/trace/impact → gated verify → Studio/MCP).
 
-Still deepening: stronger LSP backends (pyright/tsserver), deeper non-Python semantics, larger public corpora.
+Still deepening: Rust index/parsers, stronger LSP backends, larger public corpora.
 
 ## License
 

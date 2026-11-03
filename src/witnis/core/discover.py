@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from witnis.core.native import rust_list_source_files
 from witnis.core.security import assert_path_in_root, is_sensitive_path
 
 SKIP_DIR_NAMES = {
@@ -18,13 +19,31 @@ SKIP_DIR_NAMES = {
     ".pytest_cache",
     "dist",
     "build",
+    "target",
 }
 
 SKIP_FILE_SUFFIXES = {".pyc", ".pyo", ".so", ".dll", ".exe"}
 
+SOURCE_SUFFIXES = {
+    ".py",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".mjs",
+    ".cjs",
+    ".go",
+    ".java",
+}
+
 
 def iter_source_files(root: Path) -> list[Path]:
     root = root.resolve()
+    # Prefer Rust discover when witnis._native is built.
+    rust_rels = rust_list_source_files(root)
+    if rust_rels is not None:
+        return [root / rel for rel in rust_rels]
+
     found: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIR_NAMES]
@@ -38,16 +57,6 @@ def iter_source_files(root: Path) -> list[Path]:
                 continue
             if path.suffix in SKIP_FILE_SUFFIXES:
                 continue
-            if path.suffix in {
-                ".py",
-                ".js",
-                ".jsx",
-                ".ts",
-                ".tsx",
-                ".mjs",
-                ".cjs",
-                ".go",
-                ".java",
-            }:
+            if path.suffix in SOURCE_SUFFIXES:
                 found.append(path)
     return sorted(found)

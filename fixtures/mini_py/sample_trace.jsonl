@@ -1,0 +1,3 @@
+{"caller":"app.py:main","callee":"AuthService.login","count":2}
+{"from":"gate.py:AccessGate.allow","to":"login","count":1}
+{"event":"call","caller":"test_auth.py:test_login_ok","callee":"AuthService.login"}

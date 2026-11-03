@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "fixture": "fixtures/mini_py",
+  "tasks": [
+    {
+      "id": "T01_find_login_symbol",
+      "kind": "search",
+      "query": "login",
+      "expect": {
+        "any_symbol_names": ["AuthService.login"]
+      }
+    },
+    {
+      "id": "T02_trace_login_called_by_main",
+      "kind": "trace",
+      "query": "login",
+      "expect": {
+        "called_by_source_suffix": [":main"]
+      }
+    },
+    {
+      "id": "T03_impact_login_direct",
+      "kind": "impact",
+      "query": "login",
+      "expect": {
+        "direct_source_suffix": [":main"]
+      }
+    },
+    {
+      "id": "T04_related_tests_auth",
+      "kind": "related_tests",
+      "query": "login",
+      "expect": {
+        "test_file_contains": ["test_auth.py"]
+      }
+    },
+    {
+      "id": "T05_evidence_auth_service",
+      "kind": "evidence",
+      "query": "AuthService",
+      "expect": {
+        "min_evidence": 1
+      }
+    },
+    {
+      "id": "T06_overview_nonzero",
+      "kind": "overview",
+      "query": "",
+      "expect": {
+        "min_symbols": 3,
+        "min_files": 2
+      }
+    },
+    {
+      "id": "T07_import_relation_app_auth",
+      "kind": "overview_relations",
+      "query": "",
+      "expect": {
+        "relation_target_contains": ["AuthService"]
+      }
+    },
+    {
+      "id": "T08_qualified_call_preferred",
+      "kind": "trace",
+      "query": "AuthService.login",
+      "expect": {
+        "called_by_source_suffix": [":main"]
+      }
+    },
+    {
+      "id": "T09_plan_verify_has_pytest_step",
+      "kind": "plan_verify",
+      "query": "login",
+      "expect": {
+        "step_kinds": ["pytest", "static", "graph", "syntax"]
+      }
+    },
+    {
+      "id": "T10_verify_blocked_by_default",
+      "kind": "verify_blocked",
+      "query": "login",
+      "expect": {
+        "state": "blocked"
+      }
+    },
+    {
+      "id": "T11_trace_allow_calls_login",
+      "kind": "trace",
+      "query": "allow",
+      "expect": {
+        "called_by_source_suffix": [":guarded_entry"]
+      }
+    },
+    {
+      "id": "T12_impact_login_includes_gate",
+      "kind": "impact",
+      "query": "login",
+      "expect": {
+        "direct_source_suffix": [":AccessGate.allow"]
+      }
+    },
+    {
+      "id": "T13_qualified_self_attr_call",
+      "kind": "trace",
+      "query": "auth.AuthService.login",
+      "expect": {
+        "called_by_source_suffix": [":AccessGate.allow"]
+      }
+    },
+    {
+      "id": "T14_explain_code_snippet",
+      "kind": "explain_code",
+      "query": "AuthService.login",
+      "expect": {
+        "min_snippet_lines": 1
+      }
+    },
+    {
+      "id": "T15_change_impact_tool_registered",
+      "kind": "mcp_tools",
+      "query": "",
+      "expect": {
+        "tool_names": [
+          "analyze_change_impact",
+          "list_verification_runs",
+          "check_import_graph"
+        ]
+      }
+    },
+    {
+      "id": "T16_import_graph_clean",
+      "kind": "import_graph",
+      "query": "",
+      "expect": {
+        "max_broken": 0
+      }
+    },
+    {
+      "id": "T17_export_bundle_login",
+      "kind": "export_bundle",
+      "query": "login",
+      "expect": {
+        "bundle_keys": ["overview", "trace", "impact", "related_tests"]
+      }
+    },
+    {
+      "id": "T18_index_health_clean",
+      "kind": "index_health",
+      "query": "",
+      "expect": {
+        "max_issues": 0
+      }
+    },
+    {
+      "id": "T19_inheritance_impact",
+      "kind": "impact",
+      "query": "AuthService",
+      "expect": {
+        "direct_source_suffix": [":SecureAuth"]
+      }
+    },
+    {
+      "id": "T20_decorator_edge",
+      "kind": "overview_relations",
+      "query": "",
+      "expect": {
+        "relation_target_contains": ["audit"]
+      }
+    },
+    {
+      "id": "T21_override_impact",
+      "kind": "impact",
+      "query": "AuthService.login",
+      "expect": {
+        "direct_source_suffix": [":SecureAuth.login"]
+      }
+    },
+    {
+      "id": "T22_evidence_report",
+      "kind": "report",
+      "query": "login",
+      "expect": {
+        "markdown_contains": ["# Witnis evidence report", "##"]
+      }
+    },
+    {
+      "id": "T23_repo_status",
+      "kind": "status",
+      "query": "",
+      "expect": {
+        "has_keys": ["overview", "health", "snapshots"]
+      }
+    },
+    {
+      "id": "T24_snapshots_recorded",
+      "kind": "snapshots",
+      "query": "",
+      "expect": {
+        "min_count": 1
+      }
+    },
+    {
+      "id": "T25_relation_graph",
+      "kind": "graph",
+      "query": "login",
+      "expect": {
+        "graph_contains": ["flowchart LR"],
+        "min_edges": 1
+      }
+    },
+    {
+      "id": "T26_trace_has_decorator",
+      "kind": "trace",
+      "query": "AuthService.login",
+      "expect": {
+        "decorated_by_target": ["audit"]
+      }
+    },
+    {
+      "id": "T27_capabilities",
+      "kind": "capabilities",
+      "query": "",
+      "expect": {
+        "min_mcp_tools": 20
+      }
+    },
+    {
+      "id": "T28_studio_panels",
+      "kind": "studio",
+      "query": "login",
+      "expect": {
+        "has_graph": true,
+        "has_report": true
+      }
+    },
+    {
+      "id": "T29_refresh_evidence_ok",
+      "kind": "refresh_evidence",
+      "query": "",
+      "expect": {
+        "min_checked": 0
+      }
+    },
+    {
+      "id": "T30_ingest_runtime_traces",
+      "kind": "ingest_traces",
+      "query": "fixtures/mini_py/sample_trace.jsonl",
+      "expect": {
+        "min_accepted": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "name": "public",
+  "fixture": "fixtures/mini_py",
+  "tasks": [
+    {
+      "id": "P01_search_login",
+      "kind": "search",
+      "query": "login",
+      "expect": { "any_symbol_names": ["AuthService.login"] }
+    },
+    {
+      "id": "P02_trace_callers",
+      "kind": "trace",
+      "query": "login",
+      "expect": { "called_by_source_suffix": [":main"] }
+    },
+    {
+      "id": "P03_impact_direct",
+      "kind": "impact",
+      "query": "login",
+      "expect": { "direct_source_suffix": [":main"] }
+    },
+    {
+      "id": "P04_related_tests",
+      "kind": "related_tests",
+      "query": "login",
+      "expect": { "test_file_contains": ["test_auth.py"] }
+    },
+    {
+      "id": "P05_evidence_min",
+      "kind": "evidence",
+      "query": "AuthService",
+      "expect": { "min_evidence": 1 }
+    },
+    {
+      "id": "P06_verify_blocked",
+      "kind": "verify_blocked",
+      "query": "login",
+      "expect": { "state": "blocked" }
+    },
+    {
+      "id": "P07_index_health",
+      "kind": "index_health",
+      "query": "",
+      "expect": { "max_issues": 0 }
+    },
+    {
+      "id": "P08_capabilities_stable",
+      "kind": "capabilities",
+      "query": "",
+      "expect": { "min_mcp_tools": 20 }
+    },
+    {
+      "id": "P09_graph_login",
+      "kind": "graph",
+      "query": "login",
+      "expect": { "graph_contains": ["flowchart LR"], "min_edges": 1 }
+    },
+    {
+      "id": "P10_baseline_delta",
+      "kind": "baselines",
+      "query": "login",
+      "expect": {
+        "min_typed_symbols": 1,
+        "min_relation_edges": 1,
+        "verify_blocked": true
+      }
+    },
+    {
+      "id": "P11_go_fixture_search",
+      "kind": "go_search",
+      "query": "Login",
+      "expect": { "any_symbol_names": ["Login"] }
+    },
+    {
+      "id": "P12_lsp_query",
+      "kind": "lsp",
+      "query": "AuthService",
+      "expect": { "allow_unavailable": true }
+    }
+  ]
+}

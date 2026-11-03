@@ -1,0 +1,11 @@
+.witnis/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.git/COMMIT_MSG_CLEAN

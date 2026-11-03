@@ -28,4 +28,3 @@ pip install --force-reinstall dist-native/witnis-*.whl
 
 - One concern per PR when possible.
 - Include the verification commands you ran.
-- No AI co-author trailers in commits.

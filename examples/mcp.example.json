@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "witnis": {
+      "command": "witnis",
+      "args": ["mcp"],
+      "env": {
+        "WITNIS_DB": "REPLACE_WITH_ABSOLUTE_PATH_TO/.witnis/index.sqlite"
+      }
+    }
+  }
+}

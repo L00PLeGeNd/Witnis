@@ -108,7 +108,7 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 **Usable today** for local Python-first agent workflows (index → search/trace/impact → gated verify → Studio/MCP).
 
-Still deepening: Rust index/parsers, stronger LSP backends, larger public corpora.
+Still deepening: Rust SQLite index writer, stronger LSP backends, larger public corpora.
 
 ## License
 

@@ -103,14 +103,14 @@ maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
 pip install dist-native/witnis-*.whl   # optional witnis._native
 ```
 
-Native accelerates discover, digests, shallow parse (incl. deeper Python), SQLite index, and search (non-`.py` trees or `WITNIS_RUST_INDEX=1`).  
+Native accelerates discover, digests, RustPython AST parse, SQLite index, and search (non-`.py` trees or `WITNIS_RUST_INDEX=1`).  
 See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 ## Status
 
 **Usable today** for local Python-first agent workflows (index → search/trace/impact → gated verify → Studio/MCP).
 
-Still deepening: AST-parity Rust Python, stronger LSP backends, larger public corpora.
+Still deepening: full Rust CLI binary, pyright-class LSP, larger third-party corpora.
 
 ## License
 

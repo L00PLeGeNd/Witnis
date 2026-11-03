@@ -96,7 +96,6 @@ def lsp_references(
         try:
             source = path.read_text(encoding="utf-8")
             script = jedi.Script(source, path=path, project=project)
-            # Jedi columns are 0-based; prefer end of name
             column = int(col or 0) + max(len(leaf) - 1, 0)
             found = script.get_references(int(line), column, include_builtins=False)
         except Exception:
@@ -119,4 +118,78 @@ def lsp_references(
         "references": refs[:limit],
         "available": True,
         "limitation": None if refs else "No Jedi references found for name",
+    }
+
+
+def index_definitions(store: Any, name: str, *, limit: int = 20) -> dict[str, Any]:
+    """Fallback definitions from the Witnis symbol index (always available post-index)."""
+    leaf = name.split(".")[-1]
+    hits = store.search(name, limit=limit) or []
+    if not hits and leaf != name:
+        hits = store.search(leaf, limit=limit) or []
+    definitions: list[dict[str, Any]] = []
+    for h in hits:
+        item = {
+            "name": h.get("name"),
+            "kind": h.get("kind"),
+            "path": h.get("file_path"),
+            "line": h.get("start_line"),
+            "column": 0,
+            "full_name": h.get("name"),
+        }
+        if item["path"] and item not in definitions:
+            definitions.append(item)
+        if len(definitions) >= limit:
+            break
+    return {
+        "backend": "index",
+        "definitions": definitions[:limit],
+        "available": True,
+        "limitation": None if definitions else "No index symbols matched name",
+    }
+
+
+def index_references(store: Any, name: str, *, limit: int = 40) -> dict[str, Any]:
+    """Fallback references from relation edges + same-name symbol sites."""
+    leaf = name.split(".")[-1]
+    refs: list[dict[str, Any]] = []
+    seen: set[tuple] = set()
+
+    for edge in store.list_relations(limit=500) or []:
+        target = str(edge.get("target") or "")
+        source = str(edge.get("source") or "")
+        if leaf not in target and name not in target and leaf not in source and name not in source:
+            continue
+        # Prefer the source side as a reference site when target matches the symbol.
+        site = source if (leaf in target or name in target) else target
+        path = site.split(":", 1)[0]
+        line = edge.get("start_line")
+        item = {"name": leaf, "path": path, "line": line, "column": 0}
+        key = (item["path"], item["line"], item["name"])
+        if item["path"] and key not in seen:
+            seen.add(key)
+            refs.append(item)
+        if len(refs) >= limit:
+            break
+
+    if len(refs) < limit:
+        for h in store.search(leaf, limit=limit) or []:
+            item = {
+                "name": h.get("name"),
+                "path": h.get("file_path"),
+                "line": h.get("start_line"),
+                "column": 0,
+            }
+            key = (item["path"], item["line"], item["name"])
+            if item["path"] and key not in seen:
+                seen.add(key)
+                refs.append(item)
+            if len(refs) >= limit:
+                break
+
+    return {
+        "backend": "index",
+        "references": refs[:limit],
+        "available": True,
+        "limitation": None if refs else "No index references matched name",
     }

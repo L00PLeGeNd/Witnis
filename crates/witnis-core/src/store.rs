@@ -363,9 +363,6 @@ impl Store {
                 }
             }
         }
-        if !out.is_empty() {
-            return Ok(out.into_iter().take(limit as usize).collect());
-        }
         let like = format!("%{query}%");
         let mut stmt = self
             .conn
@@ -377,7 +374,7 @@ impl Store {
             )
             .map_err(sqlite_err)?;
         let rows = stmt
-            .query_map(params![like, like, limit], |r| {
+            .query_map(params![like, like, limit.max(50)], |r| {
                 Ok(SearchHit {
                     name: r.get(0)?,
                     kind: r.get(1)?,
@@ -388,9 +385,13 @@ impl Store {
             })
             .map_err(sqlite_err)?;
         for row in rows {
-            out.push(row.map_err(sqlite_err)?);
+            let hit = row.map_err(sqlite_err)?;
+            let key = (hit.name.clone(), hit.file_path.clone(), hit.start_line);
+            if seen.insert(key) {
+                out.push(hit);
+            }
         }
-        Ok(out)
+        Ok(out.into_iter().take(limit as usize).collect())
     }
 }
 

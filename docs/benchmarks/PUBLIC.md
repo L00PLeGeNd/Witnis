@@ -11,7 +11,7 @@ Publish **reproducible**, fixture-backed comparisons so agents and humans can ve
 | Suite | Command | Fixture(s) |
 |---|---|---|
 | Local regression | `python -m witnis bench --suite local` | `fixtures/mini_py` (`benchmarks/tasks.json`) |
-| Public acceptance | `python -m witnis bench --suite public` | `mini_py` + Go checks (`benchmarks/public/tasks.json`) |
+| Public acceptance | `python -m witnis bench --suite public` | `mini_py` / `mini_go` / `mini_js` / `mini_java` + `fixtures/public_svc` (`benchmarks/public/tasks.json`) |
 | Baseline deltas | `python -m witnis compare-baselines fixtures/mini_py` | git-grep / naive scan vs Witnis |
 
 ## Metrics
@@ -43,6 +43,6 @@ python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-
 
 ## Expansion path
 
-- Add larger public corpora (Apache-licensed sample repos) under `fixtures/public_*`
+- Grow `fixtures/public_svc` and add more Apache-licensed sample trees under `fixtures/public_*`
 - Record machine class + OS in report JSON
 - Track score history in CI against `benchmarks/public/tasks.json`

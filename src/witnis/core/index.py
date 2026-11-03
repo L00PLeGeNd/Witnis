@@ -44,7 +44,7 @@ def _parse_shallow_native(
     lang: str, path: Path, *, rel_path: str
 ) -> tuple[list[Symbol], list[dict]] | None:
     try:
-        source = path.read_text(encoding="utf-8")
+        source = path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:
         return [], []
     parsed = rust_parse_shallow(lang, source, rel_path)

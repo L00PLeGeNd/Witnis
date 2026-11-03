@@ -77,7 +77,7 @@ pub fn index_repository(
     let mut file_payload: Vec<(String, String, Vec<Symbol>)> = Vec::new();
     for row in &digests {
         let source = match fs::read_to_string(&row.path) {
-            Ok(s) => s,
+            Ok(s) => s.trim_start_matches('\u{feff}').to_string(),
             Err(_) => continue,
         };
         let (symbols, relations) = parse_file(&row.path, &row.rel_path, &source);

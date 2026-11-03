@@ -42,7 +42,7 @@ _BUILTIN_CALLS = {
 
 def parse_python_calls(path: Path, *, rel_path: str) -> list[dict]:
     """Extract call edges with light import/local/self-attr resolution."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:

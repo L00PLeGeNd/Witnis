@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.0
+
+- Rust Python parse uses `rustpython-parser` AST (methods/inherits/decorators/overrides/calls)
+- `fixtures/public_svc` polyglot corpus; public bench expanded (P13–P19)
+- LSP: Jedi + index-backed fallback (`backend` may be `jedi`, `index`, or combined)
+- Bench kinds: `fixture_search`, `js_search`, `java_search`, `overview_min`
+
 ## 1.6.0
 
 - Deeper Rust Python parse: qualified methods, inherits, decorators, overrides, calls

@@ -104,3 +104,33 @@ def test_rust_search_after_index(tmp_path: Path) -> None:
     hits = rust_search(db, "Login", limit=10)
     assert hits is not None
     assert any(h["name"] == "Login" for h in hits), hits
+
+
+def test_public_svc_indexes_polyglot(tmp_path: Path) -> None:
+    db = tmp_path / "public_svc.sqlite"
+    stats = index_repository(ROOT / "fixtures" / "public_svc", db, incremental=False)
+    assert stats.files >= 8
+    assert stats.symbols >= 10
+    store = Store(db)
+    try:
+        hits = store.search("charge", limit=20)
+        assert any(
+            h["name"] in {"BillingService.charge", "PromoBilling.charge", "charge"}
+            for h in hits
+        ), hits
+        assert any(h["name"] == "Issue" for h in store.search("Issue", limit=20))
+        assert any(h["name"] == "BillingClient" for h in store.search("BillingClient", limit=20))
+    finally:
+        store.close()
+
+
+def test_lsp_index_fallback_without_requiring_jedi(tmp_path: Path) -> None:
+    from witnis.core.tools import query_lsp
+
+    db = tmp_path / "lsp.sqlite"
+    index_repository(ROOT / "fixtures" / "mini_py", db, incremental=False)
+    payload = query_lsp(db, "AuthService", limit=10)
+    result = payload.get("result") or {}
+    assert result.get("available") is True
+    assert result.get("definitions") or result.get("references")
+    assert "index" in str(result.get("backend") or "") or result.get("definitions")

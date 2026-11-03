@@ -212,7 +212,7 @@ def _check_expect(kind: str, payload: dict[str, Any], expect: dict[str, Any]) ->
             ok = ok and bool(security.get("verify_blocked_without_auth"))
         return ok, f"deltas={deltas} security={security}"
 
-    if kind == "go_search":
+    if kind in {"go_search", "fixture_search", "js_search", "java_search"}:
         names = {m.get("name") for m in payload.get("result", {}).get("matches", [])}
         wanted = set(expect.get("any_symbol_names") or [])
         ok = bool(names & wanted)
@@ -224,6 +224,14 @@ def _check_expect(kind: str, payload: dict[str, Any], expect: dict[str, Any]) ->
             return True, "lsp_unavailable_allowed"
         ok = bool(result.get("definitions") or result.get("references"))
         return ok, f"lsp={result}"
+
+    if kind == "overview_min":
+        result = payload.get("result") or {}
+        ok = (
+            int(result.get("files") or 0) >= int(expect.get("min_files") or 0)
+            and int(result.get("symbols") or 0) >= int(expect.get("min_symbols") or 0)
+        )
+        return ok, f"files={result.get('files')} symbols={result.get('symbols')}"
 
     return False, f"unknown kind={kind}"
 
@@ -307,6 +315,32 @@ def run_benchmark(
                 incremental=False,
             )
             payload = repo_search(go_db, query or "Login")
+        elif kind in {"fixture_search", "js_search", "java_search"}:
+            fixture_rel = (
+                task.get("fixture")
+                or expect.get("fixture")
+                or {
+                    "js_search": "fixtures/mini_js",
+                    "java_search": "fixtures/mini_java",
+                    "fixture_search": "fixtures/public_svc",
+                }.get(kind, "fixtures/public_svc")
+            )
+            alt_db = db_path.parent / f"bench-{kind}.sqlite"
+            index_repository(
+                (repo_root / fixture_rel).resolve(),
+                alt_db,
+                incremental=False,
+            )
+            payload = repo_search(alt_db, query)
+        elif kind == "overview_min":
+            fixture_rel = task.get("fixture") or "fixtures/public_svc"
+            alt_db = db_path.parent / "bench-overview.sqlite"
+            index_repository(
+                (repo_root / fixture_rel).resolve(),
+                alt_db,
+                incremental=False,
+            )
+            payload = repo_overview(alt_db)
         elif kind == "lsp":
             payload = query_lsp(db_path, query or "AuthService")
         else:

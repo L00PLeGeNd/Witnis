@@ -6,7 +6,7 @@ from pathlib import Path
 
 def parse_python_imports(path: Path, *, rel_path: str) -> list[dict]:
     """Extract import edges as observed relations (module-level)."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:
@@ -59,7 +59,7 @@ def _base_name(node: ast.AST) -> str | None:
 
 def parse_python_inheritance(path: Path, *, rel_path: str) -> list[dict]:
     """Extract class inheritance edges (subclass -> base)."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:
@@ -87,7 +87,7 @@ def parse_python_inheritance(path: Path, *, rel_path: str) -> list[dict]:
 
 def parse_python_decorators(path: Path, *, rel_path: str) -> list[dict]:
     """Extract decorator edges for functions/methods/classes."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:
@@ -129,7 +129,7 @@ def parse_python_decorators(path: Path, *, rel_path: str) -> list[dict]:
 
 def parse_python_overrides(path: Path, *, rel_path: str) -> list[dict]:
     """Emit overrides edges for methods that share a name with an inherited base."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:

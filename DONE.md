@@ -1,15 +1,17 @@
-# DONE — Witnis 1.6.0
+# DONE — Witnis 1.7.0 (local)
 
 Public repo: https://github.com/L00PLeGeNd/Witnis
 
-## Rust progress
-- `witnis-core`: discover, hash, scan, shallow multi-lang parse, SQLite index, **search**
-- Deeper Python shallow: `Class.method`, inherits / decorated_by / overrides / calls
-- `witnis-py`: `index_repo`, `search_db`, `parse_shallow` including `python`
-- `witnis-cli`: `discover|scan|index|search`
+## This release
+- Rust Python via `rustpython-parser` AST
+- Larger public polyglot fixture `fixtures/public_svc`
+- Public bench 19 tasks (mini_* + public_svc)
+- LSP Jedi with index fallback
 
-## Still Python
-- Full AST Python analysis (default for `.py` trees), verify engine, MCP/CLI/Studio adapters
+## Still later
+- Full Rust `witnis` binary (phase 7)
+- Stronger external LSP (pyright language server)
+- Even larger third-party corpora
 
 ## Verify locally before push
 ```bash

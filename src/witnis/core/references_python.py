@@ -14,7 +14,7 @@ _SKIP_NAMES = {
 
 def parse_python_references(path: Path, *, rel_path: str) -> list[dict]:
     """Extract name-reference edges (Load) inside functions/methods."""
-    source = path.read_text(encoding="utf-8")
+    source = path.read_text(encoding="utf-8-sig")
     try:
         tree = ast.parse(source, filename=str(path))
     except SyntaxError:

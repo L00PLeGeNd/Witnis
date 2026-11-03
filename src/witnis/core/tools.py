@@ -2189,72 +2189,106 @@ def query_lsp(
     *,
     limit: int = 20,
 ) -> dict[str, Any]:
-    """Optional Jedi LSP-class definitions/references fused with the index."""
-    from witnis.core.lsp_python import lsp_available, lsp_definitions, lsp_references
+    """Jedi LSP enrichment with index-backed fallback (always usable post-index)."""
+    from witnis.core.lsp_python import (
+        index_definitions,
+        index_references,
+        lsp_available,
+        lsp_definitions,
+        lsp_references,
+    )
 
     store = _open_store(db_path)
     try:
         overview = store.overview()
         repo = overview.get("repository")
+        if repo is None:
+            return make_envelope(
+                status="failed",
+                repository=None,
+                result={},
+                limitations=["Index is empty. Run: witnis index <path>"],
+            )
+        root = Path(repo["root_path"])
+        jedi_defs = lsp_definitions(root, name, limit=limit)
+        jedi_refs = lsp_references(root, name, limit=limit * 2)
+        idx_defs = index_definitions(store, name, limit=limit)
+        idx_refs = index_references(store, name, limit=limit * 2)
+
+        definitions = list(jedi_defs.get("definitions") or [])
+        if not definitions:
+            definitions = list(idx_defs.get("definitions") or [])
+        references = list(jedi_refs.get("references") or [])
+        if not references:
+            references = list(idx_refs.get("references") or [])
+
+        backends = []
+        if jedi_defs.get("backend") and (jedi_defs.get("definitions") or jedi_refs.get("references")):
+            backends.append("jedi")
+        if (not jedi_defs.get("definitions") and idx_defs.get("definitions")) or (
+            not jedi_refs.get("references") and idx_refs.get("references")
+        ):
+            backends.append("index")
+        if not backends and lsp_available():
+            backends.append("jedi")
+        if not backends:
+            backends.append("index")
+        backend = "+".join(backends)
+
+        available = bool(definitions or references or lsp_available())
+        status = (
+            "success"
+            if definitions or references
+            else ("partial" if available else "failed")
+        )
+        limitations = []
+        if not lsp_available():
+            limitations.append(
+                "Jedi not installed — using index backend. pip install 'witnis[lsp]'"
+            )
+        for note in (
+            jedi_defs.get("limitation"),
+            jedi_refs.get("limitation"),
+            idx_defs.get("limitation"),
+            idx_refs.get("limitation"),
+        ):
+            if note and note not in limitations and not (definitions or references):
+                limitations.append(note)
+        return make_envelope(
+            status=status,
+            repository=_repo_meta(repo),
+            result={
+                "name": name,
+                "backend": backend,
+                "available": available,
+                "definitions": definitions,
+                "references": references,
+            },
+            evidence=[
+                {
+                    "type": "lsp_definition",
+                    "status": "observed",
+                    "path": d.get("path"),
+                    "line": d.get("line"),
+                    "name": d.get("name"),
+                }
+                for d in definitions[:10]
+            ]
+            + [
+                {
+                    "type": "lsp_reference",
+                    "status": "observed",
+                    "path": r.get("path"),
+                    "line": r.get("line"),
+                    "name": r.get("name"),
+                }
+                for r in references[:10]
+            ],
+            limitations=limitations
+            or ["LSP enrichment may combine Jedi and index backends"],
+        )
     finally:
         store.close()
-    if repo is None:
-        return make_envelope(
-            status="failed",
-            repository=None,
-            result={},
-            limitations=["Index is empty. Run: witnis index <path>"],
-        )
-    root = Path(repo["root_path"])
-    defs = lsp_definitions(root, name, limit=limit)
-    refs = lsp_references(root, name, limit=limit * 2)
-    available = bool(defs.get("available") or refs.get("available"))
-    status = "success" if available and (defs.get("definitions") or refs.get("references")) else (
-        "partial" if available or not lsp_available() else "failed"
-    )
-    limitations = [
-        x
-        for x in [defs.get("limitation"), refs.get("limitation")]
-        if x
-    ]
-    if not lsp_available():
-        limitations = [
-            "Jedi not installed — index-only mode. pip install 'witnis[lsp]'",
-            *limitations,
-        ]
-    return make_envelope(
-        status=status,
-        repository=_repo_meta(repo),
-        result={
-            "name": name,
-            "backend": defs.get("backend") or refs.get("backend"),
-            "available": lsp_available(),
-            "definitions": defs.get("definitions") or [],
-            "references": refs.get("references") or [],
-        },
-        evidence=[
-            {
-                "type": "lsp_definition",
-                "status": "observed",
-                "path": d.get("path"),
-                "line": d.get("line"),
-                "name": d.get("name"),
-            }
-            for d in (defs.get("definitions") or [])[:10]
-        ]
-        + [
-            {
-                "type": "lsp_reference",
-                "status": "observed",
-                "path": r.get("path"),
-                "line": r.get("line"),
-                "name": r.get("name"),
-            }
-            for r in (refs.get("references") or [])[:10]
-        ],
-        limitations=limitations
-        or ["LSP enrichment is optional and may differ from static index edges"],
-    )
 
 
 def list_capabilities() -> dict[str, Any]:

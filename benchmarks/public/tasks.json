@@ -78,6 +78,53 @@
       "kind": "lsp",
       "query": "AuthService",
       "expect": { "allow_unavailable": true }
+    },
+    {
+      "id": "P13_js_fixture_search",
+      "kind": "js_search",
+      "query": "TokenService",
+      "expect": { "any_symbol_names": ["TokenService"] }
+    },
+    {
+      "id": "P14_java_fixture_search",
+      "kind": "java_search",
+      "query": "AuthService",
+      "expect": { "any_symbol_names": ["AuthService"] }
+    },
+    {
+      "id": "P15_public_svc_overview",
+      "kind": "overview_min",
+      "fixture": "fixtures/public_svc",
+      "query": "",
+      "expect": { "min_files": 8, "min_symbols": 10 }
+    },
+    {
+      "id": "P16_public_svc_py_charge",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "charge",
+      "expect": { "any_symbol_names": ["BillingService.charge", "PromoBilling.charge"] }
+    },
+    {
+      "id": "P17_public_svc_go_issue",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "Issue",
+      "expect": { "any_symbol_names": ["Issue"] }
+    },
+    {
+      "id": "P18_public_svc_js_billing",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "BillingClient",
+      "expect": { "any_symbol_names": ["BillingClient"] }
+    },
+    {
+      "id": "P19_public_svc_java_charge",
+      "kind": "fixture_search",
+      "fixture": "fixtures/public_svc",
+      "query": "charge",
+      "expect": { "any_symbol_names": ["charge"] }
     }
   ]
 }

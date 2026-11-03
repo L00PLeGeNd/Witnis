@@ -14,6 +14,7 @@ Witnis stays **Python-first for adapters** (CLI/MCP/Studio/SDK) while hot Core p
 | 5 | `witnis-core` Rust CLI (`discover` / `scan`) | done |
 | 6 | SQLite index writer in Rust (`index` CLI + PyO3) | done |
 | 6b | Deeper Python shallow + Rust `search` | done |
+| 6c | Rust Python via `rustpython-parser` AST | done |
 | 7 | Full `witnis` Rust binary sharing contracts | later |
 
 ## Rules
@@ -39,4 +40,5 @@ pip install dist-native/witnis-*.whl
 ```
 
 Python `index_repository` uses the Rust writer when `WITNIS_RUST_INDEX=1` or the tree has no `.py` files.
-Rust Python shallow now emits qualified methods and inherits/decorators/overrides/calls; AST depth remains the Python default for `.py` trees.
+Rust Python parsing uses `rustpython-parser` AST (qualified methods, inherits, decorators, overrides, calls).
+The pure-Python AST indexer remains the default for `.py` trees unless Rust index is opted in.

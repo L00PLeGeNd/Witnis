@@ -703,10 +703,12 @@ class Store:
         return out
 
     def search(self, query: str, limit: int = 50) -> list[dict]:
-        # Prefer FTS5 when available; fall back to LIKE.
+        # Prefer FTS5, then merge LIKE so qualified names (Class.method) still match leaf queries.
         fts_query = query.strip().replace('"', "")
         if any(ch in fts_query for ch in ".-_/"):
             fts_query = f'"{fts_query}"'
+        out: list[dict] = []
+        seen: set[tuple] = set()
         try:
             fts_rows = self.conn.execute(
                 "SELECT name, path FROM symbols_fts WHERE symbols_fts MATCH ? LIMIT ?",
@@ -714,30 +716,31 @@ class Store:
             ).fetchall()
         except sqlite3.OperationalError:
             fts_rows = []
-        if fts_rows:
-            out: list[dict] = []
-            seen: set[tuple] = set()
-            for fr in fts_rows:
-                rows = self.conn.execute(
-                    "SELECT s.name, s.kind, s.start_line, s.end_line, f.path AS file_path "
-                    "FROM symbols s JOIN files f ON f.id = s.file_id "
-                    "WHERE s.name = ? AND f.path = ?",
-                    (fr["name"], fr["path"]),
-                ).fetchall()
-                for row in rows:
-                    key = (row["name"], row["file_path"], row["start_line"])
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    out.append(dict(row))
-            if out:
-                return out[:limit]
+        for fr in fts_rows:
+            rows = self.conn.execute(
+                "SELECT s.name, s.kind, s.start_line, s.end_line, f.path AS file_path "
+                "FROM symbols s JOIN files f ON f.id = s.file_id "
+                "WHERE s.name = ? AND f.path = ?",
+                (fr["name"], fr["path"]),
+            ).fetchall()
+            for row in rows:
+                key = (row["name"], row["file_path"], row["start_line"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(dict(row))
         q = f"%{query}%"
         rows = self.conn.execute(
             "SELECT s.name, s.kind, s.start_line, s.end_line, f.path AS file_path "
             "FROM symbols s JOIN files f ON f.id = s.file_id "
             "WHERE s.name LIKE ? OR f.path LIKE ? "
             "ORDER BY s.name LIMIT ?",
-            (q, q, limit),
+            (q, q, max(limit * 2, 50)),
         ).fetchall()
-        return [dict(r) for r in rows]
+        for row in rows:
+            key = (row["name"], row["file_path"], row["start_line"])
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(dict(row))
+        return out[:limit]

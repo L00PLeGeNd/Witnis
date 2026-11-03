@@ -70,7 +70,7 @@ Witnis Core  >  Witnis MCP  >  Witnis CLI  >  Witnis Studio (local web)
 ```
 
 - **Core:** parse, index, relations, git, evidence, impact, verification scheduling  
-- **MCP:** primary distribution into Cursor / Claude / other MCP clients  
+- **MCP:** distribute into any MCP-compatible host / coding agent
 - **CLI:** human debug, scripting, CI-friendly checks  
 - **Studio:** showcase + inspect graphs, evidence, verification reports (not the temple)
 

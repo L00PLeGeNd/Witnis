@@ -57,16 +57,21 @@ git clone https://github.com/L00PLeGeNd/Witnis.git
 cd Witnis
 pip install -e ".[dev,lsp]"
 
-python -m witnis index fixtures/mini_py
-python -m witnis search login --json
-python -m witnis trace login --json
-python -m witnis impact login --json
-python -m witnis lsp AuthService --json
-python -m witnis plan-verify --target login
-python -m witnis studio --target login --out .witnis/studio.html
+witnis demo                 # index sample + witness card
+witnis index .              # or index your own repo
+witnis look login           # search · trace · impact · tests · plan
+witnis studio login --open  # HTML dashboard
+```
 
-pytest -q
-python -m witnis bench --suite public
+Deeper cuts when you need them:
+
+```bash
+witnis search login
+witnis trace login --plain
+witnis plan login
+witnis verify login          # blocked until authorized
+WITNIS_ALLOW_VERIFY=1 witnis verify login --execute
+witnis bench --suite public
 ```
 
 Extras: `.[lsp]` (Jedi), `.[rust]` (maturin), or `.[all]`.
@@ -75,14 +80,16 @@ Extras: `.[lsp]` (Jedi), `.[rust]` (maturin), or `.[all]`.
 
 ## How agents should use it
 
-1. **Index** the repo (refresh after large edits)
-2. **Search** the symbol before changing it
-3. **Trace** callers, inheritance, decorators
-4. **Impact** and related tests before the edit
-5. **plan-verify**, then **verify --execute** only with explicit auth
-6. Open **Studio** or an evidence bundle for review
+```text
+witnis index .
+witnis look <symbol>
+witnis plan <symbol>
+WITNIS_ALLOW_VERIFY=1 witnis verify <symbol> --execute
+witnis studio <symbol> --open
+```
 
-Longer playbook: [`examples/agent-playbook.md`](examples/agent-playbook.md)
+`look` is the short path: one card instead of four separate JSON dumps.  
+Playbook: [`examples/agent-playbook.md`](examples/agent-playbook.md)
 
 ### Envelope shape
 
@@ -117,7 +124,7 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 
 | Layer | What you get |
 |---|---|
-| **CLI** | `index`, `search`, `trace`, `impact`, `plan-verify`, `verify`, `studio`, `lsp`, `bench`, `compare-baselines`, … |
+| **CLI** | `demo`, `look`, `index`, `search`, `trace`, `impact`, `plan`, `verify`, `studio`, `lsp`, `bench`, … |
 | **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, … |
 | **SDK** | `from witnis.sdk import index_repository, repo_search, trace_symbol, …` |
 | **Studio** | Static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru` |
@@ -133,32 +140,32 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 | **Witnis** | yes | yes | yes | yes |
 
 ```bash
-python -m witnis compare-baselines fixtures/mini_py --out docs/benchmarks/local-v1.md
+witnis baselines fixtures/mini_py
 ```
 
 ---
 
-## Cursor MCP
+## MCP (any compatible client)
 
-Index the repo first, then point MCP at the DB:
+Works with any MCP host — Claude Desktop, Continue, Cline, custom agents, and similar. Index the repo, then register the server:
 
 ```json
 {
   "mcpServers": {
     "witnis": {
-      "command": "python",
-      "args": ["-m", "witnis", "mcp", "--db", "/ABS/PATH/TO/Witnis/.witnis/index.sqlite"],
+      "command": "witnis",
+      "args": ["mcp"],
       "env": {
-        "WITNIS_DB": "/ABS/PATH/TO/Witnis/.witnis/index.sqlite"
+        "WITNIS_DB": "/ABS/PATH/TO/repo/.witnis/index.sqlite"
       }
     }
   }
 }
 ```
 
-Sample file: [`examples/mcp.cursor.example.json`](examples/mcp.cursor.example.json)
+Sample: [`examples/mcp.example.json`](examples/mcp.example.json)
 
-Agents should call `list_capabilities` before assuming tool names.
+Clients differ in config file layout; the important bits are the `witnis mcp` command and `WITNIS_DB`. Agents should call `list_capabilities` before assuming tool names.
 
 ---
 
@@ -181,8 +188,8 @@ More: [`SECURITY.md`](SECURITY.md)
 CI keeps the public suite green:
 
 ```bash
-python -m witnis bench --suite local
-python -m witnis bench --suite public
+witnis bench --suite local
+witnis bench --suite public
 ```
 
 | Suite | Scope |

@@ -49,11 +49,27 @@ from witnis.core.verify import (
     run_verification,
 )
 
-app = typer.Typer(add_completion=False, no_args_is_help=True, help="Witnis CLI")
+app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    help="Witnis — witness claims with evidence",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
 def _default_db() -> Path:
     return Path.cwd() / ".witnis" / "index.sqlite"
+
+
+def _focus(*parts: Optional[str]) -> Optional[str]:
+    for part in parts:
+        if part:
+            return part
+    return None
+
+
+def _print_json(payload: dict) -> None:
+    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
 
 
 @app.command("version")
@@ -70,9 +86,10 @@ def capabilities_cmd() -> None:
 
 @app.command("studio")
 def studio_cmd(
+    name: Optional[str] = typer.Argument(None, help="Symbol to focus"),
     out: Optional[Path] = typer.Option(None, "--out", help="HTML output path"),
     target: Optional[str] = typer.Option(
-        None, "--target", help="Symbol focus for graph/evidence/report panels"
+        None, "--target", help="Symbol focus (alias of positional name)"
     ),
     lang: str = typer.Option("en", "--lang", help="UI language: en|zh|pt|fr|ru"),
     open_browser: bool = typer.Option(
@@ -83,7 +100,9 @@ def studio_cmd(
     """Render Studio HTML dashboard (status, graph, evidence, report)."""
     db_path = db or _default_db()
     try:
-        payload = render_studio(db_path, out=out, target=target, lang=lang)
+        payload = render_studio(
+            db_path, out=out, target=_focus(name, target), lang=lang
+        )
     except FileNotFoundError as exc:
         typer.echo(str(exc), err=True)
         raise typer.Exit(code=1) from exc
@@ -146,6 +165,7 @@ def lsp_cmd(
         raise typer.Exit(code=1)
 
 
+@app.command("baselines")
 @app.command("compare-baselines")
 def compare_baselines_cmd(
     path: Path = typer.Argument(
@@ -157,7 +177,7 @@ def compare_baselines_cmd(
     ),
     db: Optional[Path] = typer.Option(None, "--db"),
 ) -> None:
-    """Compare Witnis against git-grep / naive baselines (local acceptance)."""
+    """Compare Witnis vs grep/regex baselines (alias: baselines)."""
     db_path = db or (Path.cwd() / ".witnis" / "baseline.sqlite")
     report_path = out or (Path.cwd() / "docs" / "benchmarks" / "local-v1.md")
     try:
@@ -445,6 +465,97 @@ def impact_cmd(
         raise typer.Exit(code=1)
 
 
+@app.command("look")
+def look_cmd(
+    name: str = typer.Argument(..., help="Symbol to inspect"),
+    db: Optional[Path] = typer.Option(None, "--db"),
+    as_json: bool = typer.Option(False, "--json", help="Full envelopes as JSON"),
+) -> None:
+    """One-shot witness card: search + trace + impact + related tests."""
+    db_path = db or _default_db()
+    try:
+        search = repo_search(db_path, query=name, limit=8)
+        trace = trace_symbol(db_path, name=name)
+        impact = analyze_impact(db_path, target=name)
+        tests = find_related_tests(db_path, target=name)
+        plan = create_verification_plan(db_path, target=name)
+    except FileNotFoundError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    if as_json:
+        _print_json(
+            {
+                "status": "success",
+                "result": {
+                    "search": search.get("result"),
+                    "trace": trace.get("result"),
+                    "impact": impact.get("result"),
+                    "tests": tests.get("result"),
+                    "plan": plan.get("result"),
+                },
+            }
+        )
+        return
+
+    matches = (search.get("result") or {}).get("matches") or []
+    defs = (trace.get("result") or {}).get("definitions") or []
+    called_by = (trace.get("result") or {}).get("called_by") or []
+    direct = (impact.get("result") or {}).get("direct") or []
+    related = (tests.get("result") or {}).get("tests") or []
+    steps = (plan.get("result") or {}).get("steps") or []
+
+    typer.echo(name)
+    if matches:
+        m = matches[0]
+        typer.echo(
+            f"  hit     {m.get('kind')}  {m.get('name')}  "
+            f"{m.get('file_path')}:{m.get('start_line')}"
+        )
+    for d in defs[:3]:
+        typer.echo(
+            f"  def     {d.get('kind')}  {d.get('name')}  "
+            f"{d.get('file_path')}:{d.get('start_line')}"
+        )
+    for edge in called_by[:4]:
+        typer.echo(f"  caller  {edge.get('source')}")
+    typer.echo(f"  impact  {len(direct)} direct edge(s)")
+    if related:
+        paths = ", ".join(sorted({str(t.get('file_path')) for t in related[:5]}))
+        typer.echo(f"  tests   {paths}")
+    else:
+        typer.echo("  tests   (none indexed)")
+    typer.echo(f"  plan    {len(steps)} step(s) — run: witnis verify {name} --execute")
+
+
+@app.command("demo")
+def demo_cmd(
+    root: Path = typer.Argument(
+        Path("fixtures/mini_py"),
+        exists=False,
+        help="Repo/fixture to index (default: fixtures/mini_py)",
+    ),
+    symbol: str = typer.Option("login", "--symbol", "-s"),
+    open_studio: bool = typer.Option(False, "--studio", help="Also render Studio HTML"),
+) -> None:
+    """Index a sample tree and print a look card (fast first run)."""
+    db_path = Path.cwd() / ".witnis" / "demo.sqlite"
+    target = root if root.exists() else Path(__file__).resolve().parents[2] / root
+    if not target.exists():
+        typer.echo(f"not found: {root}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(f"index  {target}")
+    stats = index_repository(target, db_path, incremental=False)
+    typer.echo(f"ready  {stats.files} files · {stats.symbols} symbols")
+    look_cmd(name=symbol, db=db_path, as_json=False)
+    if open_studio:
+        out = Path.cwd() / ".witnis" / "demo-studio.html"
+        payload = render_studio(db_path, out=out, target=symbol, lang="en")
+        path = (payload.get("result") or {}).get("path") or str(out)
+        typer.echo(f"studio  {path}")
+        webbrowser.open(Path(path).resolve().as_uri())
+
+
 @app.command("change-impact")
 def change_impact_cmd(
     revision: str = typer.Argument("HEAD", help="Git revision"),
@@ -619,12 +730,13 @@ def report_cmd(
         raise typer.Exit(code=1)
 
 
+@app.command("tests")
 @app.command("related-tests")
 def related_tests_cmd(
     target: str = typer.Argument(..., help="Symbol name"),
     db: Optional[Path] = typer.Option(None, "--db", help="SQLite index path"),
 ) -> None:
-    """List heuristically related tests for a symbol."""
+    """List related tests for a symbol (alias: tests)."""
     db_path = db or _default_db()
     try:
         payload = find_related_tests(db_path, target=target)
@@ -680,17 +792,19 @@ def evidence_cmd(
         raise typer.Exit(code=1)
 
 
+@app.command("plan")
 @app.command("plan-verify")
 def plan_verify_cmd(
+    name: Optional[str] = typer.Argument(None, help="Symbol to focus"),
     target: Optional[str] = typer.Option(None, "--target", help="Symbol to focus"),
     revision: Optional[str] = typer.Option(None, "--revision", help="Git revision"),
     db: Optional[Path] = typer.Option(None, "--db", help="SQLite index path"),
 ) -> None:
-    """Create a read-only verification plan (no command execution)."""
+    """Create a read-only verification plan (alias: plan)."""
     db_path = db or _default_db()
     try:
         payload = create_verification_plan(
-            db_path, target=target, revision=revision
+            db_path, target=_focus(name, target), revision=revision
         )
     except FileNotFoundError as exc:
         typer.echo(str(exc), err=True)
@@ -702,18 +816,22 @@ def plan_verify_cmd(
 
 @app.command("verify")
 def verify_cmd(
+    name: Optional[str] = typer.Argument(None, help="Symbol to focus"),
     target: Optional[str] = typer.Option(None, "--target"),
     revision: Optional[str] = typer.Option(None, "--revision"),
     execute: bool = typer.Option(
-        False, "--execute", help="Execute pytest steps (also needs WITNIS_ALLOW_VERIFY=1)"
+        False, "--execute", help="Run checks (also needs WITNIS_ALLOW_VERIFY=1)"
     ),
     db: Optional[Path] = typer.Option(None, "--db"),
 ) -> None:
-    """Run or preview verification. Defaults to blocked without --execute."""
+    """Preview or run verification. Blocked without --execute."""
     db_path = db or _default_db()
     try:
         payload = run_verification(
-            db_path, execute=execute, target=target, revision=revision
+            db_path,
+            execute=execute,
+            target=_focus(name, target),
+            revision=revision,
         )
     except FileNotFoundError as exc:
         typer.echo(str(exc), err=True)

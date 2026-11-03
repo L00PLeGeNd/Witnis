@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.1
+
+- `witnis look` one-shot witness card; `witnis demo` first-run
+- Short aliases: `plan`, `tests`, `baselines`; positional targets for `plan` / `verify` / `studio`
+- README & playbook use short `witnis …` commands
+
 ## 1.8.0
 
 - GitHub Actions CI (Rust + Python + public bench)

@@ -1,42 +1,47 @@
 # Witnis agent playbook (local)
 
-Witnis is evidence infrastructure: index → trace → impact → verify. Prefer facts from Core tools over model guesses.
+Prefer Core facts over model guesses.
 
 ## Bootstrap
 
 ```bash
-pip install -e ".[dev]"
-python -m witnis index /path/to/repo
-python -m witnis status
-python -m witnis capabilities
+pip install -e ".[dev,lsp]"
+witnis index /path/to/repo
+witnis look login
 ```
 
-MCP: point `WITNIS_DB` at `.witnis/index.sqlite` (see `examples/mcp.cursor.example.json`).
+Or the shortest first run: `witnis demo`
+
+MCP: set `WITNIS_DB` to `.witnis/index.sqlite` (see `examples/mcp.example.json`). Any MCP-compatible host works.
 
 ## Typical loops
 
-1. **Understand a symbol**  
-   `trace` → `explain` → `impact` → `related-tests` → `graph`
+1. **Understand a symbol** — `witnis look <symbol>`  
+   (or `trace` / `impact` / `tests` / `graph` when you need one slice)
 
 2. **Review a commit**  
-   `explain-change HEAD` → `change-impact HEAD` → `plan-verify --revision HEAD`
+   `witnis explain-change HEAD` → `witnis change-impact HEAD` → `witnis plan --revision HEAD`
 
-3. **Review dirty worktree**  
-   `compare-worktree` → `refresh` → `plan-verify --target <symbol>`
+3. **Dirty worktree**  
+   `witnis compare-worktree` → `witnis refresh` → `witnis plan <symbol>`
 
-4. **Ship a proof pack**  
-   `export-bundle --target X` or `report --target X --html-out out.html`
+4. **Proof pack**  
+   `witnis export-bundle --target X` or `witnis report X --html-out out.html`
 
 5. **Authorize checks** (explicit only)  
-   `WITNIS_ALLOW_VERIFY=1 python -m witnis verify --execute --target X`
+   `WITNIS_ALLOW_VERIFY=1 witnis verify X --execute`
+
+## Short aliases
+
+| Short | Full |
+|---|---|
+| `look` | search + trace + impact + tests + plan card |
+| `plan` | `plan-verify` |
+| `tests` | `related-tests` |
+| `baselines` | `compare-baselines` |
 
 ## Safety defaults
 
-- Verification is blocked without `--execute` **and** `WITNIS_ALLOW_VERIFY=1`
-- Allowlisted commands only: pytest / compileall (+ in-process syntax/graph)
-- Paths sandboxed to the indexed repo root; stdout redacted for secret-like assignments
-- `scan-secrets` is heuristic and redacts previews
-
-## Evidence statuses
-
-`observed` · `derived` · `verified` · `uncertain` · `failed` — treat `verified` as post-check only.
+- Verify stays blocked without `--execute` **and** `WITNIS_ALLOW_VERIFY=1`
+- Allowlisted runners only (pytest / compileall + in-process checks)
+- Paths sandboxed to the indexed root; secret-like values redacted

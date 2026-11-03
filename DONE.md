@@ -1,13 +1,11 @@
-# DONE — Witnis 1.8.0
+# DONE — Witnis 1.8.1
 
 Public repo: https://github.com/L00PLeGeNd/Witnis
 
 ## This release
-- CI on GitHub Actions
-- RustPython AST + Rust index/search/overview
-- Jedi + index + optional Pyright diagnostics
-- Polyglot `fixtures/public_svc` + 21 public bench tasks
-- CONTRIBUTING / scoreboard / polished README
+- Short CLI: `look`, `demo`, `plan` / `tests` / `baselines`
+- Docs are MCP-host neutral (not tied to one editor)
+- CI, RustPython AST, public_svc, LSP stack from 1.8.0
 
 ## Verify before publish
 ```bash

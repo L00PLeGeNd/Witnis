@@ -897,7 +897,7 @@ def bench_cmd(
     suite: str = typer.Option(
         "local",
         "--suite",
-        help="Benchmark suite: local | public",
+        help="Benchmark suite: local | public | ground-truth",
     ),
     tasks: Optional[Path] = typer.Option(
         None,
@@ -908,9 +908,24 @@ def bench_cmd(
     ),
     db: Optional[Path] = typer.Option(None, "--db"),
 ) -> None:
-    """Run reproducible benchmark tasks (local fixture or public suite)."""
+    """Run reproducible benchmark tasks (local, public acceptance, or ground-truth)."""
     db_path = db or (_default_db().parent / "bench.sqlite")
     repo_root = Path.cwd()
+    if suite in {"ground-truth", "gt"}:
+        from witnis.core.ground_truth import run_ground_truth_suite
+
+        work = db_path.parent / "gt-work"
+        work.mkdir(parents=True, exist_ok=True)
+        report = run_ground_truth_suite(
+            labels_dir=repo_root / "benchmarks" / "ground-truth" / "labels",
+            repo_root=repo_root,
+            work_dir=work,
+        )
+        typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
+        # Fail if any evaluated edge/symbol has false negatives
+        if int(report.get("fn") or 0) > 0:
+            raise typer.Exit(code=1)
+        return
     if tasks is None:
         tasks = (
             Path("benchmarks/public/tasks.json")

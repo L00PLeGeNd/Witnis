@@ -46,12 +46,15 @@ Stop growing tool/language surface. Prove (or honestly bound) **engineering unde
 - Python/Rust parity green on supported languages
 - Limitations listed per language (Spring DI, AOP, dynamic calls, …)
 
-## Progress (2026-11-03)
+## Progress (2026-11-03 → 1.9.0)
 
-- [x] Honest docs: `docs/DEPTH.md`, README/PUBLIC/SECURITY, contracts package version → 1.8.1
-- [x] Ground-truth scaffold: `benchmarks/ground-truth/{README,schema,labels/semantic_java_di.json}`
-- [x] Spring-style DI fixture: `fixtures/semantic_java_di` + honest tests
-- [x] Dual-engine parity tests: `tests/test_engine_parity.py`
-- [ ] Real corpora (Flask/FastAPI/PetClinic/TS) + human GT labels
-- [ ] Verify isolation / sandbox
-- [ ] Parity as required CI gate with tightened Jaccard
+- [x] Honest docs: `docs/DEPTH.md`, README/PUBLIC/SECURITY
+- [x] Ground-truth runner: `witnis bench --suite ground-truth` (Java DI + Python DI labels)
+- [x] Java Spring-aware relations: implements / injects / typed field calls
+- [x] Dual-engine parity tests in CI: `tests/test_engine_parity.py`
+- [x] Verify isolation default: worktree/copy + scrubbed env + FS diff
+- [x] Agent effect protocol scaffold: `docs/experiments/agent-effect-protocol.md`
+- [ ] External corpora human labels (Flask / FastAPI / PetClinic / Express) — manifest pinned, labels open
+- [ ] Container/OS jail + cgroup caps
+- [ ] Automated agent A/B runner + published effect numbers
+- [ ] Rust port of Java injects for full parity on DI trees

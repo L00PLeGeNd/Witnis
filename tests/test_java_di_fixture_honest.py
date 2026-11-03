@@ -1,6 +1,7 @@
 """Honest expectations for Spring-style DI fixture.
 
-Documents what shallow Java can and cannot claim today.
+Semantic P0 now claims implements + injects + typed field calls.
+Still out of scope: AOP proxies, generic erasure, multi-impl @Primary selection.
 """
 
 from __future__ import annotations
@@ -30,26 +31,16 @@ def test_di_fixture_files_present() -> None:
 
 
 @pytest.mark.skipif(not DI.is_dir(), reason="semantic_java_di missing")
-def test_shallow_java_indexes_without_claiming_injection(tmp_path: Path) -> None:
+def test_di_edges_present_for_p0(tmp_path: Path) -> None:
     db = tmp_path / "di.sqlite"
     stats = index_repository(DI, db, incremental=False)
     assert stats.files >= 4
-
     store = Store(db)
     try:
-        repo_id = store.conn.execute("SELECT id FROM repositories LIMIT 1").fetchone()[0]
-        rels = store.list_relations(repo_id, limit=500)
-        inject = [
-            r
-            for r in rels
-            if str(r.get("relation_type") or "").lower()
-            in {"injects", "inject", "autowired", "di"}
-        ]
-        assert inject == [], (
-            "Unexpected DI edges claimed by shallow indexer — "
-            "either implement intentionally or stop emitting them: "
-            f"{inject}"
-        )
+        inject = store.find_relations(relation_type="injects", limit=50)
+        impl = store.find_relations(relation_type="implements", limit=50)
+        assert inject, "expected @Autowired/ctor injects edges"
+        assert impl, "expected implements edges"
     finally:
         store.close()
 

@@ -32,3 +32,7 @@ jobs:
         run: pytest -q
       - name: Public benchmark
         run: python -m witnis bench --suite public
+      - name: Ground-truth suite
+        run: python -m witnis bench --suite ground-truth
+      - name: Engine parity (Python vs Rust when native present)
+        run: pytest -q tests/test_engine_parity.py

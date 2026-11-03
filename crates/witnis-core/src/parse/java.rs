@@ -39,6 +39,13 @@ fn extends_re() -> &'static Regex {
     })
 }
 
+fn implements_re() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        Regex::new(r"(?m)class\s+([A-Za-z_][\w]*)\b[^{;]*?\bimplements\s+([^{]+)\{").unwrap()
+    })
+}
+
 fn call_re() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| Regex::new(r"\b([A-Za-z_][\w]*(?:\.[A-Za-z_][\w]*)*)\s*\(").unwrap())
@@ -109,6 +116,24 @@ pub fn parse_imports(source: &str, rel_path: &str) -> Vec<Relation> {
             status: "observed".into(),
             start_line: Some(line),
         });
+    }
+    for caps in implements_re().captures_iter(source) {
+        let line = line_at(source, caps.get(0).unwrap().start());
+        let cls = caps.get(1).unwrap().as_str();
+        for raw in caps.get(2).unwrap().as_str().split(',') {
+            let iface = raw.trim().split('<').next().unwrap_or("").trim();
+            let iface = iface.rsplit('.').next().unwrap_or(iface);
+            if iface.is_empty() {
+                continue;
+            }
+            edges.push(Relation {
+                source: format!("{rel_path}:{cls}"),
+                target: iface.to_string(),
+                relation_type: "implements".into(),
+                status: "observed".into(),
+                start_line: Some(line),
+            });
+        }
     }
     edges
 }

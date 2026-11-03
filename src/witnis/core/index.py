@@ -14,7 +14,7 @@ from witnis.core.parse_js import parse_js_file
 from witnis.core.parse_python import parse_python_file
 from witnis.core.references_python import parse_python_references
 from witnis.core.relations_go import parse_go_calls, parse_go_imports
-from witnis.core.relations_java import parse_java_calls, parse_java_imports
+from witnis.core.relations_java import parse_java_relations
 from witnis.core.relations_js import parse_js_calls, parse_js_imports
 from witnis.core.relations_python import (
     parse_python_decorators,
@@ -100,12 +100,8 @@ def _parse_relations(path: Path, *, rel_path: str) -> list[dict]:
             path, rel_path=rel_path
         )
     if path.suffix == ".java":
-        native = _parse_shallow_native("java", path, rel_path=rel_path)
-        if native is not None:
-            return native[1]
-        return parse_java_imports(path, rel_path=rel_path) + parse_java_calls(
-            path, rel_path=rel_path
-        )
+        # Prefer Python Spring-aware relations over shallow native parse.
+        return parse_java_relations(path, rel_path=rel_path)
     return []
 
 
@@ -131,6 +127,9 @@ def _prefer_rust_index(paths: list[Path]) -> bool:
         from witnis.core.native import NATIVE_AVAILABLE
 
         return bool(NATIVE_AVAILABLE and paths)
+    # Java trees stay on the Python indexer until Rust ships Spring-aware relations.
+    if any(p.suffix == ".java" for p in paths):
+        return False
     # Non-Python trees can use the Rust indexer by default.
     return bool(paths) and all(p.suffix != ".py" for p in paths)
 

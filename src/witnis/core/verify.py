@@ -306,83 +306,72 @@ def run_verification(
         _save_report(db_path, plan)
         return plan
 
-    results: list[dict[str, Any]] = []
-    for step in plan["result"].get("steps", []):
-        cmd = step.get("command")
-        kind = step.get("kind")
-        if kind == "graph":
-            graph = check_import_graph(db_path)
-            broken = graph.get("result", {}).get("broken") or []
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "verified" if not broken else "failed",
-                    "broken_count": len(broken),
-                    "ok": graph.get("result", {}).get("ok"),
-                }
-            )
-            continue
-        if kind == "syntax":
-            paths = step.get("paths")
-            syntax = check_python_syntax(
-                db_path, paths=paths if isinstance(paths, list) else None
-            )
-            errors = syntax.get("result", {}).get("errors") or []
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "verified" if not errors else "failed",
-                    "checked": syntax.get("result", {}).get("checked"),
-                    "error_count": len(errors),
-                    "errors": errors[:10],
-                }
-            )
-            continue
-        if not cmd or kind not in {"pytest", "static"}:
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "skipped",
-                    "reason": "non-executable or empty command",
-                }
-            )
-            continue
-        root = Path(plan["repository"]["root_path"])
-        cwd = Path(step.get("cwd") or root)
+    from witnis.core.verify_isolate import (
+        cleanup_verify_workspace,
+        create_verify_worktree,
+        run_isolated_command,
+    )
+
+    root = Path(plan["repository"]["root_path"])
+    isolate = os.environ.get("WITNIS_VERIFY_ISOLATE", "1").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+    work_root = root
+    work_meta: dict[str, Any] = {"mode": "inplace"}
+    if isolate:
         try:
-            assert_path_in_root(root, cwd)
-        except PermissionError as exc:
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "failed",
-                    "reason": str(exc),
-                }
-            )
-            continue
-        # allowlist: pytest / python -m pytest / python -m compileall
-        py = Path(cmd[0]).name.lower().startswith("python") if cmd else False
-        allowed = (
-            cmd[0] == "pytest"
-            or (len(cmd) >= 3 and py and cmd[1:3] == ["-m", "pytest"])
-            or (len(cmd) >= 3 and py and cmd[1:3] == ["-m", "compileall"])
-        )
-        if not allowed:
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "failed",
-                    "reason": "command allowlist: pytest / compileall only",
-                }
-            )
-            continue
-        # sandbox: compileall targets must stay under repo root
-        if kind == "static":
+            work_root, work_meta = create_verify_worktree(root)
+        except OSError:
+            work_root, work_meta = root, {"mode": "inplace", "error": "worktree_failed"}
+
+    results: list[dict[str, Any]] = []
+    try:
+        for step in plan["result"].get("steps", []):
+            cmd = step.get("command")
+            kind = step.get("kind")
+            if kind == "graph":
+                graph = check_import_graph(db_path)
+                broken = graph.get("result", {}).get("broken") or []
+                results.append(
+                    {
+                        "step_id": step.get("id"),
+                        "status": "verified" if not broken else "failed",
+                        "broken_count": len(broken),
+                        "ok": graph.get("result", {}).get("ok"),
+                    }
+                )
+                continue
+            if kind == "syntax":
+                paths = step.get("paths")
+                syntax = check_python_syntax(
+                    db_path, paths=paths if isinstance(paths, list) else None
+                )
+                errors = syntax.get("result", {}).get("errors") or []
+                results.append(
+                    {
+                        "step_id": step.get("id"),
+                        "status": "verified" if not errors else "failed",
+                        "checked": syntax.get("result", {}).get("checked"),
+                        "error_count": len(errors),
+                        "errors": errors[:10],
+                    }
+                )
+                continue
+            if not cmd or kind not in {"pytest", "static"}:
+                results.append(
+                    {
+                        "step_id": step.get("id"),
+                        "status": "skipped",
+                        "reason": "non-executable or empty command",
+                    }
+                )
+                continue
+            cwd = work_root if isolate else Path(step.get("cwd") or root)
             try:
-                for arg in cmd[3:]:
-                    if arg.startswith("-"):
-                        continue
-                    assert_path_in_root(root, (cwd / arg).resolve() if arg != "." else cwd)
+                assert_path_in_root(work_root if isolate else root, cwd)
             except PermissionError as exc:
                 results.append(
                     {
@@ -392,32 +381,97 @@ def run_verification(
                     }
                 )
                 continue
-        try:
-            proc = subprocess.run(
-                cmd,
-                cwd=str(cwd),
-                capture_output=True,
-                text=True,
-                timeout=timeout_sec,
-                check=False,
+            # allowlist: pytest / python -m pytest / python -m compileall
+            py = Path(cmd[0]).name.lower().startswith("python") if cmd else False
+            allowed = (
+                cmd[0] == "pytest"
+                or (len(cmd) >= 3 and py and cmd[1:3] == ["-m", "pytest"])
+                or (len(cmd) >= 3 and py and cmd[1:3] == ["-m", "compileall"])
             )
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "verified" if proc.returncode == 0 else "failed",
-                    "exit_code": proc.returncode,
-                    "stdout_tail": redact_text(proc.stdout[-2000:]),
-                    "stderr_tail": redact_text(proc.stderr[-2000:]),
-                }
-            )
-        except subprocess.TimeoutExpired:
-            results.append(
-                {
-                    "step_id": step.get("id"),
-                    "status": "failed",
-                    "reason": f"timeout after {timeout_sec}s",
-                }
-            )
+            if not allowed:
+                results.append(
+                    {
+                        "step_id": step.get("id"),
+                        "status": "failed",
+                        "reason": "command allowlist: pytest / compileall only",
+                    }
+                )
+                continue
+            if kind == "static":
+                try:
+                    for arg in cmd[3:]:
+                        if arg.startswith("-"):
+                            continue
+                        assert_path_in_root(
+                            work_root if isolate else root,
+                            (cwd / arg).resolve() if arg != "." else cwd,
+                        )
+                except PermissionError as exc:
+                    results.append(
+                        {
+                            "step_id": step.get("id"),
+                            "status": "failed",
+                            "reason": str(exc),
+                        }
+                    )
+                    continue
+            if isolate:
+                out = run_isolated_command(
+                    cmd, cwd=cwd, timeout_sec=timeout_sec, allow_network=False
+                )
+                if out.get("status") == "timeout":
+                    results.append(
+                        {
+                            "step_id": step.get("id"),
+                            "status": "failed",
+                            "reason": f"timeout after {timeout_sec}s",
+                            "isolation": work_meta,
+                            "fs_diff": out.get("fs_diff"),
+                        }
+                    )
+                else:
+                    results.append(
+                        {
+                            "step_id": step.get("id"),
+                            "status": "verified" if out.get("exit_code") == 0 else "failed",
+                            "exit_code": out.get("exit_code"),
+                            "stdout_tail": redact_text(str(out.get("stdout") or "")[-2000:]),
+                            "stderr_tail": redact_text(str(out.get("stderr") or "")[-2000:]),
+                            "isolation": work_meta,
+                            "fs_diff": out.get("fs_diff"),
+                            "network": out.get("network"),
+                        }
+                    )
+            else:
+                try:
+                    proc = subprocess.run(
+                        cmd,
+                        cwd=str(cwd),
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout_sec,
+                        check=False,
+                    )
+                    results.append(
+                        {
+                            "step_id": step.get("id"),
+                            "status": "verified" if proc.returncode == 0 else "failed",
+                            "exit_code": proc.returncode,
+                            "stdout_tail": redact_text(proc.stdout[-2000:]),
+                            "stderr_tail": redact_text(proc.stderr[-2000:]),
+                        }
+                    )
+                except subprocess.TimeoutExpired:
+                    results.append(
+                        {
+                            "step_id": step.get("id"),
+                            "status": "failed",
+                            "reason": f"timeout after {timeout_sec}s",
+                        }
+                    )
+    finally:
+        if isolate and work_meta.get("mode") in {"worktree", "copy"}:
+            cleanup_verify_workspace(root, work_root, work_meta)
 
     all_ok = results and all(r.get("status") in {"verified", "skipped"} for r in results)
     any_fail = any(r.get("status") == "failed" for r in results)
@@ -446,6 +500,10 @@ def run_verification(
         + [
             "Auto-executed: pytest, compileall, syntax AST check, import graph",
             "Stdout/stderr truncated in report",
+            (
+                f"Isolation mode={work_meta.get('mode')} (worktree/copy + scrubbed env + FS diff); "
+                "not a full OS/container sandbox — see SECURITY.md"
+            ),
         ],
     )
     _persist_run(db_path, payload)

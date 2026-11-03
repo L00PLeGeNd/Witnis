@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "witnis"
-version = "1.8.1"
+version = "1.9.0"
 description = "Local-first engineering witness for AI coding agents"
 readme = "README.md"
 license = { text = "Apache-2.0" }

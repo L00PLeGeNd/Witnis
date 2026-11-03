@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "note": "Pinned real-repo corpora. Vendored slices run in CI; external checkouts are opt-in.",
+  "corpora": [
+    {
+      "id": "semantic_java_di",
+      "kind": "vendored",
+      "path": "fixtures/semantic_java_di",
+      "languages": ["java"],
+      "focus": ["spring-style DI", "implements", "injects", "typed calls"]
+    },
+    {
+      "id": "mini_py",
+      "kind": "vendored",
+      "path": "fixtures/mini_py",
+      "languages": ["python"],
+      "focus": ["symbols", "calls", "evidence"]
+    },
+    {
+      "id": "flask",
+      "kind": "external",
+      "repo": "https://github.com/pallets/flask",
+      "commit": "2.3.3",
+      "license": "BSD-3-Clause",
+      "status": "planned",
+      "labels": null
+    },
+    {
+      "id": "fastapi",
+      "kind": "external",
+      "repo": "https://github.com/tiangolo/fastapi",
+      "commit": "0.104.1",
+      "license": "MIT",
+      "status": "planned",
+      "labels": null
+    },
+    {
+      "id": "spring-petclinic",
+      "kind": "external",
+      "repo": "https://github.com/spring-projects/spring-petclinic",
+      "commit": "main@pin-later",
+      "license": "Apache-2.0",
+      "status": "planned",
+      "labels": null
+    },
+    {
+      "id": "express",
+      "kind": "external",
+      "repo": "https://github.com/expressjs/express",
+      "commit": "4.18.2",
+      "license": "MIT",
+      "status": "planned",
+      "labels": null
+    }
+  ]
+}

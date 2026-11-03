@@ -268,7 +268,7 @@ Ready for local Python-first agent work:
 
 Still ahead: real-repo ground truth (P/R, false-pass rate), deeper four-language semantics, verify isolation, Python/Rust parity as a merge gate, then a single Rust `witnis` binary.
 
-Package / crates: **1.8.1**. Latest tagged release on GitHub may lag until a release cut — see [`CHANGELOG.md`](CHANGELOG.md).
+Package / crates: **1.9.0**. Depth-first: Spring-aware Java relations, ground-truth suite, verify isolation. See [`docs/DEPTH.md`](docs/DEPTH.md) · [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 

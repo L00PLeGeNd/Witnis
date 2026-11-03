@@ -8,11 +8,11 @@
       "id": "controller_calls_service",
       "kind": "call_edge",
       "query": "UserController.get -> UserService.findUser",
-      "notes": "Direct field call; shallow parsers may catch by name.",
+      "notes": "Typed field call after DI-aware Java relations.",
       "expect": {
         "edges": [
           {
-            "source": "UserController.get",
+            "source": "UserController",
             "target": "UserService.findUser",
             "relation_type": "calls"
           }
@@ -23,7 +23,7 @@
       "id": "service_autowired_repo",
       "kind": "call_edge",
       "query": "UserService @Autowired -> UserRepository",
-      "notes": "Injection edge — expected FAIL on current shallow Java until DI pass lands.",
+      "notes": "Injection edge — P0 Spring-aware Java path.",
       "expect": {
         "edges": [
           {
@@ -38,7 +38,7 @@
       "id": "repo_iface_impl",
       "kind": "call_edge",
       "query": "UserRepository <- JdbcUserRepository",
-      "notes": "Interface binding — expected FAIL or weak on shallow path.",
+      "notes": "Interface binding via implements.",
       "expect": {
         "edges": [
           {

@@ -23,7 +23,15 @@ It is **not** a hardened OS/container sandbox. Authorized verify can still:
 
 Documented path boundaries and command allowlists are **policy intent**. They are not a completed third-party security audit.
 
-Planned hardening (P1): disposable worktrees, optional container/OS isolation, CPU/memory/time caps, network deny-by-default, stricter argv allowlists, pre/post filesystem diffs. See [`docs/DEPTH.md`](docs/DEPTH.md).
+Shipped hardening (default on execute, disable with `WITNIS_VERIFY_ISOLATE=0`):
+
+- Disposable git worktree (or tree copy fallback)
+- Scrubbed child environment + network-deny **hint**
+- Per-step timeouts
+- Pre/post filesystem snapshot diff in the report
+- Existing argv allowlist (pytest / compileall) and path sandbox
+
+Still **not** shipped: true container/OS jail, cgroup memory/CPU caps, enforced network namespace. See [`docs/DEPTH.md`](docs/DEPTH.md).
 
 ## Posture
 

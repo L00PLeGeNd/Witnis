@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0
+
+- Java Spring-aware relations: `implements`, field/ctor `injects`, typed field calls
+- Ground-truth suite: `witnis bench --suite ground-truth` + labeled DI fixture
+- Verify isolation by default: worktree/copy, scrubbed env, FS diff (`WITNIS_VERIFY_ISOLATE`)
+- Engine parity tests in CI; agent-effect experiment protocol scaffold
+- Honest depth docs vs SCIP/LSIF/Kythe bar
+
 ## 1.8.1
 
 - `witnis up` — index a repo then print a `look` card

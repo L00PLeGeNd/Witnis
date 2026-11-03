@@ -250,6 +250,7 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 | [`SECURITY.md`](SECURITY.md) | Security defaults |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop and PR expectations |
 | [`CHANGELOG.md`](CHANGELOG.md) | Releases |
+| [`docs/cli-cheatsheet.md`](docs/cli-cheatsheet.md) | Short CLI commands |
 | [`examples/agent-playbook.md`](examples/agent-playbook.md) | Agent usage |
 
 ---

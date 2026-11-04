@@ -1,10 +1,13 @@
-# Experiments (community-visible)
+# Experiments
 
-| Artifact | What it proves | Command |
+**Status (2026-11-04):** user-facing A/B **execution paused**. Governing strategy: [`../strategy/2026-Q4-next-phase-plan.md`](../strategy/2026-Q4-next-phase-plan.md). Next engineering step is **Architecture Audit**, not more experiment runs.
+
+| Artifact | What it is | Command / use |
 |---|---|---|
-| [`results/ab-analysis-v1.json`](results/ab-analysis-v1.json) | Grep vs Witnis **analysis completeness** on 3 fixtures | `witnis experiment` |
-| [`agent-ab-sheet.md`](agent-ab-sheet.md) | Template for Claude Code / Codex **task quality** A/B | human + model |
-| [`agent-effect-protocol.md`](agent-effect-protocol.md) | Metrics definitions | — |
-| [`../demo-auth-refresh.md`](../demo-auth-refresh.md) | Product story users should feel | `witnis scene` |
+| [`EXPERIMENT_REPORT_FILLME.md`](EXPERIMENT_REPORT_FILLME.md) | Fill-in report + ops tutorial (resume later) | when experiments restart |
+| [`results/ab-analysis-v1.json`](results/ab-analysis-v1.json) | Fixture-level grep vs Witnis completeness | `witnis experiment` |
+| [`agent-ab-sheet.md`](agent-ab-sheet.md) | Agent task A/B sheet | paused |
+| [`agent-effect-protocol.md`](agent-effect-protocol.md) | Metric definitions | reference |
+| [`../demo-auth-refresh.md`](../demo-auth-refresh.md) | Product story demo | `witnis scene` |
 
-We do **not** claim agent leadership until the sheet has filled rows on real corpora.
+No agent-leadership claims until real-corpus experiments pass the plan’s go/no-go gates.

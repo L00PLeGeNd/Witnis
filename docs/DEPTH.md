@@ -43,12 +43,14 @@ Default verify path uses disposable worktree/copy, scrubbed env, timeouts, FS di
 
 ## Roadmap status
 
+**Governing plan:** [`docs/strategy/2026-Q4-next-phase-plan.md`](strategy/2026-Q4-next-phase-plan.md) (V1.0, 12 weeks).
+
 | Priority | Item | Status |
 |---|---|---|
-| P0 | Java/Spring semantics (implements / injects / typed calls) | **landed** on fixtures |
-| P0 | Ground-truth runner + labels | **landed** (vendored); external labels open |
-| P1 | Verify isolation | **landed** (worktree/copy + env + FS diff); container TBD |
-| P1 | Dual-engine parity CI | **landed** |
-| P2 | Agent effect experiment | **protocol + task scaffold** |
+| P0 | Architecture audit + capability/defect inventory | **next** — no feature sprawl |
+| P0 | Benchmark V1 + annotation rules | with audit |
+| P0 | Agent A/B **execution** | **paused** until baseline |
+| P1 | Java/Spring semantic depth | after baseline |
+| — | Fixture DI / GT / isolate / parity / scene | earlier landings; not real-project proof |
 
-Plan: `docs/superpowers/plans/2026-11-03-depth-over-surface.md`
+Earlier notes: `docs/superpowers/plans/2026-11-03-depth-over-surface.md`

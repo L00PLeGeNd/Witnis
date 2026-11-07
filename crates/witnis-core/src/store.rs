@@ -11,7 +11,8 @@ const SCHEMA: &str = r#"
 CREATE TABLE IF NOT EXISTS repositories (
     id INTEGER PRIMARY KEY,
     root_path TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    indexed_revision TEXT
 );
 CREATE TABLE IF NOT EXISTS files (
     id INTEGER PRIMARY KEY,

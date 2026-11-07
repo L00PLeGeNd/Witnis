@@ -16,4 +16,6 @@ target/
 # Local publicity notes — keep off the public repo
 docs/PROMOTE.md
 benchmarks/ground-truth/reports/
+benchmarks/ground-truth/corpora/checkouts/
 benchmarks/experiments/reports/
+.git/witnis-tmp/

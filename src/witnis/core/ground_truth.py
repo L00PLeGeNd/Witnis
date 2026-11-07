@@ -157,16 +157,19 @@ def run_ground_truth_suite(
 ) -> dict[str, Any]:
     """Run all label JSON files under labels_dir; corpora paths are relative to repo_root."""
     reports: list[dict[str, Any]] = []
-    label_files = sorted(labels_dir.glob("*.json"))
+    label_files = sorted(
+        p for p in labels_dir.glob("*.json") if not p.name.startswith("_")
+    )
     for path in label_files:
         label = load_label(path)
         corpus_rel = label.get("corpus") or ""
         corpus_path = (repo_root / corpus_rel).resolve()
         if not corpus_path.is_dir():
+            # External checkouts are optional in CI; skip rather than fail the suite.
             reports.append(
                 {
                     "case_id": label.get("id"),
-                    "status": "failed",
+                    "status": "skipped",
                     "error": f"corpus missing: {corpus_rel}",
                 }
             )

@@ -10,11 +10,9 @@ Publish **reproducible**, fixture-backed **acceptance** checks so CI and reviewe
 
 ## Suites
 
-| Suite | Command | Fixture(s) |
-|---|---|---|
-| Local regression | `python -m witnis bench --suite local` | `fixtures/mini_py` (`benchmarks/tasks.json`) |
-| Public acceptance | `python -m witnis bench --suite public` | `mini_py` / `mini_go` / `mini_js` / `mini_java` + `fixtures/public_svc` (`benchmarks/public/tasks.json`) |
-| Baseline deltas | `python -m witnis compare-baselines fixtures/mini_py` | git-grep / naive scan vs Witnis |
+- **Local regression** — `python -m witnis bench --suite local` on `fixtures/mini_py` (`benchmarks/tasks.json`)
+- **Public acceptance** — `python -m witnis bench --suite public` on `mini_py` / `mini_go` / `mini_js` / `mini_java` + `fixtures/public_svc` (`benchmarks/public/tasks.json`)
+- **Baseline deltas** — `python -m witnis compare-baselines fixtures/mini_py` (git-grep / naive scan vs Witnis)
 
 ## Metrics
 

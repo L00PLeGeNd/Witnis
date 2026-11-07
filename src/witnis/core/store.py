@@ -12,7 +12,8 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS repositories (
     id INTEGER PRIMARY KEY,
     root_path TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    indexed_revision TEXT
 );
 
 CREATE TABLE IF NOT EXISTS files (
@@ -142,18 +143,43 @@ class Store:
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        cols = {
+            str(r["name"])
+            for r in self.conn.execute("PRAGMA table_info(repositories)").fetchall()
+        }
+        if "indexed_revision" not in cols:
+            self.conn.execute(
+                "ALTER TABLE repositories ADD COLUMN indexed_revision TEXT"
+            )
+            self.conn.commit()
 
     def close(self) -> None:
         self.conn.close()
 
-    def upsert_repository(self, root: Path) -> int:
+    def upsert_repository(
+        self, root: Path, *, indexed_revision: str | None = None
+    ) -> int:
         root_s = str(root.resolve())
         name = root.name
-        self.conn.execute(
-            "INSERT INTO repositories(root_path, name) VALUES (?, ?) "
-            "ON CONFLICT(root_path) DO UPDATE SET name=excluded.name",
-            (root_s, name),
-        )
+        rev = indexed_revision
+        if rev is None:
+            # Keep prior revision on conflict if caller omitted it.
+            self.conn.execute(
+                "INSERT INTO repositories(root_path, name) VALUES (?, ?) "
+                "ON CONFLICT(root_path) DO UPDATE SET name=excluded.name",
+                (root_s, name),
+            )
+        else:
+            self.conn.execute(
+                "INSERT INTO repositories(root_path, name, indexed_revision) "
+                "VALUES (?, ?, ?) "
+                "ON CONFLICT(root_path) DO UPDATE SET "
+                "name=excluded.name, indexed_revision=excluded.indexed_revision",
+                (root_s, name, rev),
+            )
         self.conn.commit()
         row = self.conn.execute(
             "SELECT id FROM repositories WHERE root_path = ?", (root_s,)
@@ -332,6 +358,7 @@ class Store:
         relation_type: str | None = None,
         source_contains: str | None = None,
         target_equals: str | None = None,
+        target_suffix: str | None = None,
         repo_id: int | None = None,
         limit: int = 100,
     ) -> list[dict]:
@@ -347,9 +374,16 @@ class Store:
         if source_contains:
             clauses.append("source LIKE ?")
             params.append(f"%{source_contains}%")
-        if target_equals:
+        if target_equals and target_suffix:
+            clauses.append("(target = ? OR target LIKE ? OR target = ?)")
+            params.extend([target_equals, f"%{target_suffix}", target_suffix.lstrip(".")])
+        elif target_equals:
             clauses.append("target = ?")
             params.append(target_equals)
+        elif target_suffix:
+            leaf = target_suffix.lstrip(".")
+            clauses.append("(target = ? OR target LIKE ?)")
+            params.extend([leaf, f"%.{leaf}"])
         params.append(limit)
         sql = (
             "SELECT source, target, relation_type, status, start_line FROM relations "
@@ -360,11 +394,14 @@ class Store:
     def overview(self, repo_id: int | None = None) -> dict:
         if repo_id is None:
             row = self.conn.execute(
-                "SELECT id, name, root_path FROM repositories ORDER BY id DESC LIMIT 1"
+                "SELECT id, name, root_path, indexed_revision "
+                "FROM repositories ORDER BY id DESC LIMIT 1"
             ).fetchone()
         else:
             row = self.conn.execute(
-                "SELECT id, name, root_path FROM repositories WHERE id = ?", (repo_id,)
+                "SELECT id, name, root_path, indexed_revision "
+                "FROM repositories WHERE id = ?",
+                (repo_id,),
             ).fetchone()
         if row is None:
             return {"repository": None, "files": 0, "symbols": 0}
@@ -377,11 +414,13 @@ class Store:
             "JOIN files f ON f.id = s.file_id WHERE f.repo_id = ?",
             (rid,),
         ).fetchone()["c"]
+        indexed_revision = row["indexed_revision"]
         return {
             "repository": {
                 "id": rid,
                 "name": row["name"],
                 "root_path": row["root_path"],
+                "indexed_revision": indexed_revision,
             },
             "files": int(files),
             "symbols": int(symbols),

@@ -36,12 +36,15 @@
     },
     {
       "id": "spring-petclinic",
-      "kind": "external",
+      "kind": "external_checkout",
       "repo": "https://github.com/spring-projects/spring-petclinic",
-      "commit": "main@pin-later",
+      "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
       "license": "Apache-2.0",
-      "status": "planned",
-      "labels": null
+      "status": "pinned_local",
+      "path": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+      "labels": "benchmarks/ground-truth/labels/spring_petclinic_auto.json",
+      "label_mode": "source_confirmed_auto",
+      "bootstrap": "python scripts/bootstrap_petclinic_gt.py"
     },
     {
       "id": "express",

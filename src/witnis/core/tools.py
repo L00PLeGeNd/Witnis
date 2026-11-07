@@ -31,12 +31,34 @@ def _open_store(db_path: Path) -> Store:
 
 def _repo_meta(repo: dict[str, Any]) -> dict[str, Any]:
     root = Path(repo["root_path"])
-    head = git_head(root)
+    head = git_head(root) or "workdir"
+    indexed = repo.get("indexed_revision")
     return {
         "name": repo["name"],
         "root_path": repo["root_path"],
-        "revision": head or "workdir",
+        "revision": head,
+        "indexed_revision": indexed,
+        "index_stale": bool(indexed and indexed not in {head, "workdir"} and head != "workdir" and indexed != head),
     }
+
+
+def _stale_bits(repository: dict[str, Any] | None) -> tuple[list[str], list[dict[str, Any]]]:
+    if not repository or not repository.get("index_stale"):
+        return [], []
+    return (
+        [
+            "STALE: indexed_revision differs from live git HEAD — re-run witnis index",
+            f"indexed_revision={repository.get('indexed_revision')!r} live={repository.get('revision')!r}",
+        ],
+        [
+            {
+                "type": "index_revision",
+                "status": "stale",
+                "indexed_revision": repository.get("indexed_revision"),
+                "live_revision": repository.get("revision"),
+            }
+        ],
+    )
 
 
 def repo_overview(db_path: Path) -> dict[str, Any]:
@@ -54,12 +76,15 @@ def repo_overview(db_path: Path) -> dict[str, Any]:
             result={},
             limitations=["Index is empty. Run: witnis index <path>"],
         )
+    repository = _repo_meta(repo)
+    stale_limits, stale_evidence = _stale_bits(repository)
     return make_envelope(
         status="success",
-        repository=_repo_meta(repo),
+        repository=repository,
         result={
             "files": data["files"],
             "symbols": data["symbols"],
+            "indexed_revision": repository.get("indexed_revision"),
             "relation_sample": relations,
             "relation_sample_count": len(relations),
         },
@@ -71,6 +96,7 @@ def repo_overview(db_path: Path) -> dict[str, Any]:
                 "symbols": data["symbols"],
             }
         ]
+        + stale_evidence
         + [
             {
                 "type": "relation",
@@ -86,7 +112,8 @@ def repo_overview(db_path: Path) -> dict[str, Any]:
             "Python symbols/imports only in current foundation",
             "relation_sample is capped; full graph query comes later",
             "Index may lag the worktree if files changed after last index",
-        ],
+        ]
+        + stale_limits,
     )
 
 
@@ -539,38 +566,42 @@ def analyze_impact(
             h for h in defs if h["name"] == target or h["name"].endswith("." + target)
         ]
 
-        direct_calls = _dedupe_edges(
-            store.find_relations(relation_type="calls", target_equals=short, limit=limit)
-            + (
+        def _edges(rel: str) -> list[dict[str, Any]]:
+            return _dedupe_edges(
                 store.find_relations(
-                    relation_type="calls", target_equals=target, limit=limit
+                    relation_type=rel,
+                    target_equals=short,
+                    target_suffix=short,
+                    limit=limit,
                 )
-                if target != short
-                else []
-            )
-            + store.find_relations(
-                relation_type="references", target_equals=short, limit=limit
-            )
-            + (
-                store.find_relations(
-                    relation_type="references", target_equals=target, limit=limit
+                + (
+                    store.find_relations(
+                        relation_type=rel,
+                        target_equals=target,
+                        target_suffix=short,
+                        limit=limit,
+                    )
+                    if target != short
+                    else []
                 )
-                if target != short
-                else []
             )
-        )
+
+        direct_calls = _dedupe_edges(_edges("calls") + _edges("references"))
+        # Drop tautological self edges (method body matching its own name).
+        direct_calls = [
+            e
+            for e in direct_calls
+            if not (
+                str(e.get("relation_type")) == "calls"
+                and str(e.get("source") or "").endswith("." + short)
+                and str(e.get("target") or "") in {short, target}
+            )
+        ]
         subclasses = _dedupe_edges(
-            store.find_relations(
-                relation_type="inherits", target_equals=short, limit=limit
-            )
-            + (
-                store.find_relations(
-                    relation_type="inherits", target_equals=target, limit=limit
-                )
-                if target != short
-                else []
-            )
+            _edges("inherits")
         )
+        injections = _edges("injects")
+        implementations = _edges("implements")
         decorated = _dedupe_edges(
             store.find_relations(
                 relation_type="decorated_by", target_equals=short, limit=limit
@@ -644,21 +675,28 @@ def analyze_impact(
         "tests", []
     )
 
+    direct_pack = (
+        direct_calls
+        + importers
+        + subclasses
+        + decorated
+        + overrides
+        + injections
+        + implementations
+    )
     impact = {
         "direct": [
             {**e, "impact_level": "Direct"}
-            for e in (
-                direct_calls + importers + subclasses + decorated + overrides
-            )[:limit]
+            for e in direct_pack[:limit]
         ],
         "transitive": [{**e, "impact_level": "Transitive"} for e in transitive],
         "related_tests": related_tests,
         "definitions": exact_defs or defs[:5],
     }
+    stale_limits, stale_evidence = _stale_bits(repository)
     evidence: list[dict[str, Any]] = [symbol_evidence(h) for h in (exact_defs or defs)[:10]]
-    for edge in (
-        direct_calls + importers + subclasses + decorated + overrides + transitive
-    )[:30]:
+    evidence.extend(stale_evidence)
+    for edge in (direct_pack + transitive)[:30]:
         evidence.append(
             {
                 "type": "relation",
@@ -672,11 +710,7 @@ def analyze_impact(
         )
 
     has_signal = bool(
-        direct_calls
-        or importers
-        or subclasses
-        or decorated
-        or overrides
+        direct_pack
         or transitive
         or exact_defs
         or defs
@@ -690,7 +724,9 @@ def analyze_impact(
             "Impact is relation-index based, not runtime-proven",
             "Transitive edges are one-hop and may include name collisions (Uncertain)",
             "Import matching is stringly typed across modules",
-        ],
+            "DI/implements edges are framework-pattern derived (not container-proven)",
+        ]
+        + stale_limits,
     )
 
 

@@ -34,12 +34,12 @@ MCP (Claude Code, Codex, and other MCP hosts): set `WITNIS_DB` to `.witnis/index
 
 ## Short aliases
 
-| Short | Full |
-|---|---|
-| `look` | search + trace + impact + tests + plan card |
-| `plan` | `plan-verify` |
-| `tests` | `related-tests` |
-| `baselines` | `compare-baselines` |
+```
+look        → search + trace + impact + tests + plan card
+plan        → plan-verify
+tests       → related-tests
+baselines   → compare-baselines
+```
 
 ## Safety defaults
 

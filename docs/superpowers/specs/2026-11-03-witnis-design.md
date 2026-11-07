@@ -14,10 +14,8 @@ Not another codebase chatbot. Not a PDF/folder RAG shell.
 
 **Pairing with Harnis**
 
-| Project | Role |
-|---|---|
-| **Harnis** | Safety harness — constrain what an agent may *do* |
-| **Witnis** | Engineering witness — ground what an agent may *claim* and *prove* |
+- **Harnis** — Safety harness — constrain what an agent may *do*
+- **Witnis** — Engineering witness — ground what an agent may *claim* and *prove*
 
 Same worldview, different layer. v1 does **not** couple the two codebases; complementary narrative only.
 
@@ -52,14 +50,16 @@ Existing “code intelligence MCP” tools crowd **search + graphs**. The sharp 
 
 ## 4. Non-goals (v1 boundary)
 
-| In scope | Out of scope |
-|---|---|
-| Local repo index & structure | General chatbot product |
-| Git evolution ↔ symbols | PDF / generic folder knowledge base |
-| Evidence objects & statuses | Cloud repo hosting / multi-tenant SaaS |
-| Impact analysis | Default auto-mutation of user repos |
-| Authorized verification runs | Full CI/CD platform |
-| MCP + CLI (+ Studio later) | Replacing the IDE or the agent |
+```
+In scope                         Out of scope
+-------------------------------  ------------------------------------
+Local repo index & structure     General chatbot product
+Git evolution ↔ symbols          PDF / generic folder knowledge base
+Evidence objects & statuses      Cloud repo hosting / multi-tenant SaaS
+Impact analysis                  Default auto-mutation of user repos
+Authorized verification runs     Full CI/CD platform
+MCP + CLI (+ Studio later)       Replacing the IDE or the agent
+```
 
 ---
 
@@ -94,14 +94,16 @@ Source        Git working tree · Build/test · Optional runtime traces (later)
 
 ### 6.2 Engines
 
-| Engine | Responsibility | Priority |
-|---|---|---|
-| Repository Understanding | Files, symbols, refs, calls, modules, tests discovery | P0 |
-| Change Intelligence | Commit / Diff / Blame → file & symbol mapping | P0 |
-| Evidence Engine | Typed evidence + status lifecycle | P0 (differentiator) |
-| Impact Analysis | Direct / transitive / behavioral / uncertain | P0 after graph |
-| Verification Engine | Plan → authorized run → before/after report | P1 (product core, after MCP) |
-| Runtime Intelligence | Traces fused with static facts | P2 |
+```
+Engine                      Responsibility                                       Priority
+--------------------------  ---------------------------------------------------  ---------------------------
+Repository Understanding    Files, symbols, refs, calls, modules, tests discovery  P0
+Change Intelligence         Commit / Diff / Blame → file & symbol mapping        P0
+Evidence Engine             Typed evidence + status lifecycle                    P0 (differentiator)
+Impact Analysis             Direct / transitive / behavioral / uncertain         P0 after graph
+Verification Engine         Plan → authorized run → before/after report          P1 (product core, after MCP)
+Runtime Intelligence        Traces fused with static facts                       P2
+```
 
 ### 6.3 Evidence model (core differentiator)
 
@@ -142,19 +144,21 @@ No Neo4j / ES / Redis required for v1.
 
 ## 7. MCP tool surface (engineering semantics)
 
-| Tool | Purpose | Auth |
-|---|---|---|
-| `repo_overview` | Structure / languages / index health | read |
-| `repo_search` | Code + symbol search | read |
-| `trace_symbol` | Defs, refs, call relations | read |
-| `explain_code` | Explanation bound to evidence | read |
-| `explain_change` | Commit/diff analysis | read |
-| `analyze_impact` | Blast radius of a change | read |
-| `find_related_tests` | Related tests | read |
-| `get_evidence` | Fetch / filter evidence | read |
-| `create_verification_plan` | Plan checks for a diff | read |
-| `run_verification` | Execute authorized checks | gated |
-| `get_verification_report` | Report | read |
+```
+Tool                       Purpose                               Auth
+-------------------------  ------------------------------------  -----
+repo_overview              Structure / languages / index health  read
+repo_search                Code + symbol search                  read
+trace_symbol               Defs, refs, call relations            read
+explain_code               Explanation bound to evidence         read
+explain_change             Commit/diff analysis                  read
+analyze_impact             Blast radius of a change              read
+find_related_tests         Related tests                         read
+get_evidence               Fetch / filter evidence               read
+create_verification_plan   Plan checks for a diff                read
+run_verification           Execute authorized checks             gated
+get_verification_report    Report                                read
+```
 
 MCP adapter validates params, enforces permissions, calls Core — **no** AST/Git/DB logic inside the adapter.
 
@@ -211,16 +215,14 @@ witnis/
 
 ## 10. Roadmap (quality-gated, not calendar-gated)
 
-| Version | Deliverable |
-|---|---|
-| **v0.1** | Core: scan, SQLite, Tree-sitter symbols, CLI search/overview |
-| **v0.2** | Relations, Git evolution, incremental index, Evidence engine |
-| **v0.3** | MCP server + agent integration tests + permissions |
-| **v0.4** | Impact analysis + richer evidence queries |
-| **v0.5** | Verification engine (build/test/static, reports) |
-| **v0.6** | Studio (status, graph, evidence, reports) + i18n |
-| **v0.8** | Runtime intelligence (optional traces) |
-| **v1.0** | Stable contracts, cross-platform release, docs, public benchmarks |
+- **v0.1** — Core: scan, SQLite, Tree-sitter symbols, CLI search/overview
+- **v0.2** — Relations, Git evolution, incremental index, Evidence engine
+- **v0.3** — MCP server + agent integration tests + permissions
+- **v0.4** — Impact analysis + richer evidence queries
+- **v0.5** — Verification engine (build/test/static, reports)
+- **v0.6** — Studio (status, graph, evidence, reports) + i18n
+- **v0.8** — Runtime intelligence (optional traces)
+- **v1.0** — Stable contracts, cross-platform release, docs, public benchmarks
 
 ### Acceptance themes (public benchmarks later)
 
@@ -245,13 +247,11 @@ Metrics: symbol/evidence line accuracy, impact recall (defined sets), incrementa
 
 ## 12. Risks & mitigations
 
-| Risk | Mitigation |
-|---|---|
-| Scope explosion | Strict phase gates; Studio/Runtime last |
-| Commodity code-graph MCP | Lead with evidence statuses + verification loop |
-| Shallow multi-language | One deep analyzer first |
-| LLM washing facts | Facts from Core only; model for NL/planning |
-| Solo bandwidth | Ship CLI+MCP before Studio polish |
+- **Scope explosion** — Strict phase gates; Studio/Runtime last
+- **Commodity code-graph MCP** — Lead with evidence statuses + verification loop
+- **Shallow multi-language** — One deep analyzer first
+- **LLM washing facts** — Facts from Core only; model for NL/planning
+- **Solo bandwidth** — Ship CLI+MCP before Studio polish
 
 ---
 
@@ -279,12 +279,10 @@ Before writing production code beyond spikes:
 
 ## 15. Decision log
 
-| Decision | Choice |
-|---|---|
-| Name | **Witnis** |
-| Category | Engineering verification infra for agents |
-| Distribution | MCP-first, CLI-native, Studio optional |
-| Differentiator | Evidence lifecycle + verification, not RAG |
-| Harnis relation | Complementary narrative; no hard dependency in v1 |
-| i18n | en primary; zh/pt/fr/ru for UI later |
-| Models | Optional; OpenAI-compatible + Ollama |
+- **Name** — **Witnis**
+- **Category** — Engineering verification infra for agents
+- **Distribution** — MCP-first, CLI-native, Studio optional
+- **Differentiator** — Evidence lifecycle + verification, not RAG
+- **Harnis relation** — Complementary narrative; no hard dependency in v1
+- **i18n** — en primary; zh/pt/fr/ru for UI later
+- **Models** — Optional; OpenAI-compatible + Ollama

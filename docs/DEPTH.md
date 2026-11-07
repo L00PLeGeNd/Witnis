@@ -17,12 +17,10 @@ Beating `git grep` is necessary but not sufficient.
 
 ## Language depth
 
-| Language | Depth today | Gaps |
-|---|---|---|
-| Python | AST symbols + imports / inherit / decorators / calls | Full stubs, dynamic attrs |
-| JS/TS | Shallow symbols + imports / calls | Modules, framework wiring |
-| Go | Shallow symbols + imports / calls | Interfaces across packages |
-| Java | **Spring-aware P0**: implements, `@Autowired`/`@Inject`/`@Resource` field injects, ctor injects, typed field calls | `@Primary` multi-impl, AOP proxies, generics erasure, full classpath |
+- **Python** — AST symbols + imports / inherit / decorators / calls. Gaps: full stubs, dynamic attrs.
+- **JS/TS** — shallow symbols + imports / calls. Gaps: modules, framework wiring.
+- **Go** — shallow symbols + imports / calls. Gaps: interfaces across packages.
+- **Java** — Spring-aware P0: implements, `@Autowired`/`@Inject`/`@Resource` field injects, ctor injects, typed field calls. Gaps: `@Primary` multi-impl, AOP proxies, generics erasure, full classpath.
 
 ## Dual engines
 
@@ -30,10 +28,8 @@ Java trees prefer the **Python** indexer (Spring-aware). Rust gains `implements`
 
 ## Benchmarks
 
-| Suite | Meaning |
-|---|---|
-| `local` / `public` | Acceptance / smoke |
-| `ground-truth` | Labeled P/R on fixtures (`benchmarks/ground-truth/`) |
+- `local` / `public` — acceptance / smoke
+- `ground-truth` — labeled P/R on fixtures (`benchmarks/ground-truth/`)
 
 External corpora (Flask, FastAPI, PetClinic, Express) are **pinned in manifest**, labels pending human review.
 
@@ -45,12 +41,10 @@ Default verify path uses disposable worktree/copy, scrubbed env, timeouts, FS di
 
 **Governing plan:** [`docs/strategy/2026-Q4-next-phase-plan.md`](strategy/2026-Q4-next-phase-plan.md) (V1.0, 12 weeks).
 
-| Priority | Item | Status |
-|---|---|---|
-| P0 | Architecture audit + capability/defect inventory | **next** — no feature sprawl |
-| P0 | Benchmark V1 + annotation rules | with audit |
-| P0 | Agent A/B **execution** | **paused** until baseline |
-| P1 | Java/Spring semantic depth | after baseline |
-| — | Fixture DI / GT / isolate / parity / scene | earlier landings; not real-project proof |
+- **P0** Architecture audit + capability/defect inventory — **next**, no feature sprawl
+- **P0** Benchmark V1 + annotation rules — with audit
+- **P0** Agent A/B **execution** — **paused** until baseline
+- **P1** Java/Spring semantic depth — after baseline
+- Fixture DI / GT / isolate / parity / scene — earlier landings; not real-project proof
 
 Earlier notes: `docs/superpowers/plans/2026-11-03-depth-over-surface.md`

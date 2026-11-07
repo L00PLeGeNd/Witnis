@@ -44,26 +44,13 @@ Grep and RAG find strings. They do not witness claims.
 
 Witnis is local-first: index the tree into SQLite, answer through shared contracts, and keep Core facts free of any LLM.
 
-| Piece | Role |
-|---|---|
-| **Index** | Symbols and relations on disk — no cloud |
-| **Evidence envelope** | Every reply carries `status`, `evidence`, `limitations` |
-| **Impact** | Callers, related tests, change radius |
-| **Gated verify** | Runs only with `--execute` and `WITNIS_ALLOW_VERIFY=1` |
-| **One Core** | Same behavior on **CLI · MCP · SDK · Studio** |
+- **Index** — symbols and relations on disk, no cloud
+- **Evidence envelope** — every reply carries `status`, `evidence`, `limitations`
+- **Impact** — callers, related tests, change radius
+- **Gated verify** — runs only with `--execute` and `WITNIS_ALLOW_VERIFY=1`
+- **One Core** — same behavior on CLI · MCP · SDK · Studio
 
-```mermaid
-flowchart LR
-  Repo[Repository] --> Index[SQLite index]
-  Index --> Search[search / LSP]
-  Index --> Trace[trace / impact]
-  Trace --> Plan[plan-verify]
-  Plan --> Gate{authorized?}
-  Gate -->|no| Blocked[blocked]
-  Gate -->|yes| Verify[verify]
-  Index --> Studio[Studio]
-  Index --> MCP[MCP]
-```
+![Witnis architecture: repository → SQLite index → search/LSP, impact, Studio, MCP; impact → plan-verify → gate → verify or blocked](docs/assets/architecture.svg)
 
 ---
 
@@ -140,24 +127,25 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 
 ## Surfaces
 
-| Layer | What you get |
-|---|---|
-| **CLI** | `demo`, `look`, `index`, `search`, `trace`, `impact`, `plan`, `verify`, `studio`, `lsp`, `bench`, … |
-| **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, … |
-| **SDK** | `from witnis.sdk import index_repository, repo_search, trace_symbol, …` |
-| **Studio** | Static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru` |
-| **Languages** | Python (AST) · JS/TS · Go · Java (**shallow** — not full semantic) |
-| **LSP** | Jedi · index fallback · optional Pyright diagnostics |
+- **CLI** — `demo`, `look`, `index`, `search`, `trace`, `impact`, `plan`, `verify`, `studio`, `lsp`, `bench`, …
+- **MCP** — `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, …
+- **SDK** — `from witnis.sdk import index_repository, repo_search, trace_symbol, …`
+- **Studio** — static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru`
+- **Languages** — Python (AST) · JS/TS · Go · Java (**shallow** — not full semantic)
+- **LSP** — Jedi · index fallback · optional Pyright diagnostics
 
 Language depth and known gaps (Spring DI, dual-engine parity, …): [`docs/DEPTH.md`](docs/DEPTH.md).
 
 ### Against simple baselines
 
-| Approach | Typed symbols | Call / impact | Evidence | Gated verify |
-|---|---|---|---|---|
-| `git grep` / naive scan | — | — | — | — |
-| Regex `def` / `class` | shallow | — | — | — |
-| **Witnis** | yes (fixture-proven) | yes (name/AST-level; not full semantic) | yes | yes (authorize gate, not OS sandbox) |
+```
+                 typed symbols   call/impact   evidence   gated verify
+git grep / naive      —              —            —            —
+regex def/class    shallow           —            —            —
+Witnis              yes*            yes†         yes         yes‡
+```
+
+\* fixture-proven · † name/AST-level, not full semantic · ‡ authorize gate, not OS sandbox
 
 ```bash
 witnis baselines fixtures/mini_py
@@ -212,11 +200,9 @@ witnis bench --suite local
 witnis bench --suite public
 ```
 
-| Suite | Scope |
-|---|---|
-| Local | `fixtures/mini_py` regressions |
-| Public | `mini_py` + Go / JS / Java smokes + polyglot `fixtures/public_svc` |
-| Ground truth | Scaffold only — [`benchmarks/ground-truth/`](benchmarks/ground-truth/) |
+- **Local** — `fixtures/mini_py` regressions
+- **Public** — `mini_py` + Go / JS / Java smokes + polyglot `fixtures/public_svc`
+- **Ground truth** — scaffold only — [`benchmarks/ground-truth/`](benchmarks/ground-truth/)
 
 Public score (package **1.8.1**): **21 / 21** acceptance checks.  
 That score is **not** a claim of 100% semantic accuracy on real large repos.  
@@ -251,12 +237,10 @@ maturin build -m crates/witnis-py/Cargo.toml --release --out dist-native
 pip install dist-native/witnis-*.whl
 ```
 
-| Env | Meaning |
-|---|---|
-| `WITNIS_RUST_INDEX=1` | Always use the Rust indexer |
-| `WITNIS_RUST_INDEX=auto` | Rust indexer when `_native` is loaded |
-| *(default)* | Rust for non-`.py` trees; Python AST for `.py` |
-| `WITNIS_ALLOW_VERIFY=1` | Allow `verify --execute` |
+- `WITNIS_RUST_INDEX=1` — always use the Rust indexer
+- `WITNIS_RUST_INDEX=auto` — Rust indexer when `_native` is loaded
+- *(default)* — Rust for non-`.py` trees; Python AST for `.py`
+- `WITNIS_ALLOW_VERIFY=1` — allow `verify --execute`
 
 See [`docs/rust-migration.md`](docs/rust-migration.md).
 
@@ -264,19 +248,17 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 ## Docs
 
-| Doc | Contents |
-|---|---|
-| [`docs/contracts-v1.md`](docs/contracts-v1.md) | Stable CLI / MCP / envelope |
-| [`docs/rust-migration.md`](docs/rust-migration.md) | Rust migration phases |
-| [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench method |
-| [`SECURITY.md`](SECURITY.md) | Security defaults (gate ≠ sandbox) |
-| [`docs/DEPTH.md`](docs/DEPTH.md) | Honest depth status & next bets |
-| [`docs/demo-auth-refresh.md`](docs/demo-auth-refresh.md) | Token-refresh product story |
-| [`docs/experiments/`](docs/experiments/) | Grep vs Witnis results + agent A/B sheet |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Dev loop and PR expectations |
-| [`CHANGELOG.md`](CHANGELOG.md) | Releases |
-| [`docs/cli-cheatsheet.md`](docs/cli-cheatsheet.md) | Short CLI commands |
-| [`examples/agent-playbook.md`](examples/agent-playbook.md) | Agent usage |
+- [`docs/contracts-v1.md`](docs/contracts-v1.md) — stable CLI / MCP / envelope
+- [`docs/rust-migration.md`](docs/rust-migration.md) — Rust migration phases
+- [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) — public bench method
+- [`SECURITY.md`](SECURITY.md) — security defaults (gate ≠ sandbox)
+- [`docs/DEPTH.md`](docs/DEPTH.md) — honest depth status & next bets
+- [`docs/demo-auth-refresh.md`](docs/demo-auth-refresh.md) — token-refresh product story
+- [`docs/experiments/`](docs/experiments/) — grep vs Witnis results + agent A/B sheet
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — dev loop and PR expectations
+- [`CHANGELOG.md`](CHANGELOG.md) — releases
+- [`docs/cli-cheatsheet.md`](docs/cli-cheatsheet.md) — short CLI commands
+- [`examples/agent-playbook.md`](examples/agent-playbook.md) — agent usage
 
 ---
 

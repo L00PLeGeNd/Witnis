@@ -1,0 +1,456 @@
+{
+  "id": "spring_petclinic_auto",
+  "corpus": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+  "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
+  "license": "Apache-2.0",
+  "annotators": [
+    "witnis-bootstrap-script"
+  ],
+  "label_mode": "source_confirmed_auto",
+  "tasks": [
+    {
+      "id": "auto_implements_000",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/PetClinicRuntimeHints.java:PetClinicRuntimeHints -[implements]-> RuntimeHintsRegistrar",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "PetClinicRuntimeHints",
+            "target": "RuntimeHintsRegistrar",
+            "relation_type": "implements"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_implements_001",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/model/BaseEntity.java:for -[implements]-> Serializable",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "for",
+            "target": "Serializable",
+            "relation_type": "implements"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_inherits_002",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/model/NamedEntity.java:NamedEntity -[inherits]-> BaseEntity",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "NamedEntity",
+            "target": "BaseEntity",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_inherits_003",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/model/Person.java:Person -[inherits]-> BaseEntity",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "Person",
+            "target": "BaseEntity",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_inherits_004",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/Owner.java:Owner -[inherits]-> Person",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "Owner",
+            "target": "Person",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_injects_005",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController -[injects]-> OwnerRepository",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController",
+            "target": "OwnerRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_006",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> OwnerController",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "OwnerController",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_007",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> setAllowedFields",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "setAllowedFields",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_008",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> dataBinder.setDisallowedFields",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "dataBinder.setDisallowedFields",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_009",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> ModelAttribute",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "ModelAttribute",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_010",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> findOwner",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "findOwner",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_011",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> PathVariable",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "PathVariable",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_012",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> Owner",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "Owner",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_013",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> this.owners.findById",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "this.owners.findById",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_014",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> orElseThrow",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "orElseThrow",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_015",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> IllegalArgumentException",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "IllegalArgumentException",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_016",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> GetMapping",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "GetMapping",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_017",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> initCreationForm",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "initCreationForm",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_018",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> PostMapping",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "PostMapping",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_019",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> processCreationForm",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "processCreationForm",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_020",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> result.hasErrors",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "result.hasErrors",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_021",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> redirectAttributes.addFlashAttribute",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "redirectAttributes.addFlashAttribute",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_022",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> this.owners.save",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "this.owners.save",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_calls_023",
+      "kind": "call_edge",
+      "query": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java:OwnerController.OwnerController -[calls]-> Owner.getId",
+      "notes": "source_confirmed_auto \u2014 edge present in index and needle found in source file",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController.OwnerController",
+            "target": "Owner.getId",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_024",
+      "kind": "symbol_locate",
+      "query": "processFindFormWithWhitespaceOnlyLastNameReturnsAllOwners",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processFindFormWithWhitespaceOnlyLastNameReturnsAllOwners",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_025",
+      "kind": "symbol_locate",
+      "query": "processNewVisitFormHasErrorsWhenVisitDateIsNotInFuture",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processNewVisitFormHasErrorsWhenVisitDateIsNotInFuture",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/VisitControllerTests.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_026",
+      "kind": "symbol_locate",
+      "query": "processNewVisitFormHasErrorsWhenDescriptionIsTooLong",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processNewVisitFormHasErrorsWhenDescriptionIsTooLong",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/VisitControllerTests.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_027",
+      "kind": "symbol_locate",
+      "query": "processFindFormRedirectsOutOfBoundsPageToFirstPage",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processFindFormRedirectsOutOfBoundsPageToFirstPage",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_028",
+      "kind": "symbol_locate",
+      "query": "processCreationFormRejectsAddressLongerThanColumn",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processCreationFormRejectsAddressLongerThanColumn",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "auto_sym_029",
+      "kind": "symbol_locate",
+      "query": "processCreationFormRejectsCityLongerThanColumn",
+      "notes": "source_confirmed_auto symbol",
+      "expect": {
+        "symbols": [
+          {
+            "name": "processCreationFormRejectsCityLongerThanColumn",
+            "path": "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+          }
+        ]
+      }
+    }
+  ]
+}

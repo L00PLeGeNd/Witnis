@@ -4,23 +4,19 @@ Goal: measure whether Witnis reduces harmful agent edits versus baseline tools (
 
 ## Design
 
-| Arm | Tools available |
-|---|---|
-| A — Baseline | repo checkout + grep / editor search only |
-| B — LSP | + language server (Jedi/Pyright or jdtls) |
-| C — Witnis | + `witnis` MCP/CLI (search, trace, impact, gated verify) |
+- **A — Baseline** — repo checkout + grep / editor search only
+- **B — LSP** — + language server (Jedi/Pyright or jdtls)
+- **C — Witnis** — + `witnis` MCP/CLI (search, trace, impact, gated verify)
 
 Fixed task pack (10–20 tasks): locate symbol, fix bug, refactor call site, add test, avoid false verify pass.
 
 ## Metrics
 
-| Metric | Definition |
-|---|---|
-| Task success | Human-graded correct change |
-| Omission rate | Required call sites / files missed |
-| False pass rate | Broken change marked verified |
-| Token / wall cost | Agent spend per task |
-| Tool calls | Count of search/trace/verify |
+- **Task success** — Human-graded correct change
+- **Omission rate** — Required call sites / files missed
+- **False pass rate** — Broken change marked verified
+- **Token / wall cost** — Agent spend per task
+- **Tool calls** — Count of search/trace/verify
 
 ## Rules
 

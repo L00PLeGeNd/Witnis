@@ -6,14 +6,12 @@ Status: **scaffold only**. No public “accuracy %” until labeled corpora land
 
 Upgrade from acceptance checks (`benchmarks/public/tasks.json`) to **labeled** evaluation:
 
-| Task | Metric |
-|---|---|
-| Symbol location | Precision / Recall |
-| Cross-file call edges | Edge Precision / Recall |
-| Impact set | Impact Recall |
-| Evidence anchors | Evidence Accuracy |
-| Gated verify | **False Pass Rate** (critical) |
-| Agent assist (later) | Task success / token cost |
+- **Symbol location** — Precision / Recall
+- **Cross-file call edges** — Edge Precision / Recall
+- **Impact set** — Impact Recall
+- **Evidence anchors** — Evidence Accuracy
+- **Gated verify** — **False Pass Rate** (critical)
+- **Agent assist (later)** — Task success / token cost
 
 ## Layout
 
@@ -33,12 +31,11 @@ benchmarks/ground-truth/
 3. Report unknowns and failures — never inflate “verified”.
 4. Acceptance suite (`public`) stays for CI smoke; ground-truth is for depth claims.
 
-## First corpora (planned)
+## First corpora
 
-- Python: small FastAPI/Flask slice
-- Java: Spring-style DI slice (`fixtures/semantic_java_di` as synthetic start)
-- TypeScript: small service slice
-- Optional: Spring PetClinic at a fixed tag (separate LICENSE handling)
+- Vendored: `fixtures/semantic_java_di`, `fixtures/semantic_py_di`, `fixtures/auth_refresh`
+- External pin scaffold: [`corpora/spring-petclinic.pin.md`](corpora/spring-petclinic.pin.md)
+- Labeling: [`LABELING_SHEET.md`](LABELING_SHEET.md) + [`labels/_TEMPLATE_case.json`](labels/_TEMPLATE_case.json)
 
 ## Runner (future)
 

@@ -145,6 +145,16 @@ def index_repository(
     if _prefer_rust_index(paths):
         rust_stats = rust_index_repository(root, db_path, incremental=incremental)
         if rust_stats is not None:
+            # Stamp revision in Python so Evidence STALE works even on Rust index path.
+            from witnis.core.gitinfo import git_head
+
+            stamp = Store(db_path)
+            try:
+                stamp.upsert_repository(
+                    root, indexed_revision=git_head(root) or "workdir"
+                )
+            finally:
+                stamp.close()
             return IndexStats(
                 repository=str(rust_stats.get("repository") or root.name),
                 files=int(rust_stats.get("files") or 0),
@@ -157,7 +167,11 @@ def index_repository(
 
     store = Store(db_path)
     try:
-        repo_id = store.upsert_repository(root)
+        from witnis.core.gitinfo import git_head
+
+        repo_id = store.upsert_repository(
+            root, indexed_revision=git_head(root) or "workdir"
+        )
         digests = _file_digest_map(root, paths)
         relations: list[dict] = []
         for path in paths:

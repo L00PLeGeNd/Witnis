@@ -2,10 +2,12 @@
 
 Fill one row per task after running both arms on the **same** model, prompt, and corpus commit.
 
-| date | corpus@commit | task | arm | success (0/1) | correct edit (0/1) | omitted impact files | tests pass (0/1) | tokens | seconds | notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| | | | A | | | | | | | |
-| | | | B | | | | | | | |
+```
+date  corpus@commit  task  arm  success  correct  omitted_impact  tests  tokens  seconds  notes
+----  -------------  ----  ---  -------  -------  --------------  -----  ------  -------  -----
+                           A
+                           B
+```
 
 ## Arms
 

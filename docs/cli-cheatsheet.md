@@ -12,16 +12,16 @@ witnis look login
 
 ## Everyday
 
-| Goal | Command |
-|---|---|
-| Index a repo | `witnis index .` |
-| Witness card | `witnis look <symbol>` |
-| Plan checks | `witnis plan <symbol>` |
-| Run checks | `WITNIS_ALLOW_VERIFY=1 witnis verify <symbol> --execute` |
-| Studio | `witnis studio <symbol> --open` |
-| Related tests | `witnis tests <symbol>` |
-| Baselines | `witnis baselines fixtures/mini_py` |
-| Public bench | `witnis bench --suite public` |
+```
+index a repo     witnis index .
+witness card     witnis look <symbol>
+plan checks      witnis plan <symbol>
+run checks       WITNIS_ALLOW_VERIFY=1 witnis verify <symbol> --execute
+studio           witnis studio <symbol> --open
+related tests    witnis tests <symbol>
+baselines        witnis baselines fixtures/mini_py
+public bench     witnis bench --suite public
+```
 
 ## MCP (any compatible host)
 
@@ -35,10 +35,10 @@ Sample config: [`examples/mcp.example.json`](../examples/mcp.example.json)
 
 ## Aliases
 
-| Short | Full |
-|---|---|
-| `plan` | `plan-verify` |
-| `tests` | `related-tests` |
-| `baselines` | `compare-baselines` |
-| `look` | search + trace + impact + tests + plan |
-| `demo` | index sample fixture + `look` |
+```
+plan        → plan-verify
+tests       → related-tests
+baselines   → compare-baselines
+look        → search + trace + impact + tests + plan
+demo        → index sample fixture + look
+```

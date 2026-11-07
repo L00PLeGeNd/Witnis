@@ -4,9 +4,11 @@
 **License:** Apache-2.0  
 **Upstream:** https://github.com/spring-projects/spring-petclinic  
 
-- **SHA** — `500158f732419217507c7656904b8e6aa1bcc0d6`
-- **Local path** — `benchmarks/ground-truth/corpora/checkouts/spring-petclinic`
-- **Labels** — `labels/spring_petclinic_auto.json` (source-confirmed auto)
+| Field | Value |
+| --- | --- |
+| SHA | `500158f732419217507c7656904b8e6aa1bcc0d6` |
+| Local path | `benchmarks/ground-truth/corpora/checkouts/spring-petclinic` |
+| Labels | `labels/spring_petclinic_auto.json` (source-confirmed auto) |
 
 ```bash
 # refresh

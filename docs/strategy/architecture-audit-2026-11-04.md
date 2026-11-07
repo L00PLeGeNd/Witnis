@@ -102,15 +102,12 @@ Evidence items typically `{type, status, ...}` with statuses like `observed` / `
 
 ## 4. Engineering Context (what parsers actually emit)
 
-```
-Lang    Symbols                      Relations                                              Notes
-------  ---------------------------  -----------------------------------------------------  ----------------------------------------------------
-Python  AST (classes/funcs/methods)  imports, inherits, decorated_by, calls, overrides…     Strongest path; Jedi/LSP optional
-JS/TS   regex shallow                imports/calls                                          No TS types
-Go      regex shallow                imports/calls                                          No interfaces across packages
-Java    regex + Spring-ish           imports, inherits, implements, injects, typed field    DI edges indexed; Impact ignores injects/implements
-                                     calls
-```
+| Lang | Symbols | Relations | Notes |
+| --- | --- | --- | --- |
+| Python | AST (classes/funcs/methods) | imports, inherits, decorated_by, calls, overrides… | Strongest path; Jedi/LSP optional |
+| JS/TS | regex shallow | imports/calls | No TS types |
+| Go | regex shallow | imports/calls | No interfaces across packages |
+| Java | regex + Spring-ish | imports, inherits, implements, injects, typed field calls | DI edges indexed; Impact ignores injects/implements |
 
 **Fixture probe — `semantic_java_di` / `findUser` impact:**
 
@@ -124,16 +121,14 @@ This is a **P0 product defect** relative to the Java/Spring breakthrough narrati
 
 ## 5. Change Intelligence (current)
 
-```
-Capability                                         Present?  Quality
--------------------------------------------------  --------  -----------------------------------------------------------------------
-explain_change (git name-status + blob parse)      Yes       Useful for touched files/symbols
-analyze_change_impact                              Yes       Chains explain_change → impact-like logic; still limited by relation quality
-analyze_impact                                     Yes       Relation lookup; stringly; incomplete relation types
-Impact path visualization                          Partial   Mermaid export exists; Studio shows graphs
-Predict vs actual                                  No        Plan Phase 4/实验三 — not built
-Risk classification                                No        —
-```
+| Capability | Present? | Quality |
+| --- | --- | --- |
+| explain_change (git name-status + blob parse) | Yes | Useful for touched files/symbols |
+| analyze_change_impact | Yes | Chains explain_change → impact-like logic; still limited by relation quality |
+| analyze_impact | Yes | Relation lookup; stringly; incomplete relation types |
+| Impact path visualization | Partial | Mermaid export exists; Studio shows graphs |
+| Predict vs actual | No | Plan Phase 4/实验三 — not built |
+| Risk classification | No | — |
 
 **Benchmark reality:** Public suite 21/21 is **acceptance** on mini fixtures vs grep. Ground-truth runner exists for vendored labels only. **No real Spring repo Precision/Recall.**
 
@@ -178,21 +173,19 @@ Probe note: with allow+isolate, `static_compile`/`run_tests` reported `isolation
 
 ## 8. Defect inventory (prioritized)
 
-```
-ID   Sev  Area          Defect                                                              Evidence
----  ---  ------------  ------------------------------------------------------------------  --------------------------------------------------------------
-D01  P0   Impact        analyze_impact did not query injects / implements                   fixed in working tree (tests green; uncommitted)
-D02  P0   Impact        Java/fixture caller miss for findUser                               fixed in working tree (qualified target match; uncommitted)
-D03  P0   Evidence      Index revision not stored; no STALE                                 fixed in working tree (indexed_revision + STALE limitation; uncommitted)
-D04  P0   Benchmark     No real Java/Spring corpus with human GT                            strategy + ground-truth manifest “planned”
-D05  P1   Architecture  tools.py god-module (~2.3k LOC)                                     line count
-D06  P1   Dual engine   Java injects Python-only; Rust parity incomplete                    index.py prefer path; rust java.rs
-D07  P1   Verify        Isolation ≠ OS/container; network deny is hint                      verify_isolate + SECURITY
-D08  P1   MCP           Large tool surface without workflow guidance tool                   mcp_server tool list
-D09  P2   Evidence      STALE/CONTRADICTED rarely produced                                  envelope usage
-D10  P2   Impact        Transitive one-hop name collisions admitted but still returned      limitations text
-D11  P2   Studio        Static only; easy to over-invest UI before Impact fixed             strategy P3
-```
+| ID | Sev | Area | Defect | Evidence |
+| --- | --- | --- | --- | --- |
+| D01 | P0 | Impact | analyze_impact did not query injects / implements | fixed in working tree (tests green; uncommitted) |
+| D02 | P0 | Impact | Java/fixture caller miss for findUser | fixed in working tree (qualified target match; uncommitted) |
+| D03 | P0 | Evidence | Index revision not stored; no STALE | fixed in working tree (indexed_revision + STALE limitation; uncommitted) |
+| D04 | P0 | Benchmark | No real Java/Spring corpus with human GT | strategy + ground-truth manifest “planned” |
+| D05 | P1 | Architecture | tools.py god-module (~2.3k LOC) | line count |
+| D06 | P1 | Dual engine | Java injects Python-only; Rust parity incomplete | index.py prefer path; rust java.rs |
+| D07 | P1 | Verify | Isolation ≠ OS/container; network deny is hint | verify_isolate + SECURITY |
+| D08 | P1 | MCP | Large tool surface without workflow guidance tool | mcp_server tool list |
+| D09 | P2 | Evidence | STALE/CONTRADICTED rarely produced | envelope usage |
+| D10 | P2 | Impact | Transitive one-hop name collisions admitted but still returned | limitations text |
+| D11 | P2 | Studio | Static only; easy to over-invest UI before Impact fixed | strategy P3 |
 
 ---
 

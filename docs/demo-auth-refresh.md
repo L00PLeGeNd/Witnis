@@ -27,11 +27,10 @@ WITNIS_ALLOW_VERIFY=1 witnis scene --execute
 
 ## Why not “just let the agent read the repo”?
 
-```
-bare agent                         witnis scene
-opens files until context fills    returns typed callers + impact edges
-grep-like string hits              symbol hits with file:line kinds
-“tests passed” as chat claim       gated verify with explicit state + isolation
-```
+| Bare agent | Witnis scene |
+|---|---|
+| Opens files until context fills | Returns typed callers + impact edges |
+| Grep-like string hits | Symbol hits with file:line kinds |
+| “Tests passed” as chat claim | Gated verify with explicit state + isolation |
 
 Fixture: [`fixtures/auth_refresh/`](../fixtures/auth_refresh/)

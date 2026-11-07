@@ -4,19 +4,19 @@ Witnis stays **Python-first for adapters** (CLI/MCP/Studio/SDK) while hot Core p
 
 ## Phases
 
-```
-0     Cargo workspace + witnis-core                         done
-1     Discover / path sandbox / content hash                done
-2     PyO3 witnis._native optional extension                done
-3     Batch digests for index (scan_source_digests)         done
-4     Shallow Go / JS / Java parsers in Rust                done
-5     witnis-core Rust CLI (discover / scan)                done
-6     SQLite index writer in Rust (index CLI + PyO3)        done
-6b    Deeper Python shallow + Rust search                   done
-6c    Rust Python via rustpython-parser AST                 done
-6d    Rust overview + CI + search prefer-native             done
-7     Full witnis Rust binary sharing contracts             later
-```
+| Phase | Crate / surface | Status |
+|---|---|---|
+| 0 | Cargo workspace + `witnis-core` | done |
+| 1 | Discover / path sandbox / content hash | done |
+| 2 | PyO3 `witnis._native` optional extension | done |
+| 3 | Batch digests for index (`scan_source_digests`) | done |
+| 4 | Shallow Go / JS / Java parsers in Rust | done |
+| 5 | `witnis-core` Rust CLI (`discover` / `scan`) | done |
+| 6 | SQLite index writer in Rust (`index` CLI + PyO3) | done |
+| 6b | Deeper Python shallow + Rust `search` | done |
+| 6c | Rust Python via `rustpython-parser` AST | done |
+| 6d | Rust `overview` + CI + search prefer-native | done |
+| 7 | Full `witnis` Rust binary sharing contracts | later |
 
 ## Rules
 

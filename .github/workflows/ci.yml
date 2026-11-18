@@ -36,3 +36,43 @@ jobs:
         run: python -m witnis bench --suite ground-truth
       - name: Engine parity (Python vs Rust when native present)
         run: pytest -q tests/test_engine_parity.py
+
+  pr-gate-dogfood:
+    name: PR evidence gate (dogfood)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/pr-gate
+        with:
+          base-ref: origin/${{ github.base_ref }}
+          head-ref: HEAD
+          strict: "false"
+          comment: "true"
+          witnis-source: "."
+
+  pr-gate-dogfood:
+    name: PR evidence gate (dogfood)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/pr-gate
+        with:
+          base-ref: origin/${{ github.base_ref }}
+          head-ref: HEAD
+          strict: "false"
+          comment: "true"
+          witnis-source: "."

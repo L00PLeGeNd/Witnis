@@ -52,23 +52,34 @@ def snapshot_tree(root: Path, *, limit: int = 5000) -> FsSnapshot:
     return FsSnapshot(files=out)
 
 
-def create_verify_worktree(repo_root: Path) -> tuple[Path, dict[str, Any]]:
-    """Create a disposable git worktree (or file copy fallback) for verify."""
+def create_verify_worktree(
+    repo_root: Path, *, revision: str | None = None
+) -> tuple[Path, dict[str, Any]]:
+    """Create a disposable git worktree (or file copy fallback) for verify.
+
+    When ``revision`` is set, the worktree is detached at that commit (not ambient HEAD).
+    """
     meta: dict[str, Any] = {"mode": "copy"}
+    pin = (revision or "HEAD").strip() or "HEAD"
     tmp = Path(tempfile.mkdtemp(prefix="witnis-verify-"))
     git_dir = repo_root / ".git"
     if git_dir.exists():
         branch = f"witnis-verify-{os.getpid()}"
         try:
             subprocess.run(
-                ["git", "worktree", "add", "--detach", str(tmp), "HEAD"],
+                ["git", "worktree", "add", "--detach", str(tmp), pin],
                 cwd=str(repo_root),
                 check=True,
                 capture_output=True,
                 text=True,
                 timeout=60,
             )
-            meta = {"mode": "worktree", "path": str(tmp), "branch": branch}
+            meta = {
+                "mode": "worktree",
+                "path": str(tmp),
+                "branch": branch,
+                "revision": pin,
+            }
             return tmp, meta
         except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
             shutil.rmtree(tmp, ignore_errors=True)

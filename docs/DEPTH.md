@@ -43,14 +43,17 @@ Default verify path uses disposable worktree/copy, scrubbed env, timeouts, FS di
 
 ## Roadmap status
 
-**Governing plan:** [`docs/strategy/2026-Q4-next-phase-plan.md`](strategy/2026-Q4-next-phase-plan.md) (V1.0, 12 weeks).
+**External sequencing:** [`ROADMAP.md`](../ROADMAP.md) · [`docs/strategy/2026-open-source-landing-plan.md`](strategy/2026-open-source-landing-plan.md)  
+**Engineering / experiments notebook:** [`docs/strategy/2026-Q4-next-phase-plan.md`](strategy/2026-Q4-next-phase-plan.md) (V1.1).
 
 | Priority | Item | Status |
 |---|---|---|
-| P0 | Architecture audit + capability/defect inventory | **next** — no feature sprawl |
-| P0 | Benchmark V1 + annotation rules | with audit |
+| P0 | Trusted Agent Loop: `pr-gate` (three-dot) + Action + Harnis templates | **landed** (keep hardening) |
+| P0 | PetClinic human GT + Benchmark V1 P/R | **next** (credibility track) |
+| P0 | Conversion: binary + browser demo | **next** (with ROADMAP) |
 | P0 | Agent A/B **execution** | **paused** until baseline |
-| P1 | Java/Spring semantic depth | after baseline |
-| — | Fixture DI / GT / isolate / parity / scene | earlier landings; not real-project proof |
+| P1 | Java/Spring semantic depth | **paused** — reassess after Stage-1 + GT |
+| — | verify `automation_verified` honesty; worktree pin to revision; contradicted on fail | landed with loop |
+| — | Architecture audit / D01–D03 / fixture DI / isolate / scene | landed; not real-project proof alone |
 
 Earlier notes: `docs/superpowers/plans/2026-11-03-depth-over-surface.md`

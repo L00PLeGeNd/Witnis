@@ -1,0 +1,6 @@
+{
+  "deny_tools": ["run_verification"],
+  "empty_edit_limit": 5,
+  "max_tool_calls": 300,
+  "max_unique_paths": 80
+}

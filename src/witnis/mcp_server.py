@@ -214,6 +214,47 @@ def build_server() -> FastMCP:
             indent=2,
         )
 
+    @server.tool(name="analyze_pr_impact")
+    def _pr_impact(base_ref: str, head_ref: str = "HEAD", limit: int = 50) -> str:
+        """PR-range (three-dot) blast radius + evidence; prefer over single-commit change-impact."""
+        from witnis.core.pr_gate import analyze_pr_impact
+
+        return json.dumps(
+            analyze_pr_impact(
+                _db_path(), base_ref=base_ref, head_ref=head_ref, limit=limit
+            ),
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    @server.tool(name="run_pr_gate")
+    def _pr_gate(
+        base_ref: str,
+        head_ref: str = "HEAD",
+        with_plan: bool = True,
+        execute_verify: bool = False,
+        strict: bool = False,
+    ) -> str:
+        """Build PR evidence gate payload (markdown inside JSON). Verify stays gated."""
+        from witnis.core.pr_gate import run_pr_gate
+
+        db = _db_path()
+        root = Path(db).resolve().parent.parent
+        return json.dumps(
+            run_pr_gate(
+                db,
+                base_ref=base_ref,
+                head_ref=head_ref,
+                root=root if root.exists() else Path.cwd(),
+                reindex=True,
+                with_plan=with_plan,
+                execute_verify=execute_verify,
+                strict=strict,
+            ),
+            ensure_ascii=False,
+            indent=2,
+        )
+
     @server.tool(name="check_import_graph")
     def _import_graph(limit: int = 100) -> str:
         """Check indexed local import edges for broken targets."""

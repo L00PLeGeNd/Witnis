@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "witnis"
-version = "1.9.1"
-description = "Local-first engineering witness for AI coding agents"
+version = "1.10.0"
+description = "Evidence envelopes for AI coding agents: blast-radius, PR gate, gated verify, MCP"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"

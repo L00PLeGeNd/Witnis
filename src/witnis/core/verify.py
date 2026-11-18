@@ -323,7 +323,7 @@ def run_verification(
     work_meta: dict[str, Any] = {"mode": "inplace"}
     if isolate:
         try:
-            work_root, work_meta = create_verify_worktree(root)
+            work_root, work_meta = create_verify_worktree(root, revision=revision)
         except OSError:
             work_root, work_meta = root, {"mode": "inplace", "error": "worktree_failed"}
 
@@ -473,8 +473,13 @@ def run_verification(
         if isolate and work_meta.get("mode") in {"worktree", "copy"}:
             cleanup_verify_workspace(root, work_root, work_meta)
 
-    all_ok = results and all(r.get("status") in {"verified", "skipped"} for r in results)
     any_fail = any(r.get("status") == "failed" for r in results)
+    verified_steps = [r for r in results if r.get("status") == "verified"]
+    skipped_steps = [r for r in results if r.get("status") == "skipped"]
+    # automation_verified: allowlisted steps passed; skipped never counts as human review
+    automation_ok = bool(results) and not any_fail and (
+        bool(verified_steps) or bool(skipped_steps)
+    )
     evidence = list(plan.get("evidence") or [])
     for item in results:
         evidence.append(
@@ -485,18 +490,39 @@ def run_verification(
                 "exit_code": item.get("exit_code"),
             }
         )
+        if item.get("status") == "failed":
+            evidence.append(
+                {
+                    "type": "verification_contradiction",
+                    "status": "contradicted",
+                    "step_id": item.get("step_id"),
+                    "detail": "Verify step failed",
+                }
+            )
 
-    state = "verified" if all_ok and not any_fail else "failed"
+    if any_fail:
+        state = "failed"
+    elif automation_ok:
+        # Keep state="verified" for contract compat; honesty lives in flags + limitations
+        state = "verified"
+    else:
+        state = "failed"
     payload = make_envelope(
-        status="success" if all_ok and not any_fail else "partial",
+        status="success" if automation_ok and not any_fail else "partial",
         repository=plan.get("repository"),
         result={
             **plan.get("result", {}),
             "state": state,
+            "automation_verified": bool(verified_steps) and not any_fail,
+            "skipped_only": bool(skipped_steps) and not verified_steps and not any_fail,
             "execution": results,
         },
         evidence=evidence,
         limitations=list(plan.get("limitations") or [])
+            + [
+                "state=verified here means allowlisted automations passed — not human review",
+                "skipped steps are not executed checks",
+            ]
         + [
             "Auto-executed: pytest, compileall, syntax AST check, import graph",
             "Stdout/stderr truncated in report",

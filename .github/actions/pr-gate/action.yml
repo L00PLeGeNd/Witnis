@@ -1,0 +1,126 @@
+name: Witnis PR evidence gate
+description: Index the repo, run three-dot PR impact, post sticky evidence comment and check conclusion.
+inputs:
+  base-ref:
+    description: PR base ref (e.g. origin/main)
+    required: true
+  head-ref:
+    description: PR head ref
+    required: false
+    default: HEAD
+  strict:
+    description: Fail the step on failed/uncertain/contradicted evidence
+    required: false
+    default: "false"
+  comment:
+    description: Post sticky PR comment
+    required: false
+    default: "true"
+  python-version:
+    description: Python version for the runner
+    required: false
+    default: "3.12"
+  witnis-source:
+    description: Pip install target for Witnis (path or package)
+    required: false
+    default: "."
+outputs:
+  exit-code:
+    description: pr-gate exit code
+    value: ${{ steps.gate.outputs.exit_code }}
+  markdown-path:
+    description: Path to rendered markdown
+    value: ${{ steps.gate.outputs.markdown_path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Witnis
+      shell: bash
+      run: pip install -e "${{ inputs.witnis-source }}"
+
+    - name: Run pr-gate
+      id: gate
+      shell: bash
+      env:
+        BASE_REF: ${{ inputs.base-ref }}
+        HEAD_REF: ${{ inputs.head-ref }}
+        STRICT: ${{ inputs.strict }}
+      run: |
+        set +e
+        EXTRA=()
+        if [ "$STRICT" = "true" ]; then EXTRA+=(--strict); fi
+        witnis pr-gate \
+          --base "$BASE_REF" \
+          --head "$HEAD_REF" \
+          --format markdown \
+          -o pr-gate.md \
+          "${EXTRA[@]}"
+        CODE=$?
+        echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+        echo "markdown_path=pr-gate.md" >> "$GITHUB_OUTPUT"
+        # Also emit JSON for artifacts / check annotation
+        witnis pr-gate \
+          --base "$BASE_REF" \
+          --head "$HEAD_REF" \
+          --format json \
+          -o pr-gate.json \
+          --no-reindex \
+          "${EXTRA[@]}" || true
+        exit $CODE
+
+    - name: Upload artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: witnis-pr-gate
+        path: |
+          pr-gate.md
+          pr-gate.json
+        if-no-files-found: warn
+
+    - name: Sticky PR comment
+      if: ${{ inputs.comment == 'true' && github.event_name == 'pull_request' }}
+      continue-on-error: true
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: witnis-pr-gate
+        path: pr-gate.md
+
+    - name: Publish check run conclusion
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        EXIT_CODE: ${{ steps.gate.outputs.exit_code }}
+      run: |
+        TITLE="Witnis PR evidence gate"
+        if [ "${EXIT_CODE:-1}" = "0" ]; then
+          CONCLUSION=success
+          SUMMARY="Evidence gate completed (fail-open unless --strict)."
+        else
+          CONCLUSION=failure
+          SUMMARY="Evidence gate failed under policy (see artifact pr-gate.md)."
+        fi
+        # Prefer gh check when available; otherwise rely on job status.
+        if command -v gh >/dev/null 2>&1; then
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/check-runs" \
+            -f name="$TITLE" \
+            -f head_sha="${{ github.event.pull_request.head.sha || github.sha }}" \
+            -f status="completed" \
+            -f conclusion="$CONCLUSION" \
+            -f output[title]="$TITLE" \
+            -f output[summary]="$SUMMARY" \
+            || true
+        fi
+        if [ "${EXIT_CODE:-1}" != "0" ]; then
+          exit "$EXIT_CODE"
+        fi

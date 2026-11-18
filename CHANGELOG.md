@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.10.0
+
+- **Trusted Agent Loop:** `witnis pr-gate` (three-dot / merge-base PR impact + markdown/JSON)
+- Git helpers: `git_merge_base`, `git_name_status_triple_dot`, `git_diff_hunks_range`
+- Composite Action `.github/actions/pr-gate` + consumer example + CI dogfood job
+- Verify honesty: `automation_verified` / `skipped_only`; `contradicted` evidence on failed steps; worktree pin to `--revision`
+- MCP×Harnis templates; `docs/trusted-agent-loop.md`; ROADMAP narrative update
+- `witnis loop-init` — one-shot Trusted Agent Loop bootstrap (Harnis wrap MCP + policy + index)
+- Harnis scan catalog includes `witnis` → `coding-agent` preset
+
 ## 1.9.1
 
 - `witnis scene` — auth token-refresh story card (engineering results, not MCP names)

@@ -9,6 +9,7 @@ import typer
 from witnis.bench import run_benchmark
 from witnis.core.index import index_repository
 from witnis import __version__
+from witnis.core.loop_init import init_trusted_loop
 from witnis.core.tools import (
     analyze_change_impact,
     analyze_impact,
@@ -82,6 +83,51 @@ def version_cmd() -> None:
 def capabilities_cmd() -> None:
     """List CLI commands and MCP tools for agents."""
     typer.echo(json.dumps(list_capabilities(), ensure_ascii=False, indent=2))
+
+
+@app.command("loop-init")
+def loop_init_cmd(
+    path: Optional[Path] = typer.Argument(
+        None, help="Repo root (default: cwd)"
+    ),
+    no_harnis: bool = typer.Option(
+        False,
+        "--no-harnis",
+        help="Write Witnis-only MCP config (skip Harnis seatbelt wrap)",
+    ),
+    deny_verify: bool = typer.Option(
+        False,
+        "--deny-verify",
+        help="Harnis policy denies run_verification until you edit it",
+    ),
+    python_harnis: bool = typer.Option(
+        False,
+        "--python-harnis",
+        help="Wrap with python -m harnis instead of npx -y harnis",
+    ),
+    no_index: bool = typer.Option(
+        False, "--no-index", help="Skip indexing after writing configs"
+    ),
+) -> None:
+    """Bootstrap Trusted Agent Loop: MCP config + optional Harnis wrap + index."""
+    root = (path or Path.cwd()).resolve()
+    if not root.is_dir():
+        typer.echo(f"Not a directory: {root}", err=True)
+        raise typer.Exit(code=1)
+    try:
+        payload = init_trusted_loop(
+            root,
+            with_harnis=not no_harnis,
+            deny_verify=deny_verify,
+            use_npx=not python_harnis,
+            index=not no_index,
+        )
+    except FileNotFoundError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    if payload["status"] == "failed":
+        raise typer.Exit(code=1)
 
 
 @app.command("studio")
@@ -650,6 +696,64 @@ def change_impact_cmd(
     typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
     if payload["status"] == "failed":
         raise typer.Exit(code=1)
+
+
+@app.command("pr-gate")
+def pr_gate_cmd(
+    base: str = typer.Option(..., "--base", help="PR base ref (e.g. origin/main)"),
+    head: str = typer.Option("HEAD", "--head", help="PR head ref"),
+    format: str = typer.Option(
+        "markdown", "--format", help="markdown | json"
+    ),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Write body to file"),
+    db: Optional[Path] = typer.Option(None, "--db", help="SQLite index path"),
+    root: Optional[Path] = typer.Option(
+        None, "--root", help="Repo root to (re)index; default cwd"
+    ),
+    no_reindex: bool = typer.Option(False, "--no-reindex", help="Skip index refresh"),
+    with_plan: bool = typer.Option(
+        True, "--with-plan/--no-plan", help="Include gated verify plan (blocked by default)"
+    ),
+    execute_verify: bool = typer.Option(
+        False,
+        "--execute-verify",
+        help="Run verify (still needs WITNIS_ALLOW_VERIFY=1)",
+    ),
+    strict: bool = typer.Option(
+        False, "--strict", help="Non-zero exit on failed/uncertain/contradicted"
+    ),
+) -> None:
+    """PR evidence gate: three-dot impact + markdown/JSON for CI comments."""
+    from witnis.core.pr_gate import run_pr_gate
+
+    db_path = db or _default_db()
+    repo_root = (root or Path.cwd()).resolve()
+    try:
+        payload = run_pr_gate(
+            db_path,
+            base_ref=base,
+            head_ref=head,
+            root=repo_root,
+            reindex=not no_reindex,
+            with_plan=with_plan,
+            execute_verify=execute_verify,
+            strict=strict,
+        )
+    except FileNotFoundError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    body = payload.get("markdown") if format == "markdown" else json.dumps(
+        payload, ensure_ascii=False, indent=2
+    )
+    if format == "json":
+        # Keep markdown inside JSON payload; print full structure
+        body = json.dumps(payload, ensure_ascii=False, indent=2)
+    if output:
+        output.write_text(str(body), encoding="utf-8")
+    else:
+        typer.echo(body)
+    raise typer.Exit(code=int(payload.get("exit_code") or 0))
 
 
 @app.command("import-graph")

@@ -4,7 +4,7 @@
 **Date:** 2026-11-04  
 **Scope:** Core / CLI / MCP / SDK / Studio / Rust native / Evidence / Impact / Verify  
 **Method:** code path review + fixture probes (mini_py, semantic_java_di)  
-**Governing plan:** [`2026-Q4-next-phase-plan.md`](2026-Q4-next-phase-plan.md)
+**Governing plans:** [`ROADMAP.md`](../../ROADMAP.md) (external sequencing) · [`2026-open-source-landing-plan.md`](2026-open-source-landing-plan.md) · [`2026-Q4-next-phase-plan.md`](2026-Q4-next-phase-plan.md) (engineering notebook)
 
 > This document answers Phase-1 gate questions. It is deliberately harsh.  
 > Fixture green ≠ real-project proof.

@@ -1,10 +1,18 @@
 # Witnis
 
-**An engineering witness for AI coding agents.**
+**Evidence envelopes for agent-made change.**
 
-Map the repo. Trace the blast radius. Verify with evidence — not vibes.
+Index the repo. Trace blast radius. Put the same claim shape on CLI, MCP, and every PR — statuses, limitations, and verify that stays blocked until you authorize it.
 
-Witnis pairs with [Harnis](https://github.com/L00PLeGeNd/Harnis): the *harness* limits what an agent can **do**; the *witness* grounds what an agent can **claim**.
+Agents already search the tree. Witnis witnesses what they claim.
+
+```text
+Trusted Agent Loop
+  Witnis evidence  →  pr-gate (PR/CI)  →  gated verify  →  Harnis seatbelt
+```
+
+[Harnis](https://github.com/L00PLeGeNd/Harnis) is a stdio MCP **seatbelt**, not an OS sandbox.  
+Loop: [`docs/trusted-agent-loop.md`](docs/trusted-agent-loop.md) · Roadmap: [`ROADMAP.md`](ROADMAP.md) · v1.10.0
 
 [![CI](https://github.com/L00PLeGeNd/Witnis/actions/workflows/ci.yml/badge.svg)](https://github.com/L00PLeGeNd/Witnis/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -68,6 +76,18 @@ witnis demo                 # smaller sample + look card
 witnis look login           # after: witnis index <your-repo>
 ```
 
+**Your repo → Trusted Agent Loop** (Witnis + [Harnis](https://github.com/L00PLeGeNd/Harnis) seatbelt by default):
+
+```bash
+cd /path/to/your-repo
+witnis loop-init            # writes .witnis/mcp.loop.json + .harnis/policy.json + index
+# merge .witnis/mcp.loop.json into Claude Code / Cline / Cursor MCP config
+witnis look <symbol>
+witnis pr-gate --base origin/main --head HEAD
+```
+
+`--no-harnis` if you only want Witnis MCP. Full loop: [`docs/trusted-agent-loop.md`](docs/trusted-agent-loop.md).
+
 Measured on this machine (2026-11-03): cold `python -m venv` + `pip install -e .` + `witnis demo` ≈ **88s**; `witnis scene` / `witnis demo` alone **&lt;1s** after install. First useful analysis stays inside a five-minute budget when the network for pip is healthy.
 
 Deeper cuts when you need them:
@@ -88,9 +108,11 @@ Extras: `.[lsp]` (Jedi), `.[rust]` (maturin), or `.[all]`.
 ## How agents should use it
 
 ```text
-witnis index .
+witnis loop-init            # default: Harnis wraps witnis mcp
+# merge .witnis/mcp.loop.json into the MCP client
 witnis look <symbol>
 witnis plan <symbol>
+witnis pr-gate --base origin/main --head HEAD
 WITNIS_ALLOW_VERIFY=1 witnis verify <symbol> --execute
 witnis studio <symbol> --open
 ```
@@ -131,7 +153,7 @@ Contracts: [`docs/contracts-v1.md`](docs/contracts-v1.md)
 
 | Layer | What you get |
 |---|---|
-| **CLI** | `demo`, `look`, `index`, `search`, `trace`, `impact`, `plan`, `verify`, `studio`, `lsp`, `bench`, … |
+| **CLI** | `loop-init`, `demo`, `look`, `index`, `search`, `trace`, `impact`, `pr-gate`, `plan`, `verify`, `studio`, `lsp`, `bench`, … |
 | **MCP** | `repo_search`, `trace_symbol`, `analyze_impact`, `run_verification`, `query_lsp`, `render_studio`, … |
 | **SDK** | `from witnis.sdk import index_repository, repo_search, trace_symbol, …` |
 | **Studio** | Static HTML (graph / evidence / report), `en` `zh` `pt` `fr` `ru` |
@@ -156,7 +178,9 @@ witnis baselines fixtures/mini_py
 
 ## MCP (any compatible client)
 
-Same Core over MCP for any compatible host or coding agent. Index the repo, then register the server:
+Preferred: `witnis loop-init` writes `.witnis/mcp.loop.json` with **Harnis wrapping Witnis** (absolute `WITNIS_DB` + `.harnis/policy.json`). Merge that file into the client.
+
+Bare Witnis (no seatbelt):
 
 ```json
 {
@@ -172,9 +196,9 @@ Same Core over MCP for any compatible host or coding agent. Index the repo, then
 }
 ```
 
-Sample: [`examples/mcp.example.json`](examples/mcp.example.json)
+Samples: [`examples/mcp.example.json`](examples/mcp.example.json) · Harnis wrap [`examples/mcp.witnis-behind-harnis.json`](examples/mcp.witnis-behind-harnis.json)
 
-Clients differ in config file layout; the important bits are the `witnis mcp` command and `WITNIS_DB`. Agents should call `list_capabilities` before assuming tool names.
+Clients differ in config file layout; the important bits are the command chain and `WITNIS_DB`. Agents should call `list_capabilities` before assuming tool names.
 
 ---
 
@@ -255,6 +279,10 @@ See [`docs/rust-migration.md`](docs/rust-migration.md).
 
 | Doc | Contents |
 |---|---|
+| [`ROADMAP.md`](ROADMAP.md) | Trusted Agent Loop + conversion/credibility tracks |
+| [`docs/trusted-agent-loop.md`](docs/trusted-agent-loop.md) | PR gate, MCP×Harnis, honesty rules |
+| [`examples/github-actions/witnis-pr-gate.yml`](examples/github-actions/witnis-pr-gate.yml) | Consumer PR evidence Action |
+| [`docs/strategy/2026-open-source-landing-plan.md`](docs/strategy/2026-open-source-landing-plan.md) | Open-source growth plan (external sequencing) |
 | [`docs/contracts-v1.md`](docs/contracts-v1.md) | Stable CLI / MCP / envelope |
 | [`docs/rust-migration.md`](docs/rust-migration.md) | Rust migration phases |
 | [`docs/benchmarks/PUBLIC.md`](docs/benchmarks/PUBLIC.md) | Public bench method |
@@ -275,7 +303,7 @@ Ready for local Python-first agent work:
 
 **index → search / trace / impact → gated verify → Studio / MCP**
 
-Still ahead: real-repo ground truth (P/R, false-pass rate), deeper four-language semantics, verify isolation, Python/Rust parity as a merge gate, then a single Rust `witnis` binary.
+Still ahead (see [`ROADMAP.md`](ROADMAP.md)): PetClinic human GT + Benchmark V1 P/R; binary + browser demo; keep dogfooding `pr-gate`. Java stays honest-shallow. Agent A/B execution remains paused.
 
 Package / crates: **1.9.1**. Depth + visible product proof: `scene`, `experiment`, auth-refresh demo. See [`docs/DEPTH.md`](docs/DEPTH.md) · [`docs/experiments/`](docs/experiments/) · [`CHANGELOG.md`](CHANGELOG.md).
 

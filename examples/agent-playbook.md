@@ -20,17 +20,24 @@ MCP (Claude Code, Codex, and other MCP hosts): set `WITNIS_DB` to `.witnis/index
 1. **Understand a symbol** — `witnis look <symbol>`  
    (or `trace` / `impact` / `tests` / `graph` when you need one slice)
 
-2. **Review a commit**  
+2. **Before editing (Trusted Agent Loop)**  
+   `witnis look <symbol>` / `witnis impact <symbol>` → edit from evidence → `witnis plan <symbol>`
+
+3. **Review a PR range (preferred over single-commit change-impact)**  
+   `witnis pr-gate --base origin/main --head HEAD --format markdown`
+
+4. **Review a single commit**  
    `witnis explain-change HEAD` → `witnis change-impact HEAD` → `witnis plan --revision HEAD`
 
-3. **Dirty worktree**  
+5. **Dirty worktree**  
    `witnis compare-worktree` → `witnis refresh` → `witnis plan <symbol>`
 
-4. **Proof pack**  
+6. **Proof pack**  
    `witnis export-bundle --target X` or `witnis report X --html-out out.html`
 
-5. **Authorize checks** (explicit only)  
-   `WITNIS_ALLOW_VERIFY=1 witnis verify X --execute`
+7. **Authorize checks** (explicit only)  
+   `WITNIS_ALLOW_VERIFY=1 witnis verify X --execute`  
+   Wrap MCP with Harnis: see `examples/mcp.witnis-behind-harnis.json` · [`docs/trusted-agent-loop.md`](../docs/trusted-agent-loop.md)
 
 ## Short aliases
 

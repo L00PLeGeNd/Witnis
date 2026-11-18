@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "witnis": {
+      "command": "python",
+      "args": [
+        "-m",
+        "harnis",
+        "mcp",
+        "--preset",
+        "coding-agent",
+        "--policy",
+        ".harnis/policy.json",
+        "--",
+        "python",
+        "-m",
+        "witnis",
+        "mcp"
+      ],
+      "env": {
+        "WITNIS_DB": "REPLACE_WITH_ABSOLUTE_PATH_TO/.witnis/index.sqlite"
+      }
+    }
+  }
+}

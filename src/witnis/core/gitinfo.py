@@ -119,7 +119,7 @@ def _parse_name_status(stdout: str) -> list[dict]:
 
 
 def git_name_status_range(root: Path, base: str, head: str) -> list[dict]:
-    """List files changed between two revisions (base..head)."""
+    """List files changed between two revisions (two-dot base..head)."""
     try:
         proc = _run_git(
             root,
@@ -133,6 +133,106 @@ def git_name_status_range(root: Path, base: str, head: str) -> list[dict]:
     if proc.returncode != 0:
         return []
     return _parse_name_status(proc.stdout)
+
+
+def git_merge_base(root: Path, a: str, b: str) -> str | None:
+    """Return merge-base commit hash for two revisions, or None."""
+    try:
+        proc = _run_git(root, "merge-base", a, b, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0:
+        return None
+    value = proc.stdout.strip()
+    return value or None
+
+
+def git_name_status_triple_dot(root: Path, base: str, head: str) -> list[dict]:
+    """List files changed on head since fork from base (three-dot base...head).
+
+    Matches GitHub PR \"Files changed\" semantics (diff from merge-base to head).
+    """
+    try:
+        proc = _run_git(
+            root,
+            "diff",
+            "--name-status",
+            f"{base}...{head}",
+            timeout=20,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if proc.returncode != 0:
+        return []
+    return _parse_name_status(proc.stdout)
+
+
+def _parse_unified_hunks(stdout: str) -> list[dict]:
+    hunks: list[dict] = []
+    current_path: str | None = None
+    for line in stdout.splitlines():
+        if line.startswith("+++ "):
+            path = line[4:].strip()
+            if path.startswith("b/"):
+                path = path[2:]
+            current_path = None if path == "/dev/null" else path
+            continue
+        if not line.startswith("@@") or current_path is None:
+            continue
+        try:
+            plus = line.split(" ")[2]
+            if not plus.startswith("+"):
+                continue
+            body = plus[1:]
+            if "," in body:
+                start_s, count_s = body.split(",", 1)
+                start = int(start_s)
+                count = int(count_s)
+            else:
+                start = int(body)
+                count = 1
+        except (IndexError, ValueError):
+            continue
+        if count <= 0:
+            hunks.append(
+                {
+                    "path": current_path,
+                    "start_line": max(1, start),
+                    "end_line": max(1, start),
+                    "new_count": 0,
+                }
+            )
+            continue
+        hunks.append(
+            {
+                "path": current_path,
+                "start_line": start,
+                "end_line": start + count - 1,
+                "new_count": count,
+            }
+        )
+    return hunks
+
+
+def git_diff_hunks_range(
+    root: Path, base: str, head: str, *, triple_dot: bool = True
+) -> list[dict]:
+    """Parse unified hunks for a revision range (default three-dot)."""
+    spec = f"{base}...{head}" if triple_dot else f"{base}..{head}"
+    try:
+        proc = _run_git(
+            root,
+            "diff",
+            "--unified=0",
+            "--format=",
+            spec,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if proc.returncode != 0:
+        return []
+    return _parse_unified_hunks(proc.stdout)
 
 
 def git_worktree_name_status(root: Path) -> list[dict]:
@@ -167,7 +267,7 @@ def git_worktree_name_status(root: Path) -> list[dict]:
 
 
 def git_diff_hunks(root: Path, revision: str = "HEAD") -> list[dict]:
-    """Parse unified diff hunks for a revision (new-file line ranges)."""
+    """Parse unified diff hunks for a single revision (new-file line ranges)."""
     try:
         proc = _run_git(
             root,
@@ -181,53 +281,7 @@ def git_diff_hunks(root: Path, revision: str = "HEAD") -> list[dict]:
         return []
     if proc.returncode != 0:
         return []
-
-    hunks: list[dict] = []
-    current_path: str | None = None
-    for line in proc.stdout.splitlines():
-        if line.startswith("+++ "):
-            path = line[4:].strip()
-            if path.startswith("b/"):
-                path = path[2:]
-            current_path = None if path == "/dev/null" else path
-            continue
-        if not line.startswith("@@") or current_path is None:
-            continue
-        # @@ -old_start,old_count +new_start,new_count @@
-        try:
-            plus = line.split(" ")[2]  # +start,count
-            if not plus.startswith("+"):
-                continue
-            body = plus[1:]
-            if "," in body:
-                start_s, count_s = body.split(",", 1)
-                start = int(start_s)
-                count = int(count_s)
-            else:
-                start = int(body)
-                count = 1
-        except (IndexError, ValueError):
-            continue
-        if count <= 0:
-            # pure deletion: keep a zero-width anchor at the prior line
-            hunks.append(
-                {
-                    "path": current_path,
-                    "start_line": max(1, start),
-                    "end_line": max(1, start),
-                    "new_count": 0,
-                }
-            )
-            continue
-        hunks.append(
-            {
-                "path": current_path,
-                "start_line": start,
-                "end_line": start + count - 1,
-                "new_count": count,
-            }
-        )
-    return hunks
+    return _parse_unified_hunks(proc.stdout)
 
 
 def git_show_blob(root: Path, revision: str, rel_path: str) -> str | None:

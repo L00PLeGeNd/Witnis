@@ -47,6 +47,7 @@ WITNIS_ALLOW_VERIFY=1 witnis pr-gate --base origin/main --head HEAD --execute-ve
 
 - Composite: [`.github/actions/pr-gate`](../.github/actions/pr-gate/action.yml)
 - Consumer example: [`examples/github-actions/witnis-pr-gate.yml`](../examples/github-actions/witnis-pr-gate.yml)
+- Dogfood in this repo: CI job `pr-gate-dogfood` on every PR (sticky comment + check); `pr-gate-smoke` on push (`HEAD~1...HEAD`, no comment)
 
 Permissions: `contents: read`, `pull-requests: write`, `checks: write`. Fetch full history (`fetch-depth: 0`).
 

@@ -57,13 +57,12 @@ jobs:
           comment: "true"
           witnis-source: "."
 
-  pr-gate-dogfood:
-    name: PR evidence gate (dogfood)
-    if: github.event_name == 'pull_request'
+  pr-gate-smoke:
+    name: PR evidence gate (push smoke)
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
       checks: write
     steps:
       - uses: actions/checkout@v4
@@ -71,8 +70,8 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/pr-gate
         with:
-          base-ref: origin/${{ github.base_ref }}
+          base-ref: HEAD~1
           head-ref: HEAD
           strict: "false"
-          comment: "true"
+          comment: "false"
           witnis-source: "."

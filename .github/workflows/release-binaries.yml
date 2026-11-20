@@ -1,5 +1,5 @@
 # Build cross-platform witnis-core binaries (Rust Core subset).
-# Full CLI is not the Core binary. Until PyPI: uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis
+# Full CLI is not the Core binary: uvx witnis
 name: Release binaries
 
 on:
@@ -91,7 +91,7 @@ jobs:
             Full product (PR gate, look, MCP, gated verify, Studio):
 
             ```bash
-            uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis
+            uvx witnis
             ```
 
             See [docs/BINARY.md](https://github.com/L00PLeGeNd/Witnis/blob/master/docs/BINARY.md).

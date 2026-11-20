@@ -3,7 +3,7 @@
 One name: **Witnis** (search **witnis-dev**). Copy this folder into your app repo, or skip the copy and run:
 
 ```bash
-uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+uvx witnis loop-init
 ```
 
 Merge `.witnis/mcp.loop.json` into Cursor / Claude. Drop the Action:

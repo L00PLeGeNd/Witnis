@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Public product line: PR comment is the screenshot; MCP default tools are `index` / `look` / `impact` / `verify` (`WITNIS_MCP_EXPERIMENTAL=1` for the rest); masthead says 4 tools, not 34
-- GitHub Action is zero-config besides checkout; install from git until PyPI
+- GitHub Action is zero-config besides checkout; `pip install witnis` / `uvx witnis` (PyPI 1.11.0)
 - README lead is the 15s lie/blocked/ran loop (`caught-lying.svg`); search name **witnis-dev** (not witnis.se); seatbelt included in one install
 
 ## 1.11.0

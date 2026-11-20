@@ -31,8 +31,8 @@ def test_init_trusted_loop_writes_harnis_wrap(tmp_path: Path) -> None:
     assert server["command"] == "npx"
     assert "harnis" in server["args"]
     assert "uvx" in server["args"]
-    assert "git+https://github.com/L00PLeGeNd/Witnis.git" in server["args"]
     assert server["args"][-2:] == ["witnis", "mcp"]
+    assert "git+" not in " ".join(server["args"])
     assert Path(server["env"]["WITNIS_DB"]).name == "index.sqlite"
 
     policy = Path(result["policy"])
@@ -54,12 +54,7 @@ def test_init_trusted_loop_bare_skips_harnis(tmp_path: Path) -> None:
     mcp = json.loads(Path(payload["result"]["mcp_config"]).read_text(encoding="utf-8"))
     server = mcp["mcpServers"]["witnis"]
     assert server["command"] == "uvx"
-    assert server["args"] == [
-        "--from",
-        "git+https://github.com/L00PLeGeNd/Witnis.git",
-        "witnis",
-        "mcp",
-    ]
+    assert server["args"] == ["witnis", "mcp"]
     assert not (root / ".harnis").exists()
 
 

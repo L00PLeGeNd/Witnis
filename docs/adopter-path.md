@@ -18,7 +18,7 @@ proof    →  authorize verify only when intentional
 ## 1. Once per repo
 
 ```bash
-uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+uvx witnis loop-init
 # merge .witnis/mcp.loop.json into Cursor / Claude
 ```
 

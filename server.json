@@ -1,7 +1,15 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.L00PLeGeNd/witnis",
-  "description": "witnis-dev — catch agents claiming tests passed when verify executed 0 commands. Install: uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis mcp. Not on PyPI yet. Not affiliated with Witnis AB.",
+  "description": "witnis-dev — catch agents claiming tests passed when verify executed 0 commands. Install: uvx witnis mcp. Not affiliated with Witnis AB.",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "witnis",
+      "version": "1.11.0",
+      "transport": { "type": "stdio" }
+    }
+  ],
   "title": "Witnis (witnis-dev)",
   "websiteUrl": "https://github.com/L00PLeGeNd/Witnis#readme",
   "repository": {

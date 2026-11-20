@@ -24,7 +24,7 @@ inputs:
   witnis-source:
     description: Pip install target (path, git URL, or package)
     required: false
-    default: "git+https://github.com/L00PLeGeNd/Witnis.git"
+    default: "witnis"
 outputs:
   exit-code:
     description: pr-gate exit code

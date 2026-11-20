@@ -23,7 +23,7 @@ Agent intent
 
 ```bash
 cd /path/to/your-repo
-uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+uvx witnis loop-init
 # → .witnis/mcp.loop.json  (npx harnis … -- witnis mcp + absolute WITNIS_DB)
 # → .harnis/policy.json    (coding-agent seatbelt; left alone if already present)
 # → index under .witnis/index.sqlite

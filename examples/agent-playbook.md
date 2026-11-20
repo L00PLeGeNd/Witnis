@@ -7,7 +7,7 @@ Prefer Core facts over model guesses.
 Canonical guide: [`docs/adopter-path.md`](../docs/adopter-path.md).
 
 ```bash
-uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+uvx witnis loop-init
 # merge .witnis/mcp.loop.json into the MCP client
 witnis look <symbol>
 ```

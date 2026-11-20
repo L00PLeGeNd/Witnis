@@ -30,7 +30,6 @@ Companion seatbelt: Harnis already has `glama.json` in its repo.
 ### 2. Official MCP Registry
 
 ```bash
-# after PyPI has the matching version
 npm install -g mcp-publisher   # or current install docs
 mcp-publisher login
 mcp-publisher publish          # reads server.json

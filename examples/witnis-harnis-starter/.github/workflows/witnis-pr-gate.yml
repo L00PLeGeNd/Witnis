@@ -36,4 +36,3 @@ jobs:
           head-ref: ${{ steps.refs.outputs.head }}
           strict: "false"
           comment: "true"
-          witnis-source: "git+https://github.com/L00PLeGeNd/Witnis.git"

@@ -52,7 +52,7 @@ Agent intent
 ### Sixty seconds
 
 ```bash
-uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+uvx witnis loop-init
 # merge .witnis/mcp.loop.json into Claude Code / Cline / Cursor
 
 witnis look <symbol>
@@ -86,7 +86,7 @@ Agent 能改代码，也会把文本命中当成符号、漏影响面、把「�
 **Witnis** 是本地工程见证：证据信封、爆炸半径、`pr-gate` 贴到 PR、验证默认阻断。  
 **Harnis** 是 stdio MCP **安全带**（不是 OS 沙箱）：拦的是进子进程之前的 `tools/call`。
 
-合在一起是 **Trusted Agent Loop**。一分钟：`uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init` → 合并 MCP 配置 → Action `pr-gate`。
+合在一起是 **Trusted Agent Loop**。一分钟：`uvx witnis loop-init` → 合并 MCP 配置 → Action `pr-gate`。
 
 诚实边界见 FAILURE_CASES；不吹垄断，不吹沙箱。
 

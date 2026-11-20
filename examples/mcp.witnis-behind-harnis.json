@@ -12,8 +12,6 @@
         ".harnis/policy.json",
         "--",
         "uvx",
-        "--from",
-        "git+https://github.com/L00PLeGeNd/Witnis.git",
         "witnis",
         "mcp"
       ],

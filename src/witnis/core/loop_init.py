@@ -10,15 +10,12 @@ from witnis.core.envelope import make_envelope
 from witnis.core.index import index_repository
 
 
-WITNIS_UVX_FROM = "git+https://github.com/L00PLeGeNd/Witnis.git"
-
-
 def _db_path_for(root: Path) -> Path:
     return (root / ".witnis" / "index.sqlite").resolve()
 
 
 def _uvx_witnis_mcp() -> tuple[str, list[str]]:
-    return "uvx", ["--from", WITNIS_UVX_FROM, "witnis", "mcp"]
+    return "uvx", ["witnis", "mcp"]
 
 
 def build_mcp_witnis_only(*, db: Path) -> dict[str, Any]:

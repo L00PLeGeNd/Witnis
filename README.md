@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.L00PLeGeNd/witnis -->
 <p align="center">
   <img src="./docs/assets/witnis-masthead.svg" alt="witnis" width="960"/>
 </p>

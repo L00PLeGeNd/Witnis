@@ -36,6 +36,7 @@ Java trees prefer the **Python** indexer (Spring-aware). Rust gains `implements`
 | `ground-truth` | Labeled P/R on fixtures (`benchmarks/ground-truth/`) |
 
 External corpora (Flask, FastAPI, PetClinic, Express) are **pinned in manifest**. PetClinic **human-v2 adjudicated** (16 tasks; not dual-human); see [`benchmarks/petclinic-human-v2.md`](benchmarks/petclinic-human-v2.md).  
+Grep vs impact on that pin: [`petclinic-person-grep-vs-impact.md`](benchmarks/petclinic-person-grep-vs-impact.md) (`witnis experiment`, no LLM).  
 Honest misses (product + GT): [`FAILURE_CASES.md`](FAILURE_CASES.md).
 
 ## Authorize ≠ sandbox
@@ -55,7 +56,7 @@ Default verify path uses disposable worktree/copy, scrubbed env, timeouts, FS di
 | P0 | Conversion: binary + browser demo | binary + `witnis browser-demo` landed; Studio redesign still deferred |
 | P0 | Starter seed + Issue/Discussion templates | **landed** `examples/witnis-harnis-starter` + `.github/` templates |
 | P1 | MCP directory listings | **payloads landed** (`docs/mcp-listings.md`); submit after push |
-| P0 | Agent A/B **execution** | **paused** until baseline |
+| P0 | Agent A/B **execution** | analysis pack runnable (`petclinic-person-impact` if checkout present); **LLM** Agent A/B still paused |
 | P1 | Java/Spring semantic depth | **paused** — reassess after Stage-1 + GT |
 | — | verify `automation_verified` honesty; worktree pin to revision; contradicted on fail | landed with loop |
 | — | Architecture audit / D01–D03 / fixture DI / isolate / scene | landed; not real-project proof alone |

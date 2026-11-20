@@ -15,6 +15,7 @@ from witnis.core.gitinfo import (
     git_show_blob,
 )
 from witnis.core.index import index_repository
+from witnis.core.parse_java import parse_java_source
 from witnis.core.parse_js import parse_js_source
 from witnis.core.parse_python import parse_python_source
 from witnis.core.tools import (
@@ -59,6 +60,8 @@ def _symbols_overlapping_hunks(
             syms = parse_python_source(blob, rel_path=path)
         elif suffix in _JS_COMPARE_SUFFIXES:
             syms = parse_js_source(blob, rel_path=path)
+        elif suffix == ".java":
+            syms = parse_java_source(blob, rel_path=path)
         else:
             continue
         for sym in syms:
@@ -435,6 +438,12 @@ def render_pr_gate_markdown(payload: dict[str, Any]) -> str:
     direct = result.get("direct") or []
     lines.append(f"- **direct edges:** {len(direct)}")
     for e in direct[:12]:
+        lines.append(
+            f"  - `{e.get('relation_type')}` `{e.get('source')}` → `{e.get('target')}`"
+        )
+    trans = result.get("transitive") or []
+    lines.append(f"- **transitive edges:** {len(trans)}")
+    for e in trans[:12]:
         lines.append(
             f"  - `{e.get('relation_type')}` `{e.get('source')}` → `{e.get('target')}`"
         )

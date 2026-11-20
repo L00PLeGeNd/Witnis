@@ -56,13 +56,13 @@ def test_petclinic_human_labels_load_and_score(tmp_path: Path) -> None:
 
     rep = evaluate_case(label, PETCLINIC, tmp_path / "petclinic-human.sqlite")
     metrics = {m.name: m for m in rep.metrics}
-    # Direct edges / inject sites should mostly hit on this pin.
+    data = rep.as_dict()
+    failed = [t["id"] for t in data["tasks"] if not t.get("ok")]
+    assert failed == [], data["tasks"]
     assert metrics["call_edge"].tp >= 6
     assert metrics["impact_direct"].tp >= 3
-    # Indirect Person→Owner/Pet/VisitController via uses_type (production only).
     assert metrics["impact_indirect"].tp >= 3
     assert (metrics["impact_indirect"].recall or 0) >= 0.99
-    data = rep.as_dict()
     assert "expected_item_recall" in str(data.get("scoring") or "")
     person = next(t for t in data["tasks"] if t.get("id") == "h_impact_person")
     assert person.get("ok") is True

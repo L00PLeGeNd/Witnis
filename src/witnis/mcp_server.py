@@ -346,7 +346,7 @@ def build_server() -> FastMCP:
 
     @tool("compare_revisions")
     def _compare(base: str, head: str = "HEAD", limit: int = 100) -> str:
-        """Compare Python/JS/TS symbol deltas between two git revisions."""
+        """Compare Python/JS/TS/Java symbol deltas between two git revisions."""
         return json.dumps(
             compare_revisions(_db_path(), base=base, head=head, limit=limit),
             ensure_ascii=False,

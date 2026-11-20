@@ -9,7 +9,7 @@ Verify does nothing until you set `WITNIS_ALLOW_VERIFY=1` and pass `--execute`. 
   <img src="./docs/assets/blast-radius.svg" alt="git grep Person finds five files; witnis impact Person reaches OwnerController, PetController, VisitController" width="960"/>
 </p>
 
-On spring-petclinic, `git grep -lw Person` stops at five files. `witnis impact Person` follows `Owner extends Person` into the controllers.
+On spring-petclinic, `git grep -lw Person` stops at five files. `witnis impact Person` follows `Owner extends Person` into the controllers. Measured (grep recall 0, impact 1.0 on those controllers; not LLM A/B): [`docs/benchmarks/petclinic-person-grep-vs-impact.md`](docs/benchmarks/petclinic-person-grep-vs-impact.md).
 
 ## Action
 

@@ -1,0 +1,26 @@
+{
+  "task_id": "petclinic-person-impact",
+  "corpus": "spring-petclinic",
+  "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
+  "disclaimer": "Analysis completeness only. Not LLM Agent A/B. Not dual-human GT.",
+  "expect_callers_substr": ["OwnerController", "PetController", "VisitController"],
+  "caller_recall_a": 0.0,
+  "caller_recall_b": 1.0,
+  "git_grep_lw_Person_java": [
+    "src/main/java/org/springframework/samples/petclinic/PetClinicRuntimeHints.java",
+    "src/main/java/org/springframework/samples/petclinic/model/Person.java",
+    "src/main/java/org/springframework/samples/petclinic/owner/Owner.java",
+    "src/main/java/org/springframework/samples/petclinic/vet/Vet.java",
+    "src/test/java/org/springframework/samples/petclinic/model/ValidatorTests.java"
+  ],
+  "impact_transitive_controllers": [
+    "OwnerController",
+    "PetController",
+    "VisitController"
+  ],
+  "human_gt_same_pin": {
+    "label_mode": "human_v2_adjudicated",
+    "tasks_ok": "18/18",
+    "impact_indirect": {"tp": 3, "fp": 0, "fn": 0, "precision": 1.0, "recall": 1.0}
+  }
+}

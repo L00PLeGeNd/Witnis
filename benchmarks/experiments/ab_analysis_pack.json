@@ -23,6 +23,14 @@
       "needle": "findUser",
       "expect_callers_substr": ["UserController", "UserService"],
       "expect_tests_substr": []
+    },
+    {
+      "id": "petclinic-person-impact",
+      "corpus": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+      "needle": "Person",
+      "expect_callers_substr": ["OwnerController", "PetController", "VisitController"],
+      "expect_tests_substr": [],
+      "notes": "Pin 500158f732419217507c7656904b8e6aa1bcc0d6. git grep -lw Person never names these controllers; Witnis impact Person reaches them via Owner inherits + uses_type. Clone per benchmarks/ground-truth/blind-pack/CLONE.md. Skipped if checkout missing."
     }
   ],
   "external_agent_protocol": {

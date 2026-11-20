@@ -51,6 +51,7 @@ def run_scene(
     defs = (trace.get("result") or {}).get("definitions") or []
     callers = (trace.get("result") or {}).get("called_by") or []
     direct = (impact.get("result") or {}).get("direct") or []
+    transitive = (impact.get("result") or {}).get("transitive") or []
     related = (tests.get("result") or {}).get("tests") or []
     steps = (plan.get("result") or {}).get("steps") or []
 
@@ -85,9 +86,10 @@ def run_scene(
         },
         "3_impact": {
             "direct_edges": len(direct),
+            "transitive_edges": len(transitive),
             "sample": [
                 {"from": e.get("source"), "to": e.get("target"), "type": e.get("relation_type")}
-                for e in direct[:8]
+                for e in list(direct[:6]) + list(transitive[:6])
             ],
             "related_tests": sorted(
                 {str(t.get("file_path")) for t in related if t.get("file_path")}
@@ -189,7 +191,10 @@ def format_scene_text(payload: dict[str, Any]) -> str:
     lines.append("")
     lines.append("Impact")
     imp = story["3_impact"]
-    lines.append(f"  edges   {imp['direct_edges']} direct")
+    lines.append(
+        f"  edges   {imp['direct_edges']} direct, "
+        f"{imp.get('transitive_edges') or 0} transitive"
+    )
     for e in imp["sample"][:5]:
         lines.append(f"  edge    {e.get('from')} → {e.get('to')} ({e.get('type')})")
     if imp["related_tests"]:

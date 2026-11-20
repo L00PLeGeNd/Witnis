@@ -101,3 +101,37 @@ def test_compare_revisions_symbol_delta(tmp_path: Path) -> None:
     assert payload["status"] in {"success", "partial"}
     added = {s["name"] for s in payload["result"]["symbols_added"]}
     assert "beta" in added
+
+
+def test_compare_revisions_java_method_delta(tmp_path: Path) -> None:
+    repo = tmp_path / "proj"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "test@example.com")
+    _git(repo, "config", "user.name", "Test")
+    (repo / "Person.java").write_text(
+        "public class Person {\n  public String getName() { return name; }\n}\n",
+        encoding="utf-8",
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "person")
+    base = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    (repo / "Person.java").write_text(
+        "public class Person {\n"
+        "  public String getName() { return name; }\n"
+        "  public String getId() { return id; }\n"
+        "}\n",
+        encoding="utf-8",
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "add getId")
+    db = tmp_path / "index.sqlite"
+    index_repository(repo, db, incremental=False)
+    payload = compare_revisions(db, base=base, head="HEAD")
+    added = {s["name"] for s in payload["result"]["symbols_added"]}
+    assert "getId" in added, added

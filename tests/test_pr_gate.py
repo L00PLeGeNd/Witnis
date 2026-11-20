@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from witnis.core.gitinfo import (
     git_merge_base,
@@ -9,12 +12,25 @@ from witnis.core.gitinfo import (
     git_name_status_triple_dot,
 )
 from witnis.core.index import index_repository
+from witnis.core.parse_java import parse_java_source
 from witnis.core.pr_gate import (
     analyze_pr_impact,
     evaluate_pr_gate_exit,
     render_pr_gate_markdown,
     run_pr_gate,
 )
+
+ROOT = Path(__file__).resolve().parents[1]
+DI = ROOT / "fixtures" / "semantic_java_di"
+PETCLINIC = (
+    ROOT
+    / "benchmarks"
+    / "ground-truth"
+    / "corpora"
+    / "checkouts"
+    / "spring-petclinic"
+)
+PETCLINIC_PIN = "500158f732419217507c7656904b8e6aa1bcc0d6"
 
 
 def _git(repo: Path, *args: str) -> None:
@@ -130,3 +146,158 @@ def test_pr_gate_markdown_contains_status_sections(tmp_path: Path) -> None:
     # Headline must not read as a successful verify.
     assert not md.lstrip().startswith("# Verified")
     assert evaluate_pr_gate_exit(payload, strict=False) == 0
+
+
+def test_pr_gate_markdown_lists_transitive_when_blast_radius_is_full() -> None:
+    """Person→Owner controllers must not vanish behind a 6-line blast hop of Direct calls."""
+    direct = [
+        {
+            "relation_type": "calls",
+            "source": f"Noise{i}.java:Noise{i}",
+            "target": "Person",
+        }
+        for i in range(10)
+    ]
+    md = render_pr_gate_markdown(
+        {
+            "impact": {
+                "status": "success",
+                "repository": {},
+                "result": {
+                    "direct": direct,
+                    "transitive": [
+                        {
+                            "relation_type": "uses_type",
+                            "source": "OwnerController.java:OwnerController",
+                            "target": "Owner",
+                        },
+                        {
+                            "relation_type": "uses_type",
+                            "source": "PetController.java:PetController",
+                            "target": "Owner",
+                        },
+                        {
+                            "relation_type": "uses_type",
+                            "source": "VisitController.java:VisitController",
+                            "target": "Owner",
+                        },
+                    ],
+                },
+                "evidence": [],
+            }
+        }
+    )
+    for name in ("OwnerController", "PetController", "VisitController"):
+        assert name in md, name
+    assert "**transitive edges:** 3" in md
+
+
+def test_parse_java_class_span_covers_method_body() -> None:
+    src = (DI / "com" / "example" / "user" / "Person.java").read_text(encoding="utf-8")
+    syms = parse_java_source(src, rel_path="Person.java")
+    person = next(s for s in syms if s.name == "Person" and s.kind == "class")
+    getter = next(s for s in syms if s.name == "getName")
+    assert person.end_line >= getter.start_line
+
+
+def test_java_hunk_pr_gate_names_typed_controller(tmp_path: Path) -> None:
+    repo = tmp_path / "proj"
+    shutil.copytree(DI, repo)
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "test@example.com")
+    _git(repo, "config", "user.name", "Test")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "base")
+    _git(repo, "branch", "main")
+    _git(repo, "checkout", "-b", "pr")
+    person = repo / "com" / "example" / "user" / "Person.java"
+    person.write_text(
+        person.read_text(encoding="utf-8").replace(
+            "return name;",
+            'return name == null ? "" : name;',
+        ),
+        encoding="utf-8",
+    )
+    _git(repo, "add", "com/example/user/Person.java")
+    _git(repo, "commit", "-m", "touch Person getter")
+
+    db = tmp_path / "index.sqlite"
+    payload = run_pr_gate(
+        db,
+        base_ref="main",
+        head_ref="pr",
+        root=repo,
+        reindex=True,
+        with_plan=False,
+    )
+    names = [s.get("name") for s in (payload["impact"]["result"].get("symbols_in_hunks") or [])]
+    assert "Person" in names, names
+    assert "UserController" in payload["markdown"]
+
+
+def test_pr_gate_petclinic_person_hunk_names_controllers(tmp_path: Path) -> None:
+    if not PETCLINIC.is_dir():
+        pytest.skip("clone spring-petclinic per benchmarks/ground-truth/blind-pack/CLONE.md")
+    wt = tmp_path / "pc"
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(PETCLINIC),
+            "worktree",
+            "add",
+            "--detach",
+            str(wt),
+            PETCLINIC_PIN,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    try:
+        _git(wt, "config", "user.email", "test@example.com")
+        _git(wt, "config", "user.name", "Test")
+        person = (
+            wt
+            / "src"
+            / "main"
+            / "java"
+            / "org"
+            / "springframework"
+            / "samples"
+            / "petclinic"
+            / "model"
+            / "Person.java"
+        )
+        person.write_text(
+            person.read_text(encoding="utf-8").replace(
+                "return this.firstName;",
+                'return this.firstName == null ? "" : this.firstName;',
+            ),
+            encoding="utf-8",
+        )
+        _git(wt, "add", "src/main/java/org/springframework/samples/petclinic/model/Person.java")
+        _git(wt, "commit", "-m", "touch Person.getFirstName")
+        db = tmp_path / "pc.sqlite"
+        payload = run_pr_gate(
+            db,
+            base_ref=PETCLINIC_PIN,
+            head_ref="HEAD",
+            root=wt,
+            reindex=True,
+            with_plan=False,
+        )
+        md = payload["markdown"]
+        names = [
+            s.get("name")
+            for s in (payload["impact"]["result"].get("symbols_in_hunks") or [])
+        ]
+        assert "Person" in names, names
+        for ctl in ("OwnerController", "PetController", "VisitController"):
+            assert ctl in md, md
+    finally:
+        subprocess.run(
+            ["git", "-C", str(PETCLINIC), "worktree", "remove", "--force", str(wt)],
+            capture_output=True,
+            text=True,
+        )

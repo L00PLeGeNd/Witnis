@@ -15,4 +15,8 @@
 git -C benchmarks/ground-truth/corpora/checkouts/spring-petclinic fetch
 git -C benchmarks/ground-truth/corpora/checkouts/spring-petclinic rev-parse HEAD
 python scripts/bootstrap_petclinic_gt.py
+
+# public proof (grep misses controllers; impact/look must name them)
+witnis index benchmarks/ground-truth/corpora/checkouts/spring-petclinic --db .witnis/petclinic.sqlite --full
+witnis impact Person --db .witnis/petclinic.sqlite --plain
 ```

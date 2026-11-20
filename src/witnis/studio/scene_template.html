@@ -268,7 +268,7 @@
       {
         idx: "02",
         title: "Impact",
-        html: `<p>${imp.direct_edges || 0} direct edges</p><ul>${edges}</ul>
+        html: `<p>${imp.direct_edges || 0} direct, ${imp.transitive_edges || 0} transitive</p><ul>${edges}</ul>`
           <p style="margin-top:0.55rem">Related tests</p><ul>${tests}</ul>`
       },
       {

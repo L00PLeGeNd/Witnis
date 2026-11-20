@@ -510,6 +510,11 @@ def impact_cmd(
                 f"Direct\t{edge.get('relation_type')}\t"
                 f"{edge.get('source')} -> {edge.get('target')}"
             )
+        for edge in payload["result"].get("transitive", []):
+            typer.echo(
+                f"Transitive\t{edge.get('relation_type')}\t"
+                f"{edge.get('source')} -> {edge.get('target')}"
+            )
     if payload["status"] == "failed":
         raise typer.Exit(code=1)
 
@@ -551,6 +556,7 @@ def look_cmd(
     defs = (trace.get("result") or {}).get("definitions") or []
     called_by = (trace.get("result") or {}).get("called_by") or []
     direct = (impact.get("result") or {}).get("direct") or []
+    transitive = (impact.get("result") or {}).get("transitive") or []
     related = (tests.get("result") or {}).get("tests") or []
     steps = (plan.get("result") or {}).get("steps") or []
 
@@ -574,7 +580,11 @@ def look_cmd(
             lines.append(f":{line}")
     for source, lines in list(caller_lines.items())[:4]:
         typer.echo(f"  caller  {source}  {' '.join(lines)}".rstrip())
-    typer.echo(f"  impact  {len(direct)} direct edge(s)")
+    typer.echo(f"  impact  {len(direct)} direct, {len(transitive)} transitive")
+    for edge in transitive[:6]:
+        typer.echo(
+            f"  reach   {edge.get('source')} -> {edge.get('target')}"
+        )
     if related:
         paths = ", ".join(sorted({str(t.get('file_path')) for t in related[:5]}))
         typer.echo(f"  tests   {paths}")
@@ -879,7 +889,7 @@ def compare_cmd(
     head: str = typer.Argument("HEAD", help="Head git revision"),
     db: Optional[Path] = typer.Option(None, "--db", help="SQLite index path"),
 ) -> None:
-    """Compare Python/JS/TS symbol deltas between two revisions."""
+    """Compare Python/JS/TS/Java symbol deltas between two revisions."""
     db_path = db or _default_db()
     try:
         payload = compare_revisions(db_path, base=base, head=head)

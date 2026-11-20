@@ -11,7 +11,7 @@ Protocol: [`dual-annotator-protocol.md`](dual-annotator-protocol.md)
 **label_mode:** `human_v2_adjudicated` — **not** `human_dual`.  
 FYLGls 2026-11-18 review was AI-assisted / non-blind — archived only: [`petclinic-fylgls-ai-review-2026-11-18.md`](../../benchmarks/ground-truth/adjudication/petclinic-fylgls-ai-review-2026-11-18.md).
 
-## Measured (local pin, after review fixes)
+## Measured (re-run 2026-11-20 on the pin, checkout present)
 
 | Metric | TP | FP | FN | P | R |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -21,6 +21,8 @@ FYLGls 2026-11-18 review was AI-assisted / non-blind — archived only: [`petcli
 | Impact **Indirect** | 3 | 0 | 0 | 1.0 | 1.0 |
 
 **18/18** tasks ok. Indirect expect = OwnerController + PetController + VisitController (production `uses_type` → Owner).  
+
+Same three controllers vs `git grep -lw Person`: [`petclinic-person-grep-vs-impact.md`](petclinic-person-grep-vs-impact.md).  
 
 **Scoring honesty:** metrics are **expected-item recall** plus Indirect FP for unexpected main-source `uses_type` participants. Not a claim of full-app precision.
 

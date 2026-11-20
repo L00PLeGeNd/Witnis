@@ -15,12 +15,25 @@ from witnis.core.gitinfo import (
     git_toplevel,
     git_worktree_name_status,
 )
+from witnis.core.parse_java import parse_java_source
 from witnis.core.parse_js import parse_js_source
 from witnis.core.parse_python import parse_python_source
 from witnis.core.security import is_sensitive_path, scan_text_for_secrets
 from witnis.core.store import Store
 
 _JS_COMPARE_SUFFIXES = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
+_COMPARE_SUFFIXES = {".py", ".java"} | _JS_COMPARE_SUFFIXES
+
+
+def _parse_blob_symbols(path: str, blob: str):
+    suffix = Path(path).suffix.lower()
+    if suffix == ".py":
+        return parse_python_source(blob, rel_path=path)
+    if suffix in _JS_COMPARE_SUFFIXES:
+        return parse_js_source(blob, rel_path=path)
+    if suffix == ".java":
+        return parse_java_source(blob, rel_path=path)
+    return []
 
 
 def _open_store(db_path: Path) -> Store:
@@ -327,12 +340,13 @@ def explain_change(
             if not path:
                 continue
             path_s = str(path)
-            if path_s.endswith(".py") and change.get("status") != "D":
+            if change.get("status") != "D":
                 blob = git_show_blob(root, revision, path_s)
                 if blob is None:
-                    blob_misses.append(path_s)
+                    if Path(path_s).suffix.lower() in _COMPARE_SUFFIXES:
+                        blob_misses.append(path_s)
                 else:
-                    for sym in parse_python_source(blob, rel_path=path_s):
+                    for sym in _parse_blob_symbols(path_s, blob):
                         blob_symbols.append(
                             {
                                 "name": sym.name,
@@ -433,7 +447,9 @@ def explain_change(
         "Commit message is observed text, not verified intent",
     ]
     if blob_symbols:
-        limitations.append("Python symbols for touched files are parsed from git blobs at revision")
+        limitations.append(
+            "Python/JS/Java symbols for touched files are parsed from git blobs at revision"
+        )
     else:
         limitations.append(
             "Symbol mapping fell back to the current index (no usable historical blobs)"
@@ -943,6 +959,7 @@ def look_symbol(db_path: Path, target: str) -> dict[str, Any]:
     defs = (trace.get("result") or {}).get("definitions") or []
     called_by = (trace.get("result") or {}).get("called_by") or []
     direct = (impact.get("result") or {}).get("direct") or []
+    transitive = (impact.get("result") or {}).get("transitive") or []
     related = (tests.get("result") or {}).get("tests") or []
     steps = (plan.get("result") or {}).get("steps") or []
     lines = [target]
@@ -965,7 +982,11 @@ def look_symbol(db_path: Path, target: str) -> dict[str, Any]:
             rows.append(f":{line}")
     for source, rows in list(caller_lines.items())[:4]:
         lines.append(f"  caller  {source}  {' '.join(rows)}".rstrip())
-    lines.append(f"  impact  {len(direct)} direct edge(s)")
+    lines.append(f"  impact  {len(direct)} direct, {len(transitive)} transitive")
+    for edge in transitive[:6]:
+        lines.append(
+            f"  reach   {edge.get('source')} -> {edge.get('target')}"
+        )
     if related:
         paths = ", ".join(sorted({str(t.get("file_path")) for t in related[:5]}))
         lines.append(f"  tests   {paths}")
@@ -980,6 +1001,7 @@ def look_symbol(db_path: Path, target: str) -> dict[str, Any]:
         result={
             "card": "\n".join(lines),
             "direct_count": len(direct),
+            "transitive_count": len(transitive),
             "definitions": defs[:5],
             "tests": related[:10],
             "plan_steps": len(steps),
@@ -1172,9 +1194,9 @@ def explain_code(
     blob_text: str | None = None
     if revision:
         blob_text = git_show_blob(root, revision, str(symbol["file_path"]))
-        if blob_text is not None and str(symbol["file_path"]).endswith(".py"):
-            blob_syms = parse_python_source(
-                blob_text, rel_path=str(symbol["file_path"])
+        if blob_text is not None:
+            blob_syms = _parse_blob_symbols(
+                str(symbol["file_path"]), blob_text
             )
             match = next(
                 (
@@ -1350,14 +1372,7 @@ def check_python_syntax(
 def _symbols_from_blob(path: str, blob: str | None) -> dict[str, Any]:
     if blob is None:
         return {}
-    suffix = Path(path).suffix.lower()
-    if suffix == ".py":
-        syms = parse_python_source(blob, rel_path=path)
-    elif suffix in _JS_COMPARE_SUFFIXES:
-        syms = parse_js_source(blob, rel_path=path)
-    else:
-        return {}
-    return {s.name: s for s in syms}
+    return {s.name: s for s in _parse_blob_symbols(path, blob)}
 
 
 def compare_revisions(
@@ -1367,7 +1382,7 @@ def compare_revisions(
     head: str = "HEAD",
     limit: int = 100,
 ) -> dict[str, Any]:
-    """Compare Python/JS/TS symbol sets between two git revisions for changed files."""
+    """Compare Python/JS/TS/Java symbol sets between two git revisions for changed files."""
     store = _open_store(db_path)
     try:
         overview = store.overview()
@@ -1400,7 +1415,7 @@ def compare_revisions(
         path = str(change.get("path") or "")
         files_touched.append(change)
         suffix = Path(path).suffix.lower()
-        if suffix != ".py" and suffix not in _JS_COMPARE_SUFFIXES:
+        if suffix not in _COMPARE_SUFFIXES:
             continue
         old_blob = (
             None
@@ -1466,7 +1481,7 @@ def compare_revisions(
         },
         evidence=evidence,
         limitations=[
-            "Symbol delta covers Python AST + shallow JS/TS regex symbols on changed paths",
+            "Symbol delta covers Python AST + shallow JS/TS/Java regex symbols on changed paths",
             "Renames use the new path for added symbols and from_path for removed",
         ],
     )
@@ -1504,7 +1519,7 @@ def compare_worktree(db_path: Path, limit: int = 100) -> dict[str, Any]:
         path = str(change.get("path") or "")
         files_touched.append(change)
         suffix = Path(path).suffix.lower()
-        if suffix != ".py" and suffix not in _JS_COMPARE_SUFFIXES:
+        if suffix not in _COMPARE_SUFFIXES:
             continue
         old_blob = git_show_blob(root, head_meta["hash"], path)
         if change.get("status") == "R" and change.get("from_path"):
@@ -1558,7 +1573,7 @@ def compare_worktree(db_path: Path, limit: int = 100) -> dict[str, Any]:
         ],
         limitations=[
             "Compares worktree+index+untracked against HEAD blobs",
-            "Only Python/JS/TS symbol extraction on changed paths",
+            "Only Python/JS/TS/Java symbol extraction on changed paths",
         ],
     )
 

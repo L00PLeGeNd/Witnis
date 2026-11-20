@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- PetClinic pin: `git grep Person` vs `witnis impact Person` (controllers via `Owner`); public `impact --plain` / `look` / `pr-gate` / `change-impact` / `compare` / `scene` keep those transitive Java edges instead of Direct-only or Python-only hunks
+- Still not LLM Agent A/B or dual-human GT. Measured notes: `docs/benchmarks/petclinic-person-grep-vs-impact.md`
+
 ## 1.11.1
 
 - PyPI README carries `mcp-name: io.github.L00PLeGeNd/witnis` so the official MCP Registry can claim the package

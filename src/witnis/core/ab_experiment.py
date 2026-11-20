@@ -88,8 +88,9 @@ def _witnis_arm(corpus: Path, db: Path, needle: str) -> ArmResult:
     callers = (trace.get("result") or {}).get("called_by") or []
     related = (tests.get("result") or {}).get("tests") or []
     direct = (impact.get("result") or {}).get("direct") or []
+    transitive = (impact.get("result") or {}).get("transitive") or []
     caller_names = [str(c.get("source")) for c in callers]
-    for edge in direct:
+    for edge in list(direct) + list(transitive):
         src = str(edge.get("source") or "")
         if src and src not in caller_names:
             caller_names.append(src)
@@ -106,6 +107,7 @@ def _witnis_arm(corpus: Path, db: Path, needle: str) -> ArmResult:
         ),
         notes=[
             f"impact_direct_edges={len(direct)}",
+            f"impact_transitive_edges={len(transitive)}",
             "typed search + callers + related tests + verify plan available",
         ],
     )
@@ -153,6 +155,16 @@ def run_pack(repo_root: Path, pack_path: Path, work: Path) -> dict[str, Any]:
     results = []
     for task in pack.get("tasks") or []:
         corpus = (repo_root / task["corpus"]).resolve()
+        if not corpus.is_dir():
+            results.append(
+                {
+                    "task_id": task["id"],
+                    "needle": task.get("needle"),
+                    "skipped": True,
+                    "reason": f"corpus missing: {task['corpus']}",
+                }
+            )
+            continue
         results.append(
             compare_task(
                 corpus,

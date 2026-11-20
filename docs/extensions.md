@@ -33,7 +33,7 @@ Rust port order: [`rust-full-binary.md`](rust-full-binary.md).
 
 ## Explicit non-extension points (for now)
 
-- Agent A/B **execution** (paused)  
+- LLM Agent A/B **execution** (paused; analysis pack is not)  
 - Java AOP / transaction deep dive  
 - Historical Knowledge store  
 - Marketplace GitHub App (Action-first stays)  

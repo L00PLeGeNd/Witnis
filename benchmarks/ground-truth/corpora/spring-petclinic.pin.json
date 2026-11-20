@@ -1,0 +1,8 @@
+{
+  "id": "spring-petclinic",
+  "repo": "https://github.com/spring-projects/spring-petclinic",
+  "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
+  "path": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+  "license": "Apache-2.0",
+  "label_mode": "source_confirmed_auto"
+}

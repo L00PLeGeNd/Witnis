@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "note": "Pinned real-repo corpora. Vendored slices run in CI; external checkouts are opt-in.",
+  "corpora": [
+    {
+      "id": "semantic_java_di",
+      "kind": "vendored",
+      "path": "fixtures/semantic_java_di",
+      "languages": ["java"],
+      "focus": ["spring-style DI", "implements", "injects", "typed calls"]
+    },
+    {
+      "id": "mini_py",
+      "kind": "vendored",
+      "path": "fixtures/mini_py",
+      "languages": ["python"],
+      "focus": ["symbols", "calls", "evidence"]
+    },
+    {
+      "id": "flask",
+      "kind": "external",
+      "repo": "https://github.com/pallets/flask",
+      "commit": "2.3.3",
+      "license": "BSD-3-Clause",
+      "status": "planned",
+      "labels": null
+    },
+    {
+      "id": "fastapi",
+      "kind": "external",
+      "repo": "https://github.com/tiangolo/fastapi",
+      "commit": "0.104.1",
+      "license": "MIT",
+      "status": "planned",
+      "labels": null
+    },
+    {
+      "id": "spring-petclinic",
+      "kind": "external_checkout",
+      "repo": "https://github.com/spring-projects/spring-petclinic",
+      "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
+      "license": "Apache-2.0",
+      "status": "pinned_local",
+      "path": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+      "labels": "benchmarks/ground-truth/labels/spring_petclinic_auto.json",
+      "label_mode": "source_confirmed_auto",
+      "bootstrap": "python scripts/bootstrap_petclinic_gt.py"
+    },
+    {
+      "id": "express",
+      "kind": "external",
+      "repo": "https://github.com/expressjs/express",
+      "commit": "4.18.2",
+      "license": "MIT",
+      "status": "planned",
+      "labels": null
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+.witnis/
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+dist/
+dist-native/
+build/
+target/
+*.egg-info/
+.git/COMMIT_MSG_CLEAN
+# Local publicity notes — keep off the public repo
+docs/PROMOTE.md
+benchmarks/ground-truth/reports/
+benchmarks/ground-truth/corpora/checkouts/
+benchmarks/experiments/reports/
+.git/witnis-tmp/

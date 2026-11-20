@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="280" viewBox="0 0 960 280" role="img" aria-label="Agent said tests passed. Witnis: executed 0, blocked. Then authorized: 4 passed in 0.03s.">
+<title>Agent said tests passed. Witnis: executed 0, blocked. Then authorized: 4 passed in 0.03s.</title>
+<rect x="0.5" y="0.5" width="959" height="279" rx="12" fill="#0d1117" stroke="#30363d"/>
+<text x="24.0" y="28.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#8b949e" text-anchor="start">witnis-dev</text>
+<text x="936.0" y="28.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#8b949e" text-anchor="end">15s</text>
+<rect x="24.0" y="52" width="280" height="168" rx="10" fill="#161b22" stroke="#30363d"><animate attributeName="stroke" dur="15.0s" repeatCount="indefinite" values="#30363d;#30363d;#3fb950;#3fb950;#30363d;#30363d" keyTimes="0;0;0;0.32;0.34;1"/></rect>
+<text x="40.0" y="78.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">Agent</text>
+<text x="40.0" y="128.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="18" fill="#3fb950" text-anchor="start">tests passed</text>
+<text x="40.0" y="158.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">said</text>
+<rect x="24.0" y="214.0" width="0" height="6" rx="3" fill="#3fb950"><animate attributeName="width" dur="15.0s" repeatCount="indefinite" values="0;0;280;280;0;0" keyTimes="0;0;0.04;0.32;0.34;1"/></rect>
+<rect x="340.0" y="52" width="280" height="168" rx="10" fill="#161b22" stroke="#30363d"><animate attributeName="stroke" dur="15.0s" repeatCount="indefinite" values="#30363d;#30363d;#d29922;#d29922;#30363d;#30363d" keyTimes="0;0.339;0.34;0.66;0.68;1"/></rect>
+<text x="356.0" y="78.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">Witnis</text>
+<text x="356.0" y="128.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="18" fill="#d29922" text-anchor="start" font-weight="700">executed: 0   blocked</text>
+<text x="356.0" y="158.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">gate</text>
+<rect x="340.0" y="214.0" width="0" height="6" rx="3" fill="#d29922"><animate attributeName="width" dur="15.0s" repeatCount="indefinite" values="0;0;280;280;0;0" keyTimes="0;0.34;0.38;0.66;0.68;1"/></rect>
+<rect x="656.0" y="52" width="280" height="168" rx="10" fill="#161b22" stroke="#30363d"><animate attributeName="stroke" dur="15.0s" repeatCount="indefinite" values="#30363d;#30363d;#3fb950;#3fb950;#30363d;#30363d" keyTimes="0;0.679;0.68;0.96;0.98;1"/></rect>
+<text x="672.0" y="78.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">Witnis</text>
+<text x="672.0" y="128.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="18" fill="#3fb950" text-anchor="start" font-weight="700">4 passed in 0.03s</text>
+<text x="672.0" y="158.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" fill="#8b949e" text-anchor="start">authorized execute</text>
+<rect x="656.0" y="214.0" width="0" height="6" rx="3" fill="#3fb950"><animate attributeName="width" dur="15.0s" repeatCount="indefinite" values="0;0;280;280;0;0" keyTimes="0;0.68;0.72;0.96;0.98;1"/></rect>
+</svg>

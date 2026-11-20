@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a capability for Core, CLI, MCP, or Studio
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What agent or workflow is blocked today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Desired command, MCP tool, or contract change.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence angle
+      description: How should results stay witnessable (envelope / status / gate)?

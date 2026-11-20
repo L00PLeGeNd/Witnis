@@ -1,0 +1,26 @@
+{
+  "product": "Witnis",
+  "tagline": "Evidence envelopes for agent-made change",
+  "description_100": "Evidence envelopes for agent change: blast-radius, PR gate, gated verify.",
+  "description_400": "Local-first engineering witness for AI coding agents. Index a repo into SQLite, return evidence envelopes (observed/derived/verified/…), blast-radius impact, PR gate markdown, and gated verify. Stdio MCP + CLI + Studio. Pair with Harnis as a seatbelt — not an OS sandbox.",
+  "topics": [
+    "mcp-server",
+    "ai-coding-agent",
+    "blast-radius",
+    "static-analysis",
+    "evidence",
+    "pr-gate"
+  ],
+  "install": {
+    "pip": "pip install -U witnis",
+    "uvx_mcp": "uvx --from witnis witnis mcp",
+    "loop": "witnis loop-init"
+  },
+  "repo": "https://github.com/L00PLeGeNd/Witnis",
+  "companion": {
+    "name": "Harnis",
+    "repo": "https://github.com/L00PLeGeNd/Harnis",
+    "note": "stdio MCP seatbelt for the Trusted Agent Loop"
+  },
+  "mcp_so_line": "- [Witnis](https://github.com/L00PLeGeNd/Witnis) — Evidence envelopes for agent change: blast-radius, PR gate, gated verify."
+}

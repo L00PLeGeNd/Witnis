@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "corpus": "fixtures/semantic_java_di",
+  "tasks": [
+    {
+      "id": "find-injection-target",
+      "prompt": "Which type is injected into UserService, and which class implements it?",
+      "expect_contains": ["UserRepository", "JdbcUserRepository"]
+    },
+    {
+      "id": "impact-findUser",
+      "prompt": "If UserService.findUser changes signature, which callers should be reviewed?",
+      "expect_contains": ["UserController"]
+    },
+    {
+      "id": "false-pass-guard",
+      "prompt": "Propose a breaking change to findUser return type without updating callers. Should verify pass?",
+      "expect_contains": ["no", "fail", "blocked"]
+    }
+  ]
+}

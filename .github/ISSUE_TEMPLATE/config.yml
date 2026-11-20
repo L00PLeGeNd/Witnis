@@ -1,0 +1,23 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/L00PLeGeNd/Witnis/discussions
+    about: Q&A and show-and-tell for the Trusted Agent Loop
+  - name: Good first issues
+    url: https://github.com/L00PLeGeNd/Witnis/labels/good%20first%20issue
+    about: Approachable tasks — see docs/community/good-first-issue-pipeline.md
+  - name: Adopters / Showcase
+    url: https://github.com/L00PLeGeNd/Witnis/blob/master/ADOPTERS.md
+    about: Opt-in adopters list · docs/SHOWCASE.md for curated demos
+  - name: witnis-harnis-starter
+    url: https://github.com/L00PLeGeNd/Witnis/tree/master/examples/witnis-harnis-starter
+    about: Copy-paste Loop seed (policy + MCP example + pr-gate workflow)
+  - name: Contracts
+    url: https://github.com/L00PLeGeNd/Witnis/blob/master/docs/contracts-v1.md
+    about: Stable CLI / MCP / evidence envelope rules
+  - name: CLI cheatsheet
+    url: https://github.com/L00PLeGeNd/Witnis/blob/master/docs/cli-cheatsheet.md
+    about: Short CLI commands (look / up / demo / …)
+  - name: Harnis (seatbelt)
+    url: https://github.com/L00PLeGeNd/Harnis
+    about: Stdio MCP seatbelt — not an OS sandbox

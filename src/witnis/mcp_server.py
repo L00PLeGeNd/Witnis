@@ -89,7 +89,7 @@ def build_server() -> FastMCP:
 
     @tool("index", public=True)
     def _index() -> str:
-        """Index the current working tree into WITNIS_DB (incremental)."""
+        """Index the current working directory into SQLite (WITNIS_DB or .witnis/index.sqlite). Incremental; does not run tests or modify source. Call this first in a new repo. Returns JSON with file and symbol counts."""
         db = _db_path()
         stats = index_repository(Path.cwd(), db, incremental=True)
         return json.dumps(
@@ -107,12 +107,12 @@ def build_server() -> FastMCP:
 
     @tool("look", public=True)
     def _look(target: str) -> str:
-        """Compact witness card: def, callers, impact count, tests, verify plan."""
+        """Witness card for a symbol or file name: definition, callers, impact size, related tests, verify plan. Read-only. Requires a prior index. Does not execute tests."""
         return json.dumps(look_symbol(_db_path(), target), ensure_ascii=False, indent=2)
 
     @tool("impact", public=True)
     def _impact_public(target: str, limit: int = 50) -> str:
-        """Blast radius envelope (direct + transitive)."""
+        """Blast-radius envelope for a symbol: direct and transitive callers/callees, capped by limit (default 50). Read-only. Requires a prior index. Not a security audit."""
         return json.dumps(
             analyze_impact(_db_path(), target=target, limit=limit),
             ensure_ascii=False,
@@ -121,7 +121,7 @@ def build_server() -> FastMCP:
 
     @tool("verify", public=True)
     def _verify_public(target: str = "", execute: bool = False) -> str:
-        """Plan or execute gated verification. execute requires WITNIS_ALLOW_VERIFY=1."""
+        """Gated verification. Default (execute=false) returns a plan only — 0 commands ran. execute=true runs tests only if WITNIS_ALLOW_VERIFY=1; otherwise status is blocked. Never treat blocked or plan-only as tests passed. automation_verified is true only after authorized execute."""
         return json.dumps(
             run_verification(
                 _db_path(),

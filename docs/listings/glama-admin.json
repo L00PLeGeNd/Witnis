@@ -1,0 +1,24 @@
+{
+  "dockerfile_url": "https://glama.ai/mcp/servers/L00PLeGeNd/Witnis/admin/dockerfile",
+  "listing_url": "https://glama.ai/mcp/servers/L00PLeGeNd/Witnis/admin",
+  "python_version": "3.12",
+  "build_steps": ["pip install --no-cache-dir ."],
+  "cmd": ["witnis", "mcp"],
+  "environment_variables_schema": {
+    "type": "object",
+    "properties": {
+      "WITNIS_DB": {
+        "type": "string",
+        "description": "Absolute path to the SQLite index. Optional. Defaults to .witnis/index.sqlite in the working directory. Call the index tool first in a new repo."
+      }
+    },
+    "required": []
+  },
+  "placeholder_parameters": {},
+  "release_version": "1.11.0",
+  "listing": {
+    "name": "Witnis",
+    "short": "Evidence envelopes for agent change: blast-radius, PR gate, gated verify.",
+    "long": "Local-first engineering witness for AI coding agents (search witnis-dev). Index a repo into SQLite, then use index / look / impact / verify. verify does nothing until WITNIS_ALLOW_VERIFY=1 and execute=true; blocked means 0 commands ran. Pair with Harnis as a stdio seatbelt — not an OS sandbox. Not affiliated with Witnis AB / witnis.se."
+  }
+}

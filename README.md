@@ -21,7 +21,7 @@ History has to be in the checkout (`fetch-depth: 0`):
 - uses: L00PLeGeNd/Witnis/.github/actions/pr-gate@v1
 ```
 
-`@v1` moves with 1.x. Pin with `@v1.11.0` if you do not want that. Default CI is blocked / 0 commands.
+`@v1` moves with 1.x. Pin with `@v1.11.1` if you do not want that. Default CI is blocked / 0 commands.
 
 ## MCP
 
@@ -51,6 +51,8 @@ That writes the Cursor / Claude snippet and a stdio policy. Harnis sits in front
   <img src="./docs/assets/caught-lying.svg" alt="Agent wrote tests passed; Witnis shows executed 0 blocked; after authorize, 4 passed in 0.03s" width="960"/>
 </p>
 
-`pip install witnis` / `uvx witnis`. Pin the Action with `@v1.11.0` if you do not want `@v1` to move.
+`pip install witnis` / `uvx witnis`. Pin the Action with `@v1.11.1` if you do not want `@v1` to move.
 
 If you are searching: **witnis-dev**. Unrelated to [Witnis AB](https://www.witnis.se). PetClinic labels (18 items, not dual-human): [`docs/benchmarks/petclinic-human-v2.md`](docs/benchmarks/petclinic-human-v2.md). Isolation: [`SECURITY.md`](SECURITY.md). License: Apache-2.0.
+
+mcp-name: io.github.L00PLeGeNd/witnis

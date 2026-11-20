@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "witnis"
-version = "1.11.0"
+version = "1.11.1"
 description = "witnis-dev: PR-gate evidence for coding agents (blast-radius, gated verify). Not affiliated with Witnis AB."
 readme = "README.md"
 license = { text = "Apache-2.0" }

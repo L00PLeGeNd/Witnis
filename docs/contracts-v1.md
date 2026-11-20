@@ -1,7 +1,7 @@
 # Witnis v1 stable contracts
 
 **Contract version:** `stable` (reported by `witnis capabilities`)  
-**Package version:** `1.11.0` (keep in sync with `pyproject.toml` / `Cargo.toml`)
+**Package version:** `1.11.1` (keep in sync with `pyproject.toml` / `Cargo.toml`)
 
 ## Envelope (all tools)
 

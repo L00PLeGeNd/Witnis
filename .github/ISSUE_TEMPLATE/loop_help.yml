@@ -1,0 +1,39 @@
+name: Trusted Agent Loop help
+description: loop-init, Harnis wrap, or pr-gate wiring — not a core bug
+labels: ["question", "loop"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For reproducible crashes use **Bug report**. Starter kit: `examples/witnis-harnis-starter/`.
+  - type: dropdown
+    id: piece
+    attributes:
+      label: Which piece?
+      options:
+        - witnis loop-init
+        - Harnis MCP wrap
+        - pr-gate Action / sticky comment
+        - browser-demo
+        - unclear / multiple
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should work after setup?
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant config (redact secrets)
+      render: json
+      placeholder: mcp.loop.json / .harnis/policy.json / workflow snippet
+  - type: textarea
+    id: output
+    attributes:
+      label: Command output
+      description: `witnis version`, `witnis loop-init`, Action log excerpt
+      render: shell

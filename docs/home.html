@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>witnis — Software Change Causality &amp; Gated Evidence Engine</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --ink: #e6edf3;
+      --muted: #8b949e;
+      --line: #30363d;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --warn: #d29922;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+    .wrap {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 3.5rem;
+    }
+    .masthead {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: enter 0.6s var(--ease) forwards;
+    }
+    .hero-svg {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 0.7s var(--ease) 0.08s forwards;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 0.7s var(--ease) forwards;
+    }
+    .card:nth-child(1) { animation-delay: 0.16s; }
+    .card:nth-child(2) { animation-delay: 0.22s; }
+    .card h2 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0 0 0.65rem;
+      font-family: var(--mono);
+      color: #f0f6fc;
+    }
+    .card pre {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      line-height: 1.55;
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding-top: 1.1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.1rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @keyframes enter { to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .masthead, .hero-svg, .card { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <img class="masthead" src="assets/witnis-masthead.svg" alt="witnis masthead" />
+    <img class="hero-svg" src="assets/blast-radius.svg" alt="witnis impact Person on spring-petclinic: text search versus relation graph" />
+    <img class="hero-svg" src="assets/trusted-agent-loop.svg" alt="gated verification loop on redact_text" />
+
+    <div class="grid">
+      <section class="card">
+        <h2>witnis impact Person (contracts-v1, trimmed)</h2>
+        <pre>{
+  "status": "success",
+  "repository": { "name": "spring-petclinic", "revision": "500158f&#8230;", "index_stale": false },
+  "result": {
+    "direct": [
+      { "source": "&#8230;/owner/Owner.java:Owner", "target": "Person",
+        "relation_type": "inherits", "status": "observed", "start_line": 50 }
+    ],
+    "transitive": [
+      { "source": "&#8230;/owner/OwnerController.java:OwnerController", "target": "Owner",
+        "relation_type": "uses_type", "status": "derived", "start_line": 78 }
+    ]
+  },
+  "limitations": ["uses_type is signature-derived (params/returns); not full flow-sensitive typing"]
+}</pre>
+      </section>
+      <section class="card">
+        <h2>Bootstrap + PR Gate + Isolated Verify</h2>
+        <pre>$ pip install -U witnis
+$ cd /path/to/repo &amp;&amp; witnis loop-init
+$ witnis impact Person
+$ witnis pr-gate --base origin/main --head HEAD --format markdown
+$ WITNIS_ALLOW_VERIFY=1 witnis verify redact_text --execute</pre>
+      </section>
+    </div>
+
+    <footer>
+      <a href="trusted-agent-loop.md">trusted-agent-loop.md</a>
+      <a href="contracts-v1.md">contracts-v1.md</a>
+      <a href="BINARY.md">BINARY.md</a>
+      <a href="security-hardening.md">security-hardening.md</a>
+      <a href="DEPTH.md">DEPTH.md</a>
+      <a href="FAILURE_CASES.md">FAILURE_CASES.md</a>
+      <a href="../README.md">README.md</a>
+    </footer>
+  </main>
+</body>
+</html>

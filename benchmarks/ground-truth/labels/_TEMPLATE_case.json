@@ -1,0 +1,48 @@
+{
+  "id": "petclinic-CASE_ID",
+  "corpus": "external:spring-petclinic",
+  "commit": "REPLACE_WITH_PINNED_SHA",
+  "license": "Apache-2.0",
+  "annotators": ["ann_a", "ann_b"],
+  "tasks": [
+    {
+      "id": "symbol_locate_1",
+      "kind": "symbol_locate",
+      "query": "SYMBOL_NAME",
+      "expect": {
+        "symbols": [
+          { "name": "SYMBOL_NAME", "path": "path/to/File.java", "line": 0 }
+        ]
+      }
+    },
+    {
+      "id": "direct_callers_1",
+      "kind": "call_edge",
+      "query": "who calls SYMBOL_NAME",
+      "notes": "Direct dependence only — see LABELING_SHEET.md",
+      "expect": {
+        "edges": [
+          {
+            "source": "Caller.method",
+            "target": "SYMBOL_NAME",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "injects_or_implements_1",
+      "kind": "call_edge",
+      "query": "DI or implements for TYPE",
+      "expect": {
+        "edges": [
+          {
+            "source": "ConsumerOrImpl",
+            "target": "TYPE",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    }
+  ]
+}

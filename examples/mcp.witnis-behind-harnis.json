@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "witnis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "harnis",
+        "mcp",
+        "--preset",
+        "coding-agent",
+        "--policy",
+        ".harnis/policy.json",
+        "--",
+        "uvx",
+        "witnis",
+        "mcp"
+      ],
+      "env": {
+        "WITNIS_DB": "${workspaceFolder}/.witnis/index.sqlite"
+      }
+    }
+  }
+}

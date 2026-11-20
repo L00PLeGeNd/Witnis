@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "witnis": {
+      "command": "uvx",
+      "args": [
+        "witnis",
+        "mcp"
+      ],
+      "env": {
+        "WITNIS_DB": "${workspaceFolder}/.witnis/index.sqlite"
+      }
+    }
+  }
+}

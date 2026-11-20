@@ -1,0 +1,66 @@
+{
+  "id": "semantic_java_di",
+  "corpus": "fixtures/semantic_java_di",
+  "commit": "vendored-fixture",
+  "license": "Apache-2.0",
+  "tasks": [
+    {
+      "id": "controller_calls_service",
+      "kind": "call_edge",
+      "query": "UserController.get -> UserService.findUser",
+      "notes": "Typed field call after DI-aware Java relations.",
+      "expect": {
+        "edges": [
+          {
+            "source": "UserController",
+            "target": "UserService.findUser",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "service_autowired_repo",
+      "kind": "call_edge",
+      "query": "UserService @Autowired -> UserRepository",
+      "notes": "Injection edge — P0 Spring-aware Java path.",
+      "expect": {
+        "edges": [
+          {
+            "source": "UserService",
+            "target": "UserRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "repo_iface_impl",
+      "kind": "call_edge",
+      "query": "UserRepository <- JdbcUserRepository",
+      "notes": "Interface binding via implements.",
+      "expect": {
+        "edges": [
+          {
+            "source": "JdbcUserRepository",
+            "target": "UserRepository",
+            "relation_type": "implements"
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_user_symbol",
+      "kind": "symbol_locate",
+      "query": "findUser",
+      "expect": {
+        "symbols": [
+          {
+            "name": "findUser",
+            "path": "com/example/user/UserService.java"
+          }
+        ]
+      }
+    }
+  ]
+}

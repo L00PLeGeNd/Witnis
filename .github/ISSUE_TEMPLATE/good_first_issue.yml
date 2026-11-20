@@ -1,0 +1,36 @@
+name: Good first issue (maintainers)
+description: File an approachable task for new contributors
+labels: ["good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep scope small. Do not change contracts, envelopes, or the security model unless that is the whole issue.
+  - type: input
+    id: goal
+    attributes:
+      label: Goal
+      placeholder: One sitting, clear files
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      value: No contract / envelope / security-model changes.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to touch
+    validations:
+      required: true
+  - type: textarea
+    id: verify
+    attributes:
+      label: How to verify
+      value: |
+        pytest -q
+    validations:
+      required: true

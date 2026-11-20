@@ -1,0 +1,35 @@
+{
+  "id": "semantic_py_di",
+  "corpus": "fixtures/semantic_py_di",
+  "commit": "vendored-fixture",
+  "license": "Apache-2.0",
+  "tasks": [
+    {
+      "id": "controller_calls_find_user",
+      "kind": "call_edge",
+      "query": "UserController.get -> find_user",
+      "expect": {
+        "edges": [
+          {
+            "source": "UserController",
+            "target": "find_user",
+            "relation_type": "calls"
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_user_symbol",
+      "kind": "symbol_locate",
+      "query": "find_user",
+      "expect": {
+        "symbols": [
+          {
+            "name": "find_user",
+            "path": "service.py"
+          }
+        ]
+      }
+    }
+  ]
+}

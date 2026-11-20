@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.L00PLeGeNd/witnis",
+  "description": "Evidence envelopes for agent change: blast-radius, PR gate, gated verify.",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "witnis",
+      "version": "1.11.2",
+      "transport": { "type": "stdio" }
+    }
+  ],
+  "title": "Witnis (witnis-dev)",
+  "websiteUrl": "https://github.com/L00PLeGeNd/Witnis#readme",
+  "repository": {
+    "url": "https://github.com/L00PLeGeNd/Witnis",
+    "source": "github"
+  },
+  "version": "1.11.2"
+}

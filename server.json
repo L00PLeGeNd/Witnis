@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.L00PLeGeNd/witnis",
-  "description": "witnis-dev — catch agents claiming tests passed when verify executed 0 commands. Install: uvx witnis mcp. Not affiliated with Witnis AB.",
+  "description": "Evidence envelopes for agent change: blast-radius, PR gate, gated verify.",
   "packages": [
     {
       "registryType": "pypi",

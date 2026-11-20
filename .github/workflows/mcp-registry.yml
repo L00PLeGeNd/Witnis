@@ -1,0 +1,26 @@
+# Official MCP Registry (registry.modelcontextprotocol.io).
+# Run after the matching version is already on PyPI.
+name: MCP Registry
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mcp-publisher
+        run: |
+          set -euo pipefail
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${os}_${arch}.tar.gz" | tar xz mcp-publisher
+      - name: Publish
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

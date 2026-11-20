@@ -58,6 +58,14 @@ runs:
         if [ -z "$BASE_REF" ]; then
           if [ -n "$PR_BASE" ]; then BASE_REF="origin/$PR_BASE"; else BASE_REF="HEAD~1"; fi
         fi
+        if [ "$BASE_REF" = "HEAD~1" ] && ! git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+          echo "Single commit; no parent to compare. Skipping pr-gate."
+          echo "exit_code=0" >> "$GITHUB_OUTPUT"
+          echo "markdown_path=pr-gate.md" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "_Single commit — pr-gate has no parent range._" > pr-gate.md
+          echo '{}' > pr-gate.json
+          exit 0
+        fi
         EXTRA=()
         if [ "$STRICT" = "true" ]; then EXTRA+=(--strict); fi
         witnis pr-gate \

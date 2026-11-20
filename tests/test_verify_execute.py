@@ -24,13 +24,28 @@ def test_run_verification_execute_pytest_on_fixture(tmp_path: Path) -> None:
 
 
 def test_run_verification_container_profile_on_fixture(tmp_path: Path) -> None:
+    import subprocess
+
     import pytest
 
     from witnis.core.verify_isolate import detect_container_runtime
 
-    if detect_container_runtime() is None:
+    runtime = detect_container_runtime()
+    if runtime is None:
         pytest.skip("docker/podman daemon not running")
-    image = os.environ.get("WITNIS_VERIFY_IMAGE") or "witnis-verify:3.12"
+    image = os.environ.get("WITNIS_VERIFY_IMAGE")
+    if not image:
+        pytest.skip(
+            "set WITNIS_VERIFY_IMAGE to an image that includes pytest "
+            "(docker/verify.Dockerfile)"
+        )
+    probe = subprocess.run(
+        [runtime, "image", "inspect", image],
+        capture_output=True,
+        timeout=30,
+    )
+    if probe.returncode != 0:
+        pytest.skip(f"container image {image!r} is not present")
     db = tmp_path / "index.sqlite"
     index_repository(FIXTURE, db, incremental=False)
     prev_allow = os.environ.get("WITNIS_ALLOW_VERIFY")

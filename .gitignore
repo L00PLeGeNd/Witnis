@@ -15,6 +15,9 @@ target/
 .git/COMMIT_MSG_CLEAN
 # Local publicity notes — keep off the public repo
 docs/PROMOTE.md
+DONE.md
+AGENT_UNATTENDED.md
+BLOCKED.md
 benchmarks/ground-truth/reports/
 benchmarks/ground-truth/corpora/checkouts/
 benchmarks/experiments/reports/

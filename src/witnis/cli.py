@@ -53,7 +53,7 @@ from witnis.core.verify import (
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
-    help="Witnis — witness claims with evidence",
+    help="Witnis — local evidence for coding agents",
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 

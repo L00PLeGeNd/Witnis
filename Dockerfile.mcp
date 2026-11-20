@@ -1,0 +1,13 @@
+# Optional stdio MCP image for directory / local Docker runs.
+# Glama may generate its own Dockerfile in Admin → Dockerfile; keep this as a known-good reference.
+FROM python:3.12-slim
+
+WORKDIR /app
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+RUN pip install --no-cache-dir .
+
+ENV WITNIS_DB=/data/index.sqlite
+VOLUME ["/data"]
+
+ENTRYPOINT ["witnis", "mcp"]

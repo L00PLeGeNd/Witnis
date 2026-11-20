@@ -1,0 +1,19 @@
+# Drop-in. Zero config besides checkout.
+name: Witnis
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: L00PLeGeNd/Witnis/.github/actions/pr-gate@v1

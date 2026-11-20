@@ -1,0 +1,39 @@
+name: Good first issue (maintainers)
+description: File an approachable task for new contributors
+labels: ["good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Maintainers: follow [`docs/community/good-first-issue-pipeline.md`](https://github.com/L00PLeGeNd/Witnis/blob/master/docs/community/good-first-issue-pipeline.md).
+        Seeds: `docs/community/gfi-seeds/`.
+  - type: input
+    id: goal
+    attributes:
+      label: Goal
+      placeholder: One sitting, clear files
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      value: No contract / envelope / security-model changes.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to touch
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance commands
+      value: |
+        ```bash
+        pytest -q
+        ```
+    validations:
+      required: true

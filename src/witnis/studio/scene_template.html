@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Witnis · token refresh scene</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #121c18;
+      --muted: #5a6a63;
+      --line: rgba(18, 28, 24, 0.14);
+      --paper: #eef3f0;
+      --accent: #0c5c48;
+      --accent-soft: rgba(12, 92, 72, 0.12);
+      --warn: #8a4f10;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 640px at 8% -12%, rgba(12, 92, 72, 0.14), transparent 58%),
+        radial-gradient(900px 520px at 100% 0%, rgba(18, 28, 24, 0.07), transparent 52%),
+        linear-gradient(180deg, #f6f9f7 0%, var(--paper) 42%, #e8eeea 100%);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.32;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      animation: grain 22s steps(10) infinite;
+    }
+    @keyframes grain {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(-0.8%, 0.6%); }
+      66% { transform: translate(0.7%, -0.9%); }
+    }
+    .veil {
+      position: fixed;
+      inset: auto -10% 5% auto;
+      width: 46vw;
+      height: 46vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(12, 92, 72, 0.16), transparent 70%);
+      filter: blur(10px);
+      animation: drift 32s var(--ease) infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(-7%, -5%) scale(1.06); }
+    }
+    .wrap {
+      position: relative;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 4.25rem 1.4rem 4.5rem;
+    }
+    .brand {
+      font-family: Fraunces, Georgia, serif;
+      font-weight: 650;
+      font-size: clamp(2.8rem, 7.5vw, 4.8rem);
+      letter-spacing: -0.045em;
+      line-height: 0.92;
+      margin: 0 0 0.85rem;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: enter 1.15s var(--ease) 0.06s forwards;
+    }
+    .kicker {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 1.1rem;
+      opacity: 0;
+      animation: enter 1s var(--ease) 0.14s forwards;
+    }
+    .task {
+      max-width: 36rem;
+      font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+      line-height: 1.4;
+      font-weight: 600;
+      margin: 0 0 0.85rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 1.05s var(--ease) 0.22s forwards;
+    }
+    .sub {
+      max-width: 34rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+      margin: 0 0 2.4rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 1.05s var(--ease) 0.32s forwards;
+    }
+    @keyframes enter {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .rail {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 1rem;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(14px);
+      animation: enter 0.95s var(--ease) forwards;
+    }
+    .step:nth-child(1) { animation-delay: 0.42s; }
+    .step:nth-child(2) { animation-delay: 0.52s; }
+    .step:nth-child(3) { animation-delay: 0.62s; }
+    .step:nth-child(4) { animation-delay: 0.72s; }
+    .step:nth-child(5) { animation-delay: 0.82s; }
+    .idx {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding-top: 0.2rem;
+    }
+    .step h2 {
+      margin: 0 0 0.45rem;
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    .step p, .step li {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.98rem;
+    }
+    .step ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.1rem;
+    }
+    .mono {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.82rem;
+      color: var(--ink);
+    }
+    .pill {
+      display: inline-block;
+      margin-top: 0.55rem;
+      padding: 0.25rem 0.55rem;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .pill.warn { color: var(--warn); background: rgba(138, 79, 16, 0.08); }
+    .why {
+      margin-top: 2.4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      animation: enter 1s var(--ease) 0.95s forwards;
+    }
+    .why h2 {
+      margin: 0 0 0.75rem;
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.2rem;
+    }
+    .why li { color: var(--muted); margin-bottom: 0.45rem; line-height: 1.45; }
+    .cta {
+      margin-top: 1.75rem;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .cta code {
+      color: var(--ink);
+      background: rgba(18, 28, 24, 0.05);
+      padding: 0.15rem 0.35rem;
+    }
+    .foot {
+      margin-top: 2.5rem;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      opacity: 0;
+      animation: enter 1s var(--ease) 1.05s forwards;
+    }
+    @media (max-width: 640px) {
+      .step { grid-template-columns: 1fr; gap: 0.35rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .brand, .kicker, .task, .sub, .step, .why, .foot {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      body::before, .veil { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="veil" aria-hidden="true"></div>
+  <main class="wrap">
+    <p class="kicker">Trusted Agent Loop · browser demo</p>
+    <h1 class="brand">Witnis</h1>
+    <p class="task" id="task"></p>
+    <p class="sub">Evidence envelopes for agent-made change — context, blast radius, gated verify. Not a tool catalog.</p>
+
+    <div class="rail" id="rail"></div>
+
+    <section class="why">
+      <h2>Why not “just let the agent read the repo?”</h2>
+      <ul id="why"></ul>
+      <p class="cta">CLI: <code>witnis scene</code> · Loop: <code>witnis loop-init</code> · Verify stays blocked until authorized.</p>
+    </section>
+    <p class="foot" id="foot"></p>
+  </main>
+  <script id="witnis-scene" type="application/json">__WITNIS_SCENE__</script>
+  <script>
+    const data = JSON.parse(document.getElementById("witnis-scene").textContent);
+    const story = data.story || {};
+    document.getElementById("task").textContent = story["1_task"] || data.task || "";
+
+    const ctx = story["2_context"] || {};
+    const imp = story["3_impact"] || {};
+    const guide = story["4_change_guidance"] || [];
+    const ver = story["5_verification"] || {};
+
+    const defs = (ctx.definitions || []).map(d =>
+      `<li class="mono">${d.name || ""} · ${d.file || ""}:${d.line || ""}</li>`
+    ).join("") || "<li>No definitions indexed</li>";
+    const callers = (ctx.callers || []).map(c => `<li class="mono">${c}</li>`).join("") || "<li>No callers listed</li>";
+    const edges = (imp.sample || []).map(e =>
+      `<li class="mono">${e.from || ""} → ${e.to || ""} (${e.type || ""})</li>`
+    ).join("") || "<li>No direct edges</li>";
+    const tests = (imp.related_tests || []).map(t => `<li class="mono">${t}</li>`).join("") || "<li>(none indexed)</li>";
+    const steps = (ver.plan_steps || []).map(s =>
+      `<li class="mono">${s.id || ""} · ${s.description || ""}</li>`
+    ).join("") || "<li>No plan steps</li>";
+    const state = ver.state || "planned_only";
+    const stateClass = state === "planned_only" || state === "blocked" ? "warn" : "";
+
+    const blocks = [
+      {
+        idx: "01",
+        title: "Context",
+        html: `<p>${ctx.indexed_files || 0} files · ${ctx.indexed_symbols || 0} symbols</p>
+          <p style="margin-top:0.55rem">Definitions</p><ul>${defs}</ul>
+          <p style="margin-top:0.55rem">Callers</p><ul>${callers}</ul>`
+      },
+      {
+        idx: "02",
+        title: "Impact",
+        html: `<p>${imp.direct_edges || 0} direct edges</p><ul>${edges}</ul>
+          <p style="margin-top:0.55rem">Related tests</p><ul>${tests}</ul>`
+      },
+      {
+        idx: "03",
+        title: "Change from evidence",
+        html: `<ul>${guide.map(g => `<li>${g}</li>`).join("") || "<li>—</li>"}</ul>`
+      },
+      {
+        idx: "04",
+        title: "Gated verify",
+        html: `<span class="pill ${stateClass}">state=${state}</span>
+          <ul style="margin-top:0.65rem">${steps}</ul>
+          <p style="margin-top:0.55rem" class="mono">${ver.how_to_execute || ""}</p>`
+      }
+    ];
+
+    document.getElementById("rail").innerHTML = blocks.map(b => `
+      <article class="step">
+        <div class="idx">${b.idx}</div>
+        <div><h2>${b.title}</h2>${b.html}</div>
+      </article>
+    `).join("");
+
+    const why = data.why_not_bare_agent || [];
+    document.getElementById("why").innerHTML = why.map(w => `<li>${w}</li>`).join("");
+    document.getElementById("foot").textContent =
+      `fixture ${data.fixture || ""} · symbol ${data.symbol || ""} · scene ${data.scene || ""}`;
+  </script>
+</body>
+</html>

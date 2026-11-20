@@ -1,0 +1,29 @@
+# Publishes to PyPI when a GitHub Release is published.
+# Requires a Trusted Publisher on pypi.org for L00PLeGeNd/Witnis (environment: pypi).
+name: PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/witnis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          python -m pip install -U pip build
+          python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1

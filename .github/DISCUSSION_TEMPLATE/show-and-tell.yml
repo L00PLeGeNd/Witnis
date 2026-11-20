@@ -1,0 +1,26 @@
+title: "[Show] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share an adoption of Witnis and/or Harnis. Keep claims honest — link FAILURE_CASES if you hit a miss.
+  - type: input
+    id: stack
+    attributes:
+      label: Stack
+      placeholder: "Python service · Claude Code · Harnis wrap"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What you shipped
+      description: PR gate? loop-init? custom policy?
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      placeholder: PR, blog, screenshot (optional)

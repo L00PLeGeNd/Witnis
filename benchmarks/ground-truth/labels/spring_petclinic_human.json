@@ -1,0 +1,322 @@
+{
+  "id": "spring_petclinic_human",
+  "corpus": "benchmarks/ground-truth/corpora/checkouts/spring-petclinic",
+  "commit": "500158f732419217507c7656904b8e6aa1bcc0d6",
+  "license": "Apache-2.0",
+  "annotators": ["human-v1", "human-v2-adjudication"],
+  "label_mode": "human_v2_adjudicated",
+  "review_notes": "A=human-v1; maintainer second-pass human-v2-adjudication (not a second person). 2026-11-18 FYLGls delivered AI-assisted non-blind review — archived, NOT human_dual. Scope: src/main/java; generics/class literals out. Indirect Person typed users: OwnerController+PetController+VisitController. See SCOPE.md + adjudication/petclinic-fylgls-ai-review-2026-11-18.md.",
+  "adjudication": "benchmarks/ground-truth/adjudication/petclinic-human-v2.md",
+  "scope": "benchmarks/ground-truth/SCOPE.md",
+  "tasks": [
+    {
+      "id": "h_sym_owner_controller",
+      "kind": "symbol_locate",
+      "query": "OwnerController",
+      "notes": "Controller class in owner package.",
+      "expect": {
+        "symbols": [
+          {
+            "name": "OwnerController",
+            "path": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_sym_owner_repository",
+      "kind": "symbol_locate",
+      "query": "OwnerRepository",
+      "notes": "Spring Data interface — Direct dependency hub for owner flows.",
+      "expect": {
+        "symbols": [
+          {
+            "name": "OwnerRepository",
+            "path": "src/main/java/org/springframework/samples/petclinic/owner/OwnerRepository.java"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_owner_ctrl_injects_repo",
+      "kind": "call_edge",
+      "query": "OwnerController ctor injects OwnerRepository",
+      "notes": "Direct: constructor field injection visible in OwnerController.java.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController",
+            "target": "OwnerRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_pet_ctrl_injects_repo",
+      "kind": "call_edge",
+      "query": "PetController ctor injects OwnerRepository",
+      "notes": "Direct: PetController(OwnerRepository owners, PetTypeRepository types).",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "PetController",
+            "target": "OwnerRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_visit_ctrl_injects_repo",
+      "kind": "call_edge",
+      "query": "VisitController ctor injects OwnerRepository",
+      "notes": "Direct: VisitController(OwnerRepository owners).",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "VisitController",
+            "target": "OwnerRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_vet_ctrl_injects_repo",
+      "kind": "call_edge",
+      "query": "VetController ctor injects VetRepository",
+      "notes": "Direct: VetController(VetRepository vetRepository).",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "VetController",
+            "target": "VetRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_formatter_injects_types",
+      "kind": "call_edge",
+      "query": "PetTypeFormatter ctor injects PetTypeRepository",
+      "notes": "Direct: PetTypeFormatter(PetTypeRepository types).",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "PetTypeFormatter",
+            "target": "PetTypeRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_pet_ctrl_injects_types",
+      "kind": "call_edge",
+      "query": "PetController ctor injects PetTypeRepository",
+      "notes": "Direct: PetController(OwnerRepository owners, PetTypeRepository types). Added in human-v2 B gap-fill.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "PetController",
+            "target": "PetTypeRepository",
+            "relation_type": "injects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_owner_ctrl_uses_owner",
+      "kind": "call_edge",
+      "query": "OwnerController methods use type Owner",
+      "notes": "Direct uses_type from method params/returns (quality pass after F1).",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "OwnerController",
+            "target": "Owner",
+            "relation_type": "uses_type"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_visit_ctrl_uses_owner",
+      "kind": "call_edge",
+      "query": "VisitController methods use type Owner",
+      "notes": "Direct uses_type; Visit flows take Owner.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "VisitController",
+            "target": "Owner",
+            "relation_type": "uses_type"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_formatter_implements",
+      "kind": "call_edge",
+      "query": "PetTypeFormatter implements Formatter",
+      "notes": "Direct: implements Formatter<PetType>.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "PetTypeFormatter",
+            "target": "Formatter",
+            "relation_type": "implements"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_owner_inherits_person",
+      "kind": "call_edge",
+      "query": "Owner extends Person",
+      "notes": "Direct inheritance.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "Owner",
+            "target": "Person",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_vet_inherits_person",
+      "kind": "call_edge",
+      "query": "Vet extends Person",
+      "notes": "Direct inheritance.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "Vet",
+            "target": "Person",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_edge_named_inherits_base",
+      "kind": "call_edge",
+      "query": "NamedEntity extends BaseEntity",
+      "notes": "Direct inheritance in model package.",
+      "impact_class": "Direct",
+      "expect": {
+        "edges": [
+          {
+            "source": "NamedEntity",
+            "target": "BaseEntity",
+            "relation_type": "inherits"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_impact_owner_repository",
+      "kind": "impact_set",
+      "query": "OwnerRepository",
+      "notes": "Direct: all ctor inject sites. Indirect empty for V1 — Spring Data proxy / generated impl out of static scope.",
+      "expect": {
+        "direct": [
+          {
+            "name": "OwnerController",
+            "relation_type": "injects"
+          },
+          {
+            "name": "PetController",
+            "relation_type": "injects"
+          },
+          {
+            "name": "VisitController",
+            "relation_type": "injects"
+          }
+        ],
+        "indirect": []
+      }
+    },
+    {
+      "id": "h_impact_person",
+      "kind": "impact_set",
+      "query": "Person",
+      "notes": "Direct: Owner and Vet inherit Person. Indirect: production controllers with uses_type→Owner (OwnerController, PetController, VisitController). Scope excludes tests and generics.",
+      "expect": {
+        "direct": [
+          {
+            "name": "Owner",
+            "relation_type": "inherits"
+          },
+          {
+            "name": "Vet",
+            "relation_type": "inherits"
+          }
+        ],
+        "indirect": [
+          {
+            "name": "OwnerController",
+            "reason": "methods take/return Owner which inherits Person"
+          },
+          {
+            "name": "PetController",
+            "reason": "methods take Owner which inherits Person"
+          },
+          {
+            "name": "VisitController",
+            "reason": "methods take Owner which inherits Person"
+          }
+        ]
+      }
+    },
+    {
+      "id": "h_impact_vet_repository",
+      "kind": "impact_set",
+      "query": "VetRepository",
+      "notes": "Direct: VetController inject site only in main sources at this pin.",
+      "expect": {
+        "direct": [
+          {
+            "name": "VetController",
+            "relation_type": "injects"
+          }
+        ],
+        "indirect": []
+      }
+    },
+    {
+      "id": "h_impact_pet_type_repository",
+      "kind": "impact_set",
+      "query": "PetTypeRepository",
+      "notes": "Direct: PetTypeFormatter + PetController ctor inject sites. Added in human-v2 B gap-fill.",
+      "expect": {
+        "direct": [
+          {
+            "name": "PetTypeFormatter",
+            "relation_type": "injects"
+          },
+          {
+            "name": "PetController",
+            "relation_type": "injects"
+          }
+        ],
+        "indirect": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+name: Bug report
+description: Something broken in CLI, MCP, index, or verify
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Expected vs actual.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Witnis version
+      placeholder: "witnis version"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduce
+      description: Minimal commands / fixture.
+      value: |
+        ```bash
+        witnis …
+        ```
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: OS, Python, optional Rust/_native, MCP host (if any)

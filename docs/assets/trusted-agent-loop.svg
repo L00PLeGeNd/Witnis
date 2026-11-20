@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="404" viewBox="0 0 960 404" role="img" aria-label="witnis gated verification loop on redact_text">
 <title>witnis gated verification loop on redact_text</title>
+<style>@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }</style>
 <rect x="0.5" y="0.5" width="959" height="403" rx="12" fill="#0d1117" stroke="#30363d"/>
 <line x1="0" y1="48" x2="960" y2="48" stroke="#21262d"/>
 <text x="24.0" y="30.0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" fill="#e6edf3" text-anchor="start" font-weight="600">Gated verification loop</text>

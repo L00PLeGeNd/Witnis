@@ -78,6 +78,7 @@ def frame(w: int, h: int, title: str, body: list[str]) -> str:
             f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
             f' width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{esc(title)}">',
             f"<title>{esc(title)}</title>",
+            "<style>@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }</style>",
             f'<rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="12" fill="{BG}" stroke="{LINE}"/>',
             *body,
             "</svg>",
@@ -288,12 +289,12 @@ def caught_lying() -> str:
     W, H = 960, 280
     dur = 15.0
     body: list[str] = []
-    body.append(t(24, 28, "witnis-dev", size=13, fill=MUTED))
-    body.append(t(W - 24, 28, "15s", size=13, fill=MUTED, anchor="end"))
+    body.append(t(24, 28, "verify", size=13, fill=MUTED))
+    body.append(t(W - 24, 28, "blocked until you authorize", size=13, fill=MUTED, anchor="end"))
     beats = [
-        (0.0, 0.32, "Agent", "tests passed", GREEN, "said", MUTED),
-        (0.34, 0.66, "Witnis", "executed: 0   blocked", ORANGE, "gate", MUTED),
-        (0.68, 0.96, "Witnis", "4 passed in 0.03s", GREEN, "authorized execute", MUTED),
+        (0.0, 0.32, "the agent", "tests passed", GREEN, "wrote that in the PR", MUTED),
+        (0.34, 0.66, "witnis", "executed: 0   blocked", ORANGE, "default, nothing ran", MUTED),
+        (0.68, 0.96, "witnis", "4 passed in 0.03s", GREEN, "after WITNIS_ALLOW_VERIFY=1", MUTED),
     ]
     box_w, box_h = 280, 168
     gap = (W - 48 - 3 * box_w) / 2
@@ -520,34 +521,23 @@ def loop() -> str:
 
 
 def masthead() -> str:
-    W, H = 960, 128
+    W, H = 960, 168
     body: list[str] = []
-    body.append(t(32, 64, "witnis", size=44, mono=False, weight="700"))
-    vx = 32 + width("witnis", 44, False) + 14
-    body.append(f'<rect x="{vx:.1f}" y="38" width="70" height="22" rx="11" fill="none" stroke="{LINE}"/>')
-    body.append(t(vx + 35, 53, "v1.11.0", size=11, fill=MUTED, anchor="middle"))
-    tag = "witnis-dev  ·  coding-agent evidence  ·  not witnis.se"
-    pill_x0 = 616
-    fit(tag, 14, False, pill_x0 - 32 - 20, "tagline")
-    body.append(t(32, 96, tag, size=14, mono=False, fill=MUTED))
-    pills = [
-        "SQLite + FTS5",
-        "contracts-v1",
-        "MCP \u00b7 4 tools",
-        "Py \u00b7 Java \u00b7 TS \u00b7 Go",
-        "three-dot pr-gate",
-        "worktree verify",
-    ]
-    pw, gap = 154, 8
-    for i, p in enumerate(pills):
-        col, row = i % 2, i // 2
-        x = pill_x0 + col * (pw + gap)
-        y = 24 + row * 30
-        fit(p, 11, True, pw - 16, "pill")
-        body.append(f'<rect x="{x}" y="{y}" width="{pw}" height="22" rx="11" fill="{PANEL}" stroke="{LINE}"/>')
-        body.append(t(x + pw / 2, y + 15, p, size=11, fill=FG, anchor="middle"))
-    if pill_x0 + 2 * pw + gap > W - 24:
-        raise SystemExit("pills overflow")
+    body.append(
+        f'<rect x="0" y="0" width="4" height="{H}" fill="{BLUE}" opacity="0.22">'
+        f'<animate attributeName="opacity" dur="16s" repeatCount="indefinite" values="0.12;0.38;0.12"/>'
+        "</rect>"
+    )
+    body.append(t(40, 78, "witnis", size=56, mono=False, weight="700"))
+    line = "Indexes the repo. On a PR it comments what moved, and whether tests ran."
+    fit(line, 16, False, W - 80, "masthead line")
+    body.append(t(40, 118, line, size=16, mono=False, fill=MUTED))
+    body.append(t(W - 40, 64, "v1.11.0", size=12, fill=MUTED, anchor="end"))
+    body.append(t(W - 40, 84, "Apache-2.0", size=12, fill=MUTED, anchor="end"))
+    body.append(f'<line x1="40" y1="140" x2="{W - 40}" y2="140" stroke="{RULE}"/>')
+    note = "witnis-dev  ·  not the company at witnis.se"
+    fit(note, 12, False, W - 80, "masthead note")
+    body.append(t(40, 158, note, size=12, mono=False, fill=MUTED))
     return frame(W, H, "witnis", body)
 
 

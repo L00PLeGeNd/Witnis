@@ -1,16 +1,20 @@
-# Witnis
+<p align="center">
+  <img src="./docs/assets/witnis-masthead.svg" alt="witnis" width="960"/>
+</p>
 
-Public name: **witnis-dev**. This project is not [Witnis AB](https://www.witnis.se).
+Indexes your working tree. On a pull request it leaves a comment: what the change is likely to touch, and whether verify actually ran commands.
 
-Witnis indexes a repo and answers two questions agents get wrong: what else did this change touch, and did the tests actually run.
+Verify does nothing until you set `WITNIS_ALLOW_VERIFY=1` and pass `--execute`. `automation_verified` means the commands ran. It is not a human review.
 
-Default verify is blocked. Nothing executes until you set `WITNIS_ALLOW_VERIFY=1` and pass `--execute`. A PR comment that says `automation_verified` means commands ran, not that a human signed off.
+<p align="center">
+  <img src="./docs/assets/blast-radius.svg" alt="git grep Person finds five files; witnis impact Person reaches OwnerController, PetController, VisitController" width="960"/>
+</p>
 
-<img src="./docs/assets/caught-lying.svg" alt="Agent says tests passed; Witnis shows executed 0, blocked; after authorize, pytest ran." width="960"/>
+On spring-petclinic, `git grep -lw Person` stops at five files. `witnis impact Person` follows `Owner extends Person` into the controllers.
 
-## GitHub Action
+## Action
 
-Needs a checkout with history (`fetch-depth: 0`). The rest is the Action:
+History has to be in the checkout (`fetch-depth: 0`):
 
 ```yaml
 - uses: actions/checkout@v4
@@ -18,17 +22,17 @@ Needs a checkout with history (`fetch-depth: 0`). The rest is the Action:
 - uses: L00PLeGeNd/Witnis/.github/actions/pr-gate@master
 ```
 
-On a pull request it leaves a sticky comment: blast radius, whether verify was blocked or ran, exit codes. CI default is blocked / 0 commands.
+Default CI is blocked / 0 commands. That is the useful case.
 
-## MCP / CLI
+## MCP
 
-Four tools on the default MCP surface: `index`, `look`, `impact`, `verify`. Everything else is behind `WITNIS_MCP_EXPERIMENTAL=1`.
+Four tools: `index`, `look`, `impact`, `verify`. The rest is `WITNIS_MCP_EXPERIMENTAL=1`.
 
 ```bash
 uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
 ```
 
-That indexes the tree, writes a Cursor/Claude MCP snippet, and a stdio policy (Harnis sits in front of the server; it is not a second product). `WITNIS_DB` defaults to `.witnis/index.sqlite` in the workspace.
+That writes the Cursor / Claude snippet and a stdio policy. Harnis sits in front of the server; you do not install a second product. `WITNIS_DB` defaults to `.witnis/index.sqlite`.
 
 ```json
 {
@@ -45,16 +49,10 @@ That indexes the tree, writes a Cursor/Claude MCP snippet, and a stdio policy (H
 }
 ```
 
-Do not tell anyone tests passed unless `verify` returned `automation_verified=true` after an authorized execute.
+<p align="center">
+  <img src="./docs/assets/caught-lying.svg" alt="Agent wrote tests passed; Witnis shows executed 0 blocked; after authorize, 4 passed in 0.03s" width="960"/>
+</p>
 
-Not on PyPI yet. Do not `pip install witnis` expecting this repo.
+This is not on PyPI. `pip install witnis` is not this project.
 
-## Impact
-
-`git grep -lw Person` on spring-petclinic misses the controllers. `witnis impact Person` follows `Owner extends Person` into `OwnerController` / `PetController` / `VisitController`.
-
-<img src="./docs/assets/blast-radius.svg" alt="Person typed through Owner into the PetClinic controllers" width="960"/>
-
-The labelled PetClinic set (18 items, maintainer-adjudicated, not dual-human) is in [`docs/benchmarks/petclinic-human-v2.md`](docs/benchmarks/petclinic-human-v2.md). Isolation and authorize-vs-sandbox: [`SECURITY.md`](SECURITY.md). Envelope shape: [`docs/contracts-v1.md`](docs/contracts-v1.md).
-
-CLI of note: `look`, `impact`, `verify`, `pr-gate`. Apache-2.0.
+If you are searching: **witnis-dev**. Unrelated to [Witnis AB](https://www.witnis.se). PetClinic labels (18 items, not dual-human): [`docs/benchmarks/petclinic-human-v2.md`](docs/benchmarks/petclinic-human-v2.md). Isolation: [`SECURITY.md`](SECURITY.md). License: Apache-2.0.

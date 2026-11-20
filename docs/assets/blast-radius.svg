@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="440" viewBox="0 0 960 440" role="img" aria-label="witnis impact Person on spring-petclinic: text search vs relation graph">
 <title>witnis impact Person on spring-petclinic: text search vs relation graph</title>
+<style>@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }</style>
 <rect x="0.5" y="0.5" width="959" height="439" rx="12" fill="#0d1117" stroke="#30363d"/>
 <line x1="0" y1="48" x2="960" y2="48" stroke="#21262d"/>
 <text x="24.0" y="30.0" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#8b949e" text-anchor="start">$</text>

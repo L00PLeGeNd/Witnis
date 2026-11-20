@@ -1,5 +1,5 @@
 # Build cross-platform witnis-core binaries (Rust Core subset).
-# Full Trusted Agent Loop CLI remains: pip install witnis
+# Full CLI is not the Core binary. Until PyPI: uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis
 name: Release binaries
 
 on:
@@ -91,8 +91,7 @@ jobs:
             Full product (PR gate, look, MCP, gated verify, Studio):
 
             ```bash
-            pip install witnis
-            # or: pip install git+https://github.com/L00PLeGeNd/Witnis.git
+            uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis
             ```
 
             See [docs/BINARY.md](https://github.com/L00PLeGeNd/Witnis/blob/master/docs/BINARY.md).

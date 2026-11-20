@@ -5,7 +5,7 @@ One-command, browser-openable story of the Trusted Agent Loop — not a Studio r
 ## Run
 
 ```bash
-pip install -e .   # or: pip install witnis
+pip install -e .   # from a clone; this project is not on PyPI yet
 witnis browser-demo
 # writes .witnis/browser-demo.html and opens it
 

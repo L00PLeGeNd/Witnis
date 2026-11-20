@@ -18,10 +18,8 @@ proof    →  authorize verify only when intentional
 ## 1. Once per repo
 
 ```bash
-pip install -U witnis
-cd /path/to/your-repo
-witnis loop-init                 # index + .witnis/mcp.loop.json + .harnis/policy.json
-# merge .witnis/mcp.loop.json into Claude Code / Cline / Cursor
+uvx --from git+https://github.com/L00PLeGeNd/Witnis.git witnis loop-init
+# merge .witnis/mcp.loop.json into Cursor / Claude
 ```
 
 Copy-paste seed: [`examples/witnis-harnis-starter/`](../examples/witnis-harnis-starter/).  

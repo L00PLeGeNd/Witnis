@@ -2,8 +2,6 @@
   <img src="./docs/assets/witnis-masthead.svg" alt="witnis" width="960"/>
 </p>
 
-Indexes your working tree. On a pull request it leaves a comment: what the change is likely to touch, and whether verify actually ran commands.
-
 Verify does nothing until you set `WITNIS_ALLOW_VERIFY=1` and pass `--execute`. `automation_verified` means the commands ran. It is not a human review.
 
 <p align="center">

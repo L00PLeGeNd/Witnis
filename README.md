@@ -1,19 +1,39 @@
 <!-- mcp-name: io.github.L00PLeGeNd/witnis -->
-<p align="center">
-  <img src="./docs/assets/witnis-masthead.svg" alt="witnis" width="960"/>
-</p>
 
-Verify does nothing until you set `WITNIS_ALLOW_VERIFY=1` and pass `--execute`. `automation_verified` means the commands ran. It is not a human review.
+# Witnis
+
+Local evidence for coding agents: index a repo, show blast radius, put the same envelope on a PR, and keep verify **blocked** until you authorize it.
+
+Search name: **witnis-dev**. Not [Witnis AB](https://www.witnis.se). Apache-2.0.
+
+## Install
+
+```bash
+pip install witnis
+# or
+uvx witnis
+```
+
+## What it catches that grep misses
+
+On [spring-petclinic](https://github.com/spring-projects/spring-petclinic) @ `500158f`, `git grep -lw Person -- '*.java'` hits five files. None of them are `OwnerController`, `PetController`, or `VisitController` — those only talk about `Owner`.
+
+`witnis impact Person` follows `Owner extends Person` into those controllers.
+
+```bash
+witnis index .
+witnis impact Person --plain
+```
+
+That is analysis completeness (grep vs index), not an LLM A/B test. Dual-human labels are still open. Notes: [`docs/benchmarks/petclinic-person-grep-vs-impact.md`](docs/benchmarks/petclinic-person-grep-vs-impact.md).
 
 <p align="center">
   <img src="./docs/assets/blast-radius.svg" alt="git grep Person finds five files; witnis impact Person reaches OwnerController, PetController, VisitController" width="960"/>
 </p>
 
-On spring-petclinic, `git grep -lw Person` stops at five files. `witnis impact Person` follows `Owner extends Person` into the controllers. Measured (grep recall 0, impact 1.0 on those controllers; not LLM A/B): [`docs/benchmarks/petclinic-person-grep-vs-impact.md`](docs/benchmarks/petclinic-person-grep-vs-impact.md).
+## PR Action
 
-## Action
-
-History has to be in the checkout (`fetch-depth: 0`):
+Use a full clone (`fetch-depth: 0`). `@v1` moves with 1.x; pin `@v1.11.2` if you do not want that. Default run is blocked — 0 commands executed.
 
 ```yaml
 - uses: actions/checkout@v4
@@ -21,17 +41,15 @@ History has to be in the checkout (`fetch-depth: 0`):
 - uses: L00PLeGeNd/Witnis/.github/actions/pr-gate@v1
 ```
 
-`@v1` moves with 1.x. Pin with `@v1.11.2` if you do not want that. Default CI is blocked / 0 commands.
-
 ## MCP
 
-Four tools: `index`, `look`, `impact`, `verify`. The rest is `WITNIS_MCP_EXPERIMENTAL=1`.
+Public tools: `index`, `look`, `impact`, `verify`. Everything else needs `WITNIS_MCP_EXPERIMENTAL=1`.
 
 ```bash
 uvx witnis loop-init
 ```
 
-That writes the Cursor / Claude snippet and a stdio policy. Harnis sits in front of the server; you do not install a second product. `WITNIS_DB` defaults to `.witnis/index.sqlite`.
+That writes a Cursor / Claude snippet and a Harnis stdio policy. One install — seatbelt is not a second product. `WITNIS_DB` defaults to `.witnis/index.sqlite`.
 
 ```json
 {
@@ -47,12 +65,10 @@ That writes the Cursor / Claude snippet and a stdio policy. Harnis sits in front
 }
 ```
 
-<p align="center">
-  <img src="./docs/assets/caught-lying.svg" alt="Agent wrote tests passed; Witnis shows executed 0 blocked; after authorize, 4 passed in 0.03s" width="960"/>
-</p>
+## Verify honesty
 
-`pip install witnis` / `uvx witnis`. Pin the Action with `@v1.11.2` if you do not want `@v1` to move.
+Verify does nothing until `WITNIS_ALLOW_VERIFY=1` and `--execute`. `automation_verified` means the allowlisted commands ran. It is not a human review.
 
-If you are searching: **witnis-dev**. Unrelated to [Witnis AB](https://www.witnis.se). PetClinic labels (18 items, not dual-human): [`docs/benchmarks/petclinic-human-v2.md`](docs/benchmarks/petclinic-human-v2.md). Isolation: [`SECURITY.md`](SECURITY.md). License: Apache-2.0.
+More: [`SECURITY.md`](SECURITY.md) · [`docs/trusted-agent-loop.md`](docs/trusted-agent-loop.md) · [`docs/cli-cheatsheet.md`](docs/cli-cheatsheet.md) · PetClinic GT (not dual-human): [`docs/benchmarks/petclinic-human-v2.md`](docs/benchmarks/petclinic-human-v2.md).
 
 mcp-name: io.github.L00PLeGeNd/witnis

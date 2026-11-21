@@ -532,7 +532,7 @@ def masthead() -> str:
     line = "Indexes the repo. On a PR it comments what moved, and whether tests ran."
     fit(line, 16, False, W - 80, "masthead line")
     body.append(t(40, 118, line, size=16, mono=False, fill=MUTED))
-    body.append(t(W - 40, 64, "v1.11.0", size=12, fill=MUTED, anchor="end"))
+    body.append(t(W - 40, 64, "v1.11.2", size=12, fill=MUTED, anchor="end"))
     body.append(t(W - 40, 84, "Apache-2.0", size=12, fill=MUTED, anchor="end"))
     body.append(f'<line x1="40" y1="140" x2="{W - 40}" y2="140" stroke="{RULE}"/>')
     note = "witnis-dev  ·  not the company at witnis.se"

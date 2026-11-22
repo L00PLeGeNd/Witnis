@@ -2,9 +2,11 @@
 
 # Witnis
 
+[![Witnis (witnis-dev) MCP server](https://mcprush.com/badge/witnis-witnis-dev-mcp/card.svg)](https://mcprush.com/to/witnis-witnis-dev-mcp?ref=badge)
+
 Local evidence for coding agents: index a repo, show blast radius, put the same envelope on a PR, and keep verify **blocked** until you authorize it.
 
-Search name: **witnis-dev**. Not [Witnis AB](https://www.witnis.se). Apache-2.0.
+Search name: **witnis-dev**. Not [Witnis AB](https://www.witnis.se). Apache-2.0. Listing: [mcprush](https://mcprush.com/l00plegend/witnis-witnis-dev-mcp).
 
 ## Install
 
